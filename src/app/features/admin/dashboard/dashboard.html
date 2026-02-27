@@ -1,0 +1,61 @@
+<div class="p-4 md:p-8 flex flex-col gap-6 bg-[#f9fafb] min-h-full">
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-[#101828] text-[30px] font-bold">Centro de Comando</h1>
+    <p class="text-[#4a5565] text-[14px] mt-0.5">{{ today }}</p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="rounded-[14px] p-5 shadow-lg"
+      style="background: linear-gradient(163deg, #00a63e 0%, #008236 100%)">
+      <div class="flex items-center justify-between mb-6">
+        <div class="size-10 bg-[rgba(255,255,255,0.2)] rounded-[10px] flex items-center justify-center">
+          <lucide-angular [img]="DollarSignIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        </div>
+        <lucide-angular [img]="TrendingDownIcon" class="size-5" color="rgba(255,255,255,0.6)" [strokeWidth]="1.5" />
+      </div>
+      <p class="text-[#dcfce7] text-[12px] font-semibold uppercase tracking-wide">Ingresos del Mes</p>
+      <p class="text-white text-[30px] font-bold mt-1">$145,780</p>
+      <p class="text-[#dcfce7] text-[12px] mt-1">24 servicios finalizados y cobrados</p>
+    </div>
+
+    <div class="rounded-[14px] p-5 shadow-lg"
+      style="background: linear-gradient(163deg, #e17100 0%, #bb4d00 100%)">
+      <div class="flex items-center justify-between mb-6">
+        <div class="size-10 bg-[rgba(255,255,255,0.2)] rounded-[10px] flex items-center justify-center">
+          <lucide-angular [img]="ClockIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        </div>
+        <lucide-angular [img]="AlertTriangleIcon" class="size-5" color="rgba(255,255,255,0.6)" [strokeWidth]="1.5" />
+      </div>
+      <p class="text-[#fef3c6] text-[12px] font-semibold uppercase tracking-wide">Pendiente por Cobrar</p>
+      <p class="text-white text-[30px] font-bold mt-1">$18,450</p>
+      <p class="text-[#fef3c6] text-[12px] mt-1">6 servicios finalizados sin pago</p>
+    </div>
+
+    <div class="rounded-[14px] p-5 shadow-lg"
+      style="background: linear-gradient(163deg, #e17100 0%, #bb4d00 100%)">
+      <div class="flex items-center justify-between mb-6">
+        <div class="size-10 bg-[rgba(255,255,255,0.2)] rounded-[10px] flex items-center justify-center">
+          <lucide-angular [img]="TrendingDownIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        </div>
+        <lucide-angular [img]="TrendingDownIcon" class="size-5" color="rgba(255,255,255,0.6)" [strokeWidth]="1.5" />
+      </div>
+      <p class="text-[rgba(255,255,255,0.8)] text-[12px] font-semibold uppercase tracking-wide">Tasa de Cancelación</p>
+      <p class="text-white text-[30px] font-bold mt-1">8.5%</p>
+      <p class="text-[rgba(255,255,255,0.8)] text-[12px] mt-1">7 cancelados de 85 totales</p>
+    </div>
+  </div>
+
+  <!-- Widgets Row -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <app-balance-operativo [operadoresDisponibles]="operadoresDisponibles()" />
+    <app-alertas-sistema />
+    <app-acciones-rapidas [motorActivo]="motorActivo()" (toggleMotor)="motorActivo.set(!motorActivo())" />
+  </div>
+
+  <!-- Próximos Hitos -->
+  <app-proximos-hitos [hitos]="proximosHitos" />
+
+</div>

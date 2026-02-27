@@ -1,0 +1,129 @@
+<div class="p-4 md:p-8 flex flex-col gap-6 bg-[#f9fafb] min-h-full">
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="text-[#101828] text-[30px] font-bold">Gestión de Operadores</h1>
+      <p class="text-[#4a5565] text-[14px] mt-0.5">Administración de operadores y credenciales de la app móvil</p>
+    </div>
+    <button type="button" (click)="showNuevo.set(true)"
+      class="flex items-center gap-2 bg-[#155dfc] text-white text-[14px] font-semibold rounded-[10px] px-4 h-10 hover:bg-[#1447e6] transition-colors cursor-pointer">
+      <lucide-angular [img]="PlusIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      Nuevo Operador
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm">
+      <p class="text-[#6a7282] text-[12px]">Total Operadores</p>
+      <p class="text-[#101828] text-[28px] font-bold">{{ totalOperadores() }}</p>
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm">
+      <p class="text-[#6a7282] text-[12px]">Con Servicios Hoy</p>
+      <p class="text-[#155dfc] text-[28px] font-bold">{{ conServiciosHoy() }}</p>
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm">
+      <p class="text-[#6a7282] text-[12px]">Con Servicios Asignados</p>
+      <p class="text-[#008236] text-[28px] font-bold">{{ conServiciosHoy() }}</p>
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm">
+      <div class="flex items-center gap-1.5">
+        <lucide-angular [img]="AlertTriangleIcon" class="size-4" color="#e17100" [strokeWidth]="1.5" />
+        <p class="text-[#6a7282] text-[12px]">Licencias Vencidas</p>
+      </div>
+      <p class="text-[#e17100] text-[28px] font-bold">{{ licenciasVencidas() }}</p>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
+    <!-- Search + Filter -->
+    <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
+      <div class="flex-1 relative">
+        <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+        <input type="text" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" name="busqueda"
+          placeholder="Buscar por nombre o ID..."
+          class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+      </div>
+      <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
+        @for (f of filtroEstados; track f) {
+          <button type="button" (click)="filtroEstado.set(f)"
+            class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+            [class.bg-[#155dfc]]="filtroEstado() === f"
+            [class.text-white]="filtroEstado() === f"
+            [class.text-[#6a7282]]="filtroEstado() !== f">
+            {{ f }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+    <!-- Table header -->
+    <div class="grid grid-cols-[0.8fr_1.5fr_1.2fr_1.2fr_1.2fr_1.2fr_0.8fr] gap-3 bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-2.5 min-w-[720px]">
+      @for (col of ['ID', 'NOMBRE COMPLETO', 'TELÉFONO', 'LICENCIA', 'VENC. LICENCIA', 'PRÓX. SERVICIO', 'ACCIONES']; track col) {
+        <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">{{ col }}</span>
+      }
+    </div>
+
+    @if (operadoresFiltrados().length === 0) {
+      <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
+        <lucide-angular [img]="UserCogIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+        <p class="text-[14px]">No hay operadores en estado "{{ filtroEstado() }}"</p>
+      </div>
+    }
+
+    @for (o of operadoresFiltrados(); track o.id) {
+      <div class="grid grid-cols-[0.8fr_1.5fr_1.2fr_1.2fr_1.2fr_1.2fr_0.8fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[720px]">
+        <p class="text-[#101828] text-[13px] font-bold font-mono">{{ o.id }}</p>
+        <div>
+          <p class="text-[#101828] text-[14px] font-semibold">{{ o.nombre }}</p>
+          <p class="text-[#9ca3af] text-[12px] font-mono">{{ o.loginId }}</p>
+        </div>
+        <p class="text-[#4a5565] text-[13px]">{{ o.telefono }}</p>
+        <p class="text-[#4a5565] text-[13px] font-mono">{{ o.licencia }}</p>
+        <div>
+          <p class="text-[13px]" [class.text-[#e7000b]]="licenciaVencida(o)" [class.text-[#4a5565]]="!licenciaVencida(o)">
+            {{ formatFecha(o.vencimientoLicencia) }}
+          </p>
+          @if (licenciaVencida(o)) {
+            <span class="inline-block text-[11px] font-semibold bg-[#fef2f2] text-[#c10007] border border-[#fca5a5] rounded-full px-2 py-0.5 mt-0.5">Vencida</span>
+          }
+        </div>
+        <p class="text-[#4a5565] text-[13px]">{{ o.proximoServicio ?? 'Sin asignación' }}</p>
+        <div class="flex items-center gap-1">
+          @if (o.activo) {
+            <button type="button" (click)="operadorEditar.set(o)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer">
+              <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+            </button>
+            <button type="button" (click)="toggleActivo(o.id)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer">
+              <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
+            </button>
+          } @else {
+            <button type="button" (click)="toggleActivo(o.id)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer">
+              <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
+            </button>
+          }
+        </div>
+      </div>
+    }
+    </div>
+  </div>
+</div>
+
+@if (showNuevo()) {
+  <app-nuevo-operador
+    (guardar)="onNuevoOperador($event)"
+    (cerrar)="showNuevo.set(false)" />
+}
+
+@if (operadorEditar()) {
+  <app-editar-operador
+    [operador]="operadorEditar()!"
+    (guardar)="onEditarOperador($event)"
+    (cerrar)="operadorEditar.set(null)" />
+}

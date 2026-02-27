@@ -1,0 +1,212 @@
+<div class="p-4 md:p-8 flex flex-col gap-6 bg-[#f9fafb] min-h-full">
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="text-[#101828] text-[30px] font-bold">Gestión de Flota</h1>
+      <p class="text-[#4a5565] text-[14px] mt-0.5">Administración de unidades operativas y registro de mantenimiento</p>
+    </div>
+    <button type="button" (click)="showNueva.set(true)"
+      class="flex items-center gap-2 bg-[#155dfc] text-white text-[14px] font-semibold rounded-[10px] px-4 h-10 hover:bg-[#1447e6] transition-colors cursor-pointer">
+      <lucide-angular [img]="PlusIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      + Nueva Unidad
+    </button>
+  </div>
+
+  <!-- Metric Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[13px]">Total Unidades</p>
+        <p class="text-[#101828] text-[32px] font-bold leading-none mt-1">{{ totalUnidades() }}</p>
+      </div>
+      <div class="size-12 bg-[#eff6ff] rounded-[12px] flex items-center justify-center">
+        <lucide-angular [img]="TruckIcon" class="size-6" color="#155dfc" [strokeWidth]="1.5" />
+      </div>
+    </div>
+
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[13px]">Operativas</p>
+        <p class="text-[#008236] text-[32px] font-bold leading-none mt-1">{{ operativas() }}</p>
+      </div>
+      <div class="size-12 bg-[#f0fdf4] rounded-[12px] flex items-center justify-center">
+        <lucide-angular [img]="ShieldIcon" class="size-6" color="#008236" [strokeWidth]="1.5" />
+      </div>
+    </div>
+
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[13px]">En Taller</p>
+        <p class="text-[#e17100] text-[32px] font-bold leading-none mt-1">{{ enTaller() }}</p>
+      </div>
+      <div class="size-12 bg-[#fff7ed] rounded-[12px] flex items-center justify-center">
+        <lucide-angular [img]="WrenchIcon" class="size-6" color="#e17100" [strokeWidth]="1.5" />
+      </div>
+    </div>
+
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[13px]">Seguros Críticos</p>
+        <p class="text-[#e7000b] text-[32px] font-bold leading-none mt-1">{{ segurosCriticos() }}</p>
+      </div>
+      <div class="size-12 bg-[#fef2f2] rounded-[12px] flex items-center justify-center">
+        <lucide-angular [img]="AlertTriangleIcon" class="size-6" color="#e7000b" [strokeWidth]="1.5" />
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
+
+    <!-- Search + Filter -->
+    <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
+      <div class="flex-1 relative">
+        <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+        <input type="text" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" name="busqueda"
+          placeholder="Buscar por placa, marca, modelo..."
+          class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-[#6a7282] text-[13px] font-medium">Estado:</span>
+        <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
+          @for (f of filtrosFlota; track f) {
+            <button type="button" (click)="filtroFlota.set(f)"
+              class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroFlota() === f"
+              [class.text-white]="filtroFlota() === f"
+              [class.text-[#6a7282]]="filtroFlota() !== f">
+              {{ f }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Count -->
+    <div class="px-5 py-2 border-b border-[#f3f4f6]">
+      <p class="text-[#6a7282] text-[13px]">Mostrando <strong class="text-[#101828]">{{ flotaFiltrada().length }}</strong> unidad(es)</p>
+    </div>
+
+    <div class="overflow-x-auto">
+    <!-- Table Header -->
+    <div class="grid grid-cols-[1.1fr_2fr_0.8fr_1.3fr_1fr_0.8fr] gap-3 bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-2.5 min-w-[650px]">
+      <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">ID / PLACA</span>
+      <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">MARCA / MODELO</span>
+      <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">CAPACIDAD</span>
+      <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">VENCIMIENTO SEGURO</span>
+      <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">ESTADO ACTUAL</span>
+      <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">ACCIONES</span>
+    </div>
+
+    <!-- Empty state -->
+    @if (flotaFiltrada().length === 0) {
+      <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
+        <lucide-angular [img]="TruckIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+        <p class="text-[14px]">No hay unidades en estado "{{ filtroFlota() }}"</p>
+      </div>
+    }
+
+    <!-- Rows -->
+    @for (u of flotaFiltrada(); track u.id) {
+      <div class="grid grid-cols-[1.1fr_2fr_0.8fr_1.3fr_1fr_0.8fr] gap-3 items-center px-5 py-3.5 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[650px]">
+
+        <!-- ID / PLACA -->
+        <div>
+          <p class="text-[#101828] text-[13px] font-bold font-mono">{{ u.id }}</p>
+          <div class="flex items-center gap-1 mt-0.5">
+            <lucide-angular [img]="TagIcon" class="size-3" color="#155dfc" [strokeWidth]="1.5" />
+            <span class="text-[#155dfc] text-[12px] font-mono font-medium">{{ u.placa }}</span>
+          </div>
+        </div>
+
+        <!-- MARCA / MODELO -->
+        <div>
+          <p class="text-[#101828] text-[14px] font-bold">{{ u.marca }} {{ u.modelo }}</p>
+          <p class="text-[#9ca3af] text-[12px] mt-0.5">Año {{ u.anio }}</p>
+        </div>
+
+        <!-- CAPACIDAD -->
+        <div class="flex items-center gap-1.5">
+          <lucide-angular [img]="TruckIcon" class="size-6" color="#155dfc" [strokeWidth]="1.5" />
+          <span class="text-[#4a5565] text-[14px] font-semibold">{{ u.capacidad }}</span>
+        </div>
+
+        <!-- VENCIMIENTO SEGURO -->
+        <div>
+          <p class="text-[#101828] text-[13px]">{{ formatFecha(u.vencimientoSeguro) }}</p>
+          <span class="inline-block mt-0.5 text-[11px] font-semibold border rounded-full px-2 py-0.5"
+            [class]="seguroBadgeClass(seguroBadge(u.vencimientoSeguro))">
+            {{ seguroBadge(u.vencimientoSeguro) }}
+          </span>
+        </div>
+
+        <!-- ESTADO ACTUAL -->
+        <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+          [class]="estadoClass(u.estado)">
+          @if (u.estado === 'Operativa') {
+            <lucide-angular [img]="CheckCircleIcon" class="size-3" color="#166534" [strokeWidth]="2" />
+          } @else if (u.estado === 'En Taller') {
+            <lucide-angular [img]="WrenchIcon" class="size-3" color="#854d0e" [strokeWidth]="2" />
+          } @else {
+            <lucide-angular [img]="AlertTriangleIcon" class="size-3" color="#c10007" [strokeWidth]="2" />
+          }
+          {{ u.estado }}
+        </span>
+
+        <!-- ACCIONES -->
+        <div class="flex items-center gap-1">
+          @if (u.estado !== 'Baja') {
+            <button type="button" (click)="unidadEditar.set(u)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
+              title="Editar">
+              <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+            </button>
+          }
+          <button type="button" (click)="unidadDetalle.set(u)"
+            class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+            title="Ver detalle">
+            <lucide-angular [img]="FileTextIcon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
+          </button>
+          @if (u.estado !== 'Baja') {
+            <button type="button" (click)="darDeBaja(u.id)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+              title="Dar de baja">
+              <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
+            </button>
+          } @else {
+            <button type="button" (click)="reactivar(u.id)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer"
+              title="Reactivar">
+              <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
+            </button>
+          }
+        </div>
+
+      </div>
+    }
+
+    </div>
+  </div>
+</div>
+
+@if (showNueva()) {
+  <app-nueva-unidad
+    (guardar)="onNuevaUnidad($event)"
+    (cerrar)="showNueva.set(false)" />
+}
+
+@if (unidadEditar()) {
+  <app-editar-unidad
+    [unidad]="unidadEditar()!"
+    (guardar)="onEditarUnidad($event)"
+    (cerrar)="unidadEditar.set(null)" />
+}
+
+@if (unidadDetalle()) {
+  <app-detalle-unidad
+    [unidad]="unidadDetalle()!"
+    (cerrar)="unidadDetalle.set(null)" />
+}

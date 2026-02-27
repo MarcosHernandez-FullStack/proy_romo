@@ -1,0 +1,61 @@
+<div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[480px] overflow-hidden">
+    <!-- Header -->
+    <div class="bg-[#155dfc] px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="FileTextIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Confirmación de Acción</h2>
+          <p class="text-[#dbeafe] text-[13px]">Servicio {{ servicio().id }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.2)] transition-colors cursor-pointer">
+        <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+      <div>
+        <p class="text-[#364153] text-[13px] font-bold mb-3">Información del Servicio:</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <p class="text-[#9ca3af] text-[12px]">Cliente</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ servicio().cliente }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[12px]">Fecha</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ servicio().fechaCompleta }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[12px]">Monto</p>
+            <p class="text-[#101828] text-[13px] font-semibold">USD {{ servicio().costo.toLocaleString() }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[12px]">Grúa</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ servicio().grua }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-[#364153] text-[13px] font-bold mb-2">Acción a Realizar:</p>
+        <div class="bg-[#fef9c3] border border-[#fde68a] rounded-[10px] px-4 py-3 flex items-center gap-3">
+          <lucide-angular [img]="FileTextIcon" class="size-5 flex-shrink-0" color="#854d0e" [strokeWidth]="1.5" />
+          <p class="text-[#854d0e] text-[14px] font-semibold">Marcar servicio como <strong>FACTURADO</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#374151] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="confirmar.emit()"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[520px] overflow-hidden">
+    <!-- Purple header -->
+    <div class="px-6 py-5 flex items-center justify-between" style="background: linear-gradient(135deg, #7c3aed, #5b21b6)">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="UserCogIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Nuevo Operador</h2>
+          <p class="text-[rgba(255,255,255,0.7)] text-[13px]">Registro de Acceso a la App Móvil</p>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.2)] transition-colors cursor-pointer">
+        <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <div class="p-6 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+      <!-- CREDENCIALES -->
+      <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[12px] p-4">
+        <p class="text-[#bb4d00] text-[11px] font-bold uppercase tracking-wider mb-1">Credenciales de Acceso a la App Móvil</p>
+        <p class="text-[#e17100] text-[12px] mb-3">Estas credenciales permiten al operador iniciar sesión en la app móvil</p>
+        <div class="flex flex-col gap-3">
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">ID de Usuario (Login) *</label>
+            <input type="text" [ngModel]="loginId()" (ngModelChange)="loginId.set($event)" name="loginId"
+              placeholder="Ej: OPER001"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Contraseña *</label>
+            <div class="flex gap-2">
+              <input type="text" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password"
+                placeholder="Contraseña de acceso"
+                class="flex-1 border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+              <button type="button" (click)="generarPassword()"
+                class="flex items-center gap-1.5 bg-[#e17100] text-white text-[13px] font-semibold rounded-[10px] px-3 h-10 hover:bg-[#bb4d00] transition-colors cursor-pointer shrink-0">
+                <lucide-angular [img]="RefreshCwIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+                Generar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFORMACIÓN PERSONAL -->
+      <div>
+        <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-3">Información Personal</p>
+        <div class="flex flex-col gap-3">
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Nombre Completo *</label>
+            <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre"
+              placeholder="Ej: Roberto Sánchez"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Teléfono</label>
+            <input type="tel" [ngModel]="telefono()" (ngModelChange)="telefono.set($event)" name="telefono"
+              placeholder="+54 11 2222-3333"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Número de Licencia *</label>
+            <input type="text" [ngModel]="licencia()" (ngModelChange)="licencia.set($event)" name="licencia"
+              placeholder="Ej: D-12345678"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Fecha de Vencimiento de Licencia</label>
+            <input type="date" [ngModel]="vencimientoLicencia()" (ngModelChange)="vencimientoLicencia.set($event)" name="vencimiento"
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none"
+              [class.border-[#ffd230]]="licenciaVenceProximo"
+              [class.border-[#d1d5dc]]="!licenciaVenceProximo"
+              [class.focus:border-[#ffd230]]="licenciaVenceProximo"
+              [class.focus:border-[#155dfc]]="!licenciaVenceProximo" />
+            @if (licenciaVenceProximo) {
+              <div class="flex items-center gap-1.5 mt-1">
+                <lucide-angular [img]="AlertTriangleIcon" class="size-3.5" color="#bb4d00" [strokeWidth]="1.5" />
+                <p class="text-[#bb4d00] text-[11px]">La licencia vence en menos de 15 días</p>
+              </div>
+            } @else {
+              <p class="text-[#9ca3af] text-[11px] mt-1">Se enviará alerta automática 15 días antes del vencimiento</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="onGuardar()" [disabled]="!esValido"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        Crear Operador y Credenciales
+      </button>
+    </div>
+  </div>
+</div>

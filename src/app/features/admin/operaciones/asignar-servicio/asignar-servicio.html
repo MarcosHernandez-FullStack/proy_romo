@@ -1,0 +1,118 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[560px] overflow-hidden">
+    <!-- Blue header -->
+    <div class="bg-[#155dfc] px-6 py-5">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="PencilIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Asignar Servicio</h2>
+          <p class="text-[#bedbff] text-[13px]">Servicio {{ servicio().id }} - {{ servicio().cliente }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+      <!-- Motor de Cálculo -->
+      <div>
+        <div class="flex items-center gap-1.5 mb-3">
+          <lucide-angular [img]="ClockIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
+          <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wide">Motor de Cálculo de Tiempo</span>
+        </div>
+        <div class="bg-[#eff6ff] rounded-[10px] px-4 py-2.5 mb-3 flex items-center gap-2">
+          <lucide-angular [img]="TruckIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+          <span class="text-[#155dfc] text-[13px] font-medium">Servicio {{ servicio().carga }}: {{ servicio().vehiculos }} vehículo{{ servicio().vehiculos > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <div class="border border-[#e5e7eb] rounded-[10px] px-3 py-2.5">
+            <p class="text-[#9ca3af] text-[11px]">Distancia (KM)</p>
+            <p class="text-[#101828] text-[16px] font-bold">{{ servicio().distanciaKm }} km</p>
+          </div>
+          <div class="border border-[#e5e7eb] rounded-[10px] px-3 py-2.5">
+            <p class="text-[#9ca3af] text-[11px]">Tiempo Google Maps</p>
+            <p class="text-[#101828] text-[16px] font-bold">25 min</p>
+          </div>
+          <div class="border border-[#e5e7eb] rounded-[10px] px-3 py-2.5">
+            <p class="text-[#9ca3af] text-[11px]">Margen Maniobra (%)</p>
+            <p class="text-[#00a63e] text-[16px] font-bold">+ 30 min</p>
+          </div>
+          <div class="border border-[#e5e7eb] rounded-[10px] px-3 py-2.5">
+            <p class="text-[#9ca3af] text-[11px]">Tiempo Retorno Base</p>
+            <p class="text-[#101828] text-[16px] font-bold">25 min</p>
+          </div>
+        </div>
+        <div class="bg-[#155dfc] rounded-[10px] px-4 py-3 flex items-center justify-between">
+          <div>
+            <p class="text-[#bedbff] text-[12px]">Tiempo Total Estimado</p>
+            <p class="text-white text-[28px] font-bold">{{ servicio().tiempoMin }} minutos</p>
+            <p class="text-[#bedbff] text-[11px]">Cálculo: 25 + 30 + 25 = {{ servicio().tiempoMin }} min ({{ servicio().bloques }} bloques de 30 min c/u)</p>
+          </div>
+          <div class="text-right">
+            <p class="text-[#bedbff] text-[11px]">Bloques Requeridos</p>
+            <p class="text-white text-[28px] font-bold">{{ servicio().bloques }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service Details -->
+      <div class="border-t border-[#e5e7eb] pt-4">
+        <p class="text-[#364153] text-[13px] font-semibold mb-2">Detalles del Servicio</p>
+        <div class="flex items-center gap-4 mb-2">
+          <div class="flex items-center gap-1.5">
+            <lucide-angular [img]="CalendarIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
+            <span class="text-[#364153] text-[13px]">Fecha: <strong>{{ servicio().fecha }}</strong></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <lucide-angular [img]="ClockIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
+            <span class="text-[#364153] text-[13px]">Hora: <strong>{{ servicio().hora }}</strong></span>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-1.5">
+            <lucide-angular [img]="MapPinIcon" class="size-4" color="#00a63e" [strokeWidth]="1.5" />
+            <span class="text-[#364153] text-[13px]">Origen: <strong>{{ servicio().origen }}</strong></span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <lucide-angular [img]="MapPinIcon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
+            <span class="text-[#364153] text-[13px]">Destino: <strong>{{ servicio().destino }}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Operador & Unidad selectors -->
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1 block">Seleccionar Operador *</label>
+          <select [ngModel]="operadorSeleccionado()" (ngModelChange)="operadorSeleccionado.set($event)" name="operador"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
+            <option value="">Seleccionar operador...</option>
+            @for (op of operadores(); track op.id) {
+              @if (op.activo) {
+                <option [value]="op.nombre">{{ op.nombre }}</option>
+              }
+            }
+          </select>
+          <p class="text-[#9ca3af] text-[11px] mt-1">Filtro dinámico: Solo operadores Activos y Disponibles para este horario</p>
+        </div>
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1 block">Seleccionar Unidad (Grúa) *</label>
+          <input type="text" [ngModel]="unidadSeleccionada()" (ngModelChange)="unidadSeleccionada.set($event)" name="unidad"
+            placeholder="GRU-001"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          <p class="text-[#9ca3af] text-[11px] mt-1">Filtro dinámico: Solo unidades Activas/Disponibles con capacidad suficiente ({{ servicio().vehiculos }}+ veh.)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="onConfirmar()"
+        [disabled]="!operadorSeleccionado() || !unidadSeleccionada()"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        Confirmar Asignación
+      </button>
+    </div>
+  </div>
+</div>

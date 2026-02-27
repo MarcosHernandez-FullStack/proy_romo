@@ -1,0 +1,178 @@
+<div class="p-4 md:p-8 flex flex-col gap-6 bg-[#f9fafb] min-h-full">
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-[#101828] text-[30px] font-bold">Operaciones y Despacho</h1>
+    <p class="text-[#4a5565] text-[14px] mt-0.5">Asignación manual de servicios, operadores y unidades</p>
+  </div>
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-4 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">Reservados (Sin Asignar)</p>
+        <p class="text-[#101828] text-[32px] font-bold">{{ countReservado() }}</p>
+      </div>
+      <lucide-angular [img]="AlertTriangleIcon" class="size-6" color="#e17100" [strokeWidth]="1.5" />
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-4 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">Asignados</p>
+        <p class="text-[#101828] text-[32px] font-bold">{{ countAsignado() }}</p>
+      </div>
+      <lucide-angular [img]="CheckCircle2Icon" class="size-6" color="#7c3aed" [strokeWidth]="1.5" />
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-4 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">En Curso</p>
+        <p class="text-[#101828] text-[32px] font-bold">{{ countEnCurso() }}</p>
+      </div>
+      <lucide-angular [img]="TruckIcon" class="size-6" color="#155dfc" [strokeWidth]="1.5" />
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-4 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">Operadores Disponibles</p>
+        <p class="text-[#101828] text-[32px] font-bold">{{ operadoresDisponibles() }}</p>
+      </div>
+      <lucide-angular [img]="UsersIcon" class="size-6" color="#008236" [strokeWidth]="1.5" />
+    </div>
+  </div>
+
+  <!-- Filter tabs + table -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
+    <div class="flex items-center gap-2 px-5 py-4 border-b border-[#e5e7eb]">
+      <span class="text-[#364153] text-[13px] font-medium mr-1">Filtrar por Estado:</span>
+      @for (tab of filtroTabs; track tab) {
+        <button type="button" (click)="filtroTab.set(tab)"
+          class="px-4 h-8 rounded-full text-[13px] font-semibold transition-colors cursor-pointer border"
+          [class.bg-[#bb4d00]]="filtroTab() === tab && tab === 'Reservado'"
+          [class.text-white]="filtroTab() === tab"
+          [class.border-transparent]="filtroTab() === tab"
+          [class.bg-[#155dfc]]="filtroTab() === tab && tab === 'Asignado'"
+          [class.bg-[#ff6900]]="filtroTab() === tab && tab === 'En Curso'"
+          [class.bg-white]="filtroTab() !== tab"
+          [class.text-[#364153]]="filtroTab() !== tab"
+          [class.border-[#e5e7eb]]="filtroTab() !== tab">
+          {{ tab }}
+        </button>
+      }
+    </div>
+
+    <div class="p-5">
+      <h2 class="text-[#101828] text-[18px] font-bold mb-4">Servicios Programados</h2>
+
+      <div class="grid grid-cols-[1.2fr_2fr_1fr_1fr_1fr_1.5fr_0.8fr_1fr] gap-2 bg-[#f9fafb] border-b border-[#e5e7eb] px-3 py-2.5">
+        @for (col of ['ID / CLIENTE', 'RUTA', 'CARGA / VEHÍCULOS', 'FECHA / HORA', 'TIEMPO / BLOQUES', 'ASIGNACIÓN', 'ESTADO', 'ACCIONES']; track col) {
+          <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">{{ col }}</span>
+        }
+      </div>
+
+      @if (serviciosFiltrados().length === 0) {
+        <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
+          <lucide-angular [img]="TruckIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+          <p class="text-[14px]">No hay servicios con estado "{{ filtroTab() }}"</p>
+        </div>
+      }
+
+      @for (s of serviciosFiltrados(); track s.id) {
+        <div class="grid grid-cols-[1.2fr_2fr_1fr_1fr_1fr_1.5fr_0.8fr_1fr] gap-2 items-start px-3 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors">
+          <div>
+            <p class="text-[#101828] text-[13px] font-bold font-mono">{{ s.id }}</p>
+            <p class="text-[#4a5565] text-[12px]">{{ s.cliente }}</p>
+            <p class="text-[#008236] text-[13px] font-semibold mt-0.5">${{ s.costo.toLocaleString('es-AR') }}</p>
+          </div>
+          <div class="flex flex-col gap-1">
+            <div class="flex items-start gap-1.5">
+              <lucide-angular [img]="MapPinIcon" class="size-3.5 mt-0.5 shrink-0" color="#00a63e" [strokeWidth]="1.5" />
+              <span class="text-[#4a5565] text-[12px]">{{ s.origen }}</span>
+            </div>
+            <div class="flex items-start gap-1.5">
+              <lucide-angular [img]="MapPinIcon" class="size-3.5 mt-0.5 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
+              <span class="text-[#4a5565] text-[12px]">{{ s.destino }}</span>
+            </div>
+            <p class="text-[#9ca3af] text-[11px] ml-5">{{ s.distanciaKm }} km</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <div class="bg-[#eff6ff] border border-[#bedbff] rounded-lg px-2 py-1 flex items-center gap-1">
+              <lucide-angular [img]="TruckIcon" class="size-3" color="#155dfc" [strokeWidth]="1.5" />
+              <span class="text-[#155dfc] text-[11px] font-semibold">x {{ s.vehiculos }}</span>
+            </div>
+            <span class="text-[#6a7282] text-[12px]">{{ s.carga }}</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-1">
+              <lucide-angular [img]="CalendarIcon" class="size-3.5" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#364153] text-[12px]">{{ s.fecha }}</span>
+            </div>
+            <div class="flex items-center gap-1 mt-0.5">
+              <lucide-angular [img]="ClockIcon" class="size-3.5" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#364153] text-[12px]">{{ s.hora }}</span>
+            </div>
+          </div>
+          <div>
+            <p class="text-[#364153] text-[12px]">{{ s.tiempoMin }} min / {{ s.bloques }} bloque{{ s.bloques > 1 ? 's' : '' }}</p>
+          </div>
+          <div>
+            @if (!s.operador) {
+              <button type="button" (click)="abrirAsignar(s)"
+                class="flex items-center gap-1 bg-[#fef2f2] border border-[#fca5a5] text-[#c10007] text-[12px] font-semibold rounded-lg px-2.5 py-1.5 hover:bg-[#fee2e2] transition-colors cursor-pointer">
+                <lucide-angular [img]="AlertTriangleIcon" class="size-3.5" color="#c10007" [strokeWidth]="1.5" />
+                Sin Asignar
+              </button>
+            } @else {
+              <div class="flex flex-col gap-0.5">
+                <p class="text-[#364153] text-[12px] font-medium">{{ s.operador }}</p>
+                <p class="text-[#9ca3af] text-[11px] font-mono">{{ s.unidad }}</p>
+              </div>
+            }
+          </div>
+          <div>
+            <span class="inline-block text-[12px] font-semibold rounded-full px-2.5 py-0.5"
+              [class]="estadoBadgeClass(s.estado)">
+              {{ s.estado }}
+            </span>
+          </div>
+          <div class="flex items-center gap-1">
+            <button type="button" (click)="abrirAsignar(s)"
+              class="size-7 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
+              title="Asignar">
+              <lucide-angular [img]="PencilIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
+            </button>
+            <button type="button" (click)="abrirCancelar(s)"
+              class="size-7 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+              title="Cancelar">
+              <lucide-angular [img]="XCircleIcon" class="size-3.5" color="#e7000b" [strokeWidth]="1.5" />
+            </button>
+            <button type="button" (click)="abrirReprogramar(s)"
+              class="size-7 flex items-center justify-center rounded-lg hover:bg-[#fffbeb] transition-colors cursor-pointer"
+              title="Reprogramar">
+              <lucide-angular [img]="CalendarIcon" class="size-3.5" color="#e17100" [strokeWidth]="1.5" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (showAsignar() && servicioAsignar()) {
+  <app-asignar-servicio
+    [servicio]="servicioAsignar()!"
+    [operadores]="operadores()"
+    (confirmar)="onConfirmarAsignacion($event)"
+    (cerrar)="showAsignar.set(false)" />
+}
+
+@if (showCancelar() && servicioCancelar()) {
+  <app-cancelar-servicio
+    [servicio]="servicioCancelar()!"
+    (confirmar)="onConfirmarCancelacion(servicioCancelar()!.id)"
+    (cerrar)="showCancelar.set(false)" />
+}
+
+@if (showReprogramar() && servicioReprogramar()) {
+  <app-reprogramar-servicio
+    [servicio]="servicioReprogramar()!"
+    (confirmar)="showReprogramar.set(false)"
+    (cerrar)="showReprogramar.set(false)" />
+}

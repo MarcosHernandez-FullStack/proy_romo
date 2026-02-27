@@ -1,0 +1,59 @@
+<div class="flex flex-col h-full w-64 shrink-0" style="background: linear-gradient(to bottom, #0f172b, #1d293d)">
+
+  <!-- Logo / Header -->
+  <div class="border-b border-[#314158] px-6 py-6 shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="bg-[#155dfc] rounded-[10px] size-10 flex items-center justify-center shrink-0">
+        <lucide-angular [img]="TruckIcon" class="size-6" color="white" [strokeWidth]="2" />
+      </div>
+      <div>
+        <p class="text-white font-bold text-xl leading-7">CraneManager</p>
+        <p class="text-[#90a1b9] text-xs leading-4">Portal B2B</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 px-4 pt-4 flex flex-col gap-2 overflow-y-auto">
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive
+        #rla="routerLinkActive"
+        class="flex items-center gap-3 h-12 pl-4 rounded-[10px] transition-colors cursor-pointer"
+        [class.bg-[#155dfc]]="rla.isActive"
+        [class.shadow-lg]="rla.isActive"
+      >
+        <lucide-angular
+          [img]="item.icon"
+          class="size-5 shrink-0"
+          [color]="rla.isActive ? 'white' : '#cad5e2'"
+          [strokeWidth]="2"
+        />
+        <span
+          class="text-base font-medium"
+          [class.text-white]="rla.isActive"
+          [class.text-[#cad5e2]]="!rla.isActive"
+        >{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Footer / User -->
+  <div class="border-t border-[#314158] px-4 pt-4 pb-4 flex flex-col gap-4 shrink-0">
+    <!-- User info -->
+    <div class="bg-[#314158] rounded-[10px] px-3 py-3">
+      <p class="text-[#90a1b9] text-xs leading-4">Usuario</p>
+      <p class="text-white text-sm font-medium truncate mt-1">{{ auth.user()?.email }}</p>
+    </div>
+    <!-- Logout -->
+    <button
+      (click)="auth.logout()"
+      class="flex items-center gap-3 h-12 pl-4 rounded-[10px] w-full hover:bg-[#314158] transition-colors cursor-pointer"
+    >
+      <lucide-angular [img]="LogOutIcon" class="size-5 shrink-0" color="#cad5e2" [strokeWidth]="2" />
+      <span class="text-[#cad5e2] text-base font-medium">Cerrar Sesión</span>
+    </button>
+  </div>
+
+</div>

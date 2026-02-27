@@ -1,0 +1,241 @@
+<div class="p-4 md:p-8 flex flex-col gap-6 bg-[#f9fafb] min-h-full">
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="text-[#101828] text-[30px] font-bold">Reportes de Servicios</h1>
+      <p class="text-[#4a5565] text-[14px] mt-0.5">Gestión administrativa de servicios finalizados y cancelados</p>
+    </div>
+    <button type="button"
+      class="flex items-center gap-2 bg-[#155dfc] text-white text-[14px] font-semibold rounded-[10px] px-4 h-10 hover:bg-[#1447e6] transition-colors cursor-pointer">
+      <lucide-angular [img]="DownloadIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      Exportar Excel
+    </button>
+  </div>
+
+  <!-- KPI Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">Total Servicios</p>
+        <p class="text-[#101828] text-[28px] font-bold">{{ totalServicios() }}</p>
+      </div>
+      <lucide-angular [img]="FileTextIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">Finalizados</p>
+        <p class="text-[#008236] text-[28px] font-bold">{{ finalizados() }}</p>
+      </div>
+      <lucide-angular [img]="CheckCircleIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">Cancelados</p>
+        <p class="text-[#e7000b] text-[28px] font-bold">{{ cancelados() }}</p>
+      </div>
+      <lucide-angular [img]="XCircleIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+    </div>
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[#6a7282] text-[12px]">Monto Total</p>
+        <p class="text-[#155dfc] text-[22px] font-bold">USD {{ montoTotal().toLocaleString() }}</p>
+      </div>
+      <lucide-angular [img]="DollarSignIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-5 flex flex-col gap-4">
+    <h3 class="text-[#101828] text-[15px] font-bold">Filtros de Búsqueda</h3>
+
+    <!-- Row 1: Search + Cliente B2B -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Buscar por ID de Servicio o Placa</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" name="busqueda"
+            placeholder="Ej: SRV-001 o ABC-123"
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Cliente B2B</label>
+        <div class="relative">
+          <lucide-angular [img]="Building2Icon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <select [ngModel]="filtroCliente()" (ngModelChange)="filtroCliente.set($event)" name="filtroCliente"
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-8 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer appearance-none">
+            <option value="">Buscar y seleccionar cliente...</option>
+            @for (c of clientesUnicos(); track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+          <lucide-angular [img]="ChevronDownIcon" class="size-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Rango de Fechas -->
+    <div>
+      <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Rango de Fechas</label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-1">DESDE:</p>
+          <div class="relative">
+            <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+            <input type="date" [ngModel]="fechaDesde()" (ngModelChange)="fechaDesde.set($event)" name="fechaDesde"
+              class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+        </div>
+        <div>
+          <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-1">HASTA:</p>
+          <div class="relative">
+            <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+            <input type="date" [ngModel]="fechaHasta()" (ngModelChange)="fechaHasta.set($event)" name="fechaHasta"
+              class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Estado Operativo + Estado Administrativo -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Estado Operativo</label>
+        <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
+          @for (f of filtrosOperativos; track f) {
+            <button type="button" (click)="filtroOperativo.set(f)"
+              class="px-3 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroOperativo() === f"
+              [class.text-white]="filtroOperativo() === f"
+              [class.text-[#6a7282]]="filtroOperativo() !== f">
+              {{ f }}
+            </button>
+          }
+        </div>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Estado Administrativo</label>
+        <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
+          @for (f of filtrosAdmin; track f) {
+            <button type="button" (click)="filtroAdmin.set(f)"
+              class="px-3 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroAdmin() === f"
+              [class.text-white]="filtroAdmin() === f"
+              [class.text-[#6a7282]]="filtroAdmin() !== f">
+              {{ f }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <p class="text-[#155dfc] text-[13px] font-medium">
+      Mostrando <strong>{{ serviciosFiltrados().length }}</strong> servicio(s)
+    </p>
+  </div>
+
+  <!-- Estados summary bar -->
+  <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[12px] px-5 py-3 flex flex-wrap items-center gap-4">
+    <span class="text-[#193cb8] text-[13px] font-semibold">Estados Administrativos:</span>
+    <div class="flex items-center gap-1.5">
+      <span class="size-2 rounded-full bg-[#e17100] inline-block"></span>
+      <span class="text-[#193cb8] text-[13px]"><strong>{{ pendientes() }}</strong> Pendiente(s)</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="size-2 rounded-full bg-[#155dfc] inline-block"></span>
+      <span class="text-[#193cb8] text-[13px]"><strong>{{ facturados() }}</strong> Facturado(s)</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="size-2 rounded-full bg-[#008236] inline-block"></span>
+      <span class="text-[#193cb8] text-[13px]"><strong>{{ pagados() }}</strong> Pagado(s)</span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+    <div class="grid grid-cols-[0.6fr_1fr_1.4fr_1.2fr_0.9fr_0.9fr_1fr] gap-3 bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-2.5 min-w-[750px]">
+      @for (col of ['ID', 'FECHA / HORA', 'CLIENTE B2B', 'RECURSO / GRÚA', 'MONTO', 'EST. OPERATIVO', 'EST. ADMINISTRATIVO']; track col) {
+        <span class="text-[#374151] text-[11px] font-bold uppercase tracking-wider">{{ col }}</span>
+      }
+    </div>
+
+    @if (serviciosFiltrados().length === 0) {
+      <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
+        <lucide-angular [img]="FileBarChart2Icon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+        <p class="text-[14px]">No hay servicios con los filtros aplicados</p>
+      </div>
+    }
+
+    @for (s of serviciosFiltrados(); track s.id) {
+      <div class="grid grid-cols-[0.6fr_1fr_1.4fr_1.2fr_0.9fr_0.9fr_1fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[750px]">
+        <!-- ID -->
+        <p class="text-[#101828] text-[13px] font-bold font-mono">{{ s.id }}</p>
+        <!-- Fecha -->
+        <p class="text-[#4a5565] text-[12px]">{{ s.fechaCompleta }}</p>
+        <!-- Cliente -->
+        <div class="flex items-center gap-2">
+          <lucide-angular [img]="Building2Icon" class="size-4 flex-shrink-0" color="#155dfc" [strokeWidth]="1.5" />
+          <p class="text-[#101828] text-[13px] font-medium truncate">{{ s.cliente }}</p>
+        </div>
+        <!-- Grúa -->
+        <div class="flex items-center gap-2">
+          <lucide-angular [img]="TruckIcon" class="size-4 flex-shrink-0" color="#0e7490" [strokeWidth]="1.5" />
+          <p class="text-[#4a5565] text-[13px]">{{ s.grua }}</p>
+        </div>
+        <!-- Monto -->
+        <p class="text-[#101828] text-[13px] font-semibold">${{ s.costo.toLocaleString() }}</p>
+        <!-- Estado Operativo -->
+        <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
+          [class]="estadoOperClass(s.estado)">
+          @if (s.estado === 'Finalizado') {
+            <lucide-angular [img]="CheckCircleIcon" class="size-3" [strokeWidth]="2" />
+          } @else {
+            <lucide-angular [img]="XCircleIcon" class="size-3" [strokeWidth]="2" />
+          }
+          {{ s.estado }}
+        </span>
+        <!-- Estado Admin -->
+        @if (s.estado === 'Cancelado') {
+          <span class="text-[#9ca3af] text-[12px]">N/A</span>
+        } @else if (s.estadoAdministrativo === 'Pendiente') {
+          <div class="flex items-center gap-1">
+            <button type="button" (click)="servicioFacturar.set(s)"
+              class="inline-flex items-center gap-1 border border-[#fde68a] bg-[#fef9c3] text-[#854d0e] rounded-full px-2.5 py-0.5 text-[11px] font-semibold hover:bg-[#fde68a] transition-colors cursor-pointer">
+              Facturar
+            </button>
+          </div>
+        } @else if (s.estadoAdministrativo === 'Facturado') {
+          <div class="flex items-center gap-1">
+            <button type="button" (click)="servicioPago.set(s)"
+              class="inline-flex items-center gap-1 border border-[#bedbff] text-[#1447e6] rounded-full px-2.5 py-0.5 text-[11px] font-semibold hover:bg-[#eff6ff] transition-colors cursor-pointer">
+              Registrar Pago
+            </button>
+          </div>
+        } @else {
+          <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
+            [class]="estadoAdminClass(s.estadoAdministrativo)">
+            {{ s.estadoAdministrativo }}
+          </span>
+        }
+      </div>
+    }
+    </div>
+  </div>
+</div>
+
+@if (servicioFacturar()) {
+  <app-accion-facturar
+    [servicio]="servicioFacturar()!"
+    (confirmar)="onFacturar()"
+    (cerrar)="servicioFacturar.set(null)" />
+}
+
+@if (servicioPago()) {
+  <app-accion-registrar-pago
+    [servicio]="servicioPago()!"
+    (confirmar)="onRegistrarPago()"
+    (cerrar)="servicioPago.set(null)" />
+}

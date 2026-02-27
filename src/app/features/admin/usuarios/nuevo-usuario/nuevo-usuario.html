@@ -1,0 +1,76 @@
+<div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[540px] overflow-hidden">
+    <!-- Header -->
+    <div class="bg-[#155dfc] px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="UserPlusIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Añadir Nuevo Usuario</h2>
+          <p class="text-[#dbeafe] text-[13px]">Complete todos los campos obligatorios (*)</p>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.2)] transition-colors cursor-pointer">
+        <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+      <!-- Info banner -->
+      <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-3 flex items-start gap-3">
+        <lucide-angular [img]="InfoIcon" class="size-5 flex-shrink-0 mt-0.5" color="#193cb8" [strokeWidth]="1.5" />
+        <div>
+          <p class="text-[#193cb8] text-[13px] font-bold">Credenciales de Acceso</p>
+          <p class="text-[#193cb8] text-[12px] mt-0.5">Se generará automáticamente una contraseña temporal y se enviará al correo electrónico del usuario.</p>
+        </div>
+      </div>
+
+      <!-- Nombre -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Nombre Completo *</label>
+        <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre"
+          placeholder="Ingrese el nombre completo..."
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+      </div>
+
+      <!-- Correo -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Correo Electrónico Corporativo *</label>
+        <div class="relative">
+          <lucide-angular [img]="MailIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="email" [ngModel]="correo()" (ngModelChange)="correo.set($event)" name="correo"
+            placeholder="usuario@cranemanager.com"
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+
+      <!-- Rol -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Rol de Usuario *</label>
+        <select [ngModel]="rol()" (ngModelChange)="rol.set($event)" name="rol"
+          class="w-full border border-[#8ec5ff] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
+          @for (r of roles; track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+        <!-- Permisos info -->
+        <div class="bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] px-3 py-2.5 mt-2">
+          <p class="text-[#364153] text-[12px] font-semibold mb-1">Permisos por Rol:</p>
+          <p class="text-[#364153] text-[12px]"><strong>Administrador:</strong> Acceso total al sistema, gestión de usuarios y configuración</p>
+          <p class="text-[#364153] text-[12px] mt-1"><strong>Staff:</strong> Acceso a operaciones, reservas, clientes y reportes</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3 bg-[#f9fafb]">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 bg-[#e5e7eb] text-[#1e2939] text-[14px] font-medium rounded-[10px] h-9 hover:bg-[#d1d5dc] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="onGuardar()" [disabled]="!esValido"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-9 transition-colors cursor-pointer">
+        Crear Usuario
+      </button>
+    </div>
+  </div>
+</div>

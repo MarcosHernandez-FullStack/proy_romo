@@ -1,0 +1,39 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[460px] overflow-hidden">
+    <!-- Red header -->
+    <div class="bg-[#e7000b] px-6 py-5">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="XCircleIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Cancelar Servicio</h2>
+          <p class="text-[#ffe2e2] text-[13px]">Esta acción no se puede deshacer</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+      <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-3">
+        <p class="text-[#364153] text-[13px]">Servicio: <strong class="text-[#101828]">{{ servicio().id }}</strong></p>
+        <p class="text-[#364153] text-[13px]">Cliente: <strong class="text-[#101828]">{{ servicio().cliente }}</strong></p>
+      </div>
+
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Motivo de Cancelación *</label>
+        <input type="text" [ngModel]="motivo()" (ngModelChange)="motivo.set($event)" name="motivo"
+          placeholder="Indique el motivo..."
+          class="w-full border border-[#fca5a5] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#e7000b]" />
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Volver
+      </button>
+      <button type="button" (click)="onConfirmar()" [disabled]="!motivo()"
+        class="flex-1 bg-[#e7000b] hover:bg-[#c10007] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        Confirmar Cancelación
+      </button>
+    </div>
+  </div>
+</div>

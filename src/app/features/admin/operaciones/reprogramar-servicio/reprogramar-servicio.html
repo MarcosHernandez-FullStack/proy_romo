@@ -1,0 +1,105 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[600px] overflow-hidden">
+    <!-- Dark header -->
+    <div class="bg-[#101828] px-6 py-5">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="CalendarIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Gestión de Itinerario</h2>
+          <p class="text-[#9ca3af] text-[13px]">Servicio {{ servicio().id }} - {{ servicio().cliente }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+      <!-- Summary cards -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-[#155dfc] rounded-[10px] px-4 py-3 text-center">
+          <p class="text-[#bedbff] text-[11px]">Duración Estimada</p>
+          <p class="text-white text-[28px] font-bold">{{ servicio().bloques }}</p>
+          <p class="text-[#bedbff] text-[11px]">Bloques Requeridos</p>
+        </div>
+        <div class="rounded-[10px] px-4 py-3 text-center"
+          style="background: linear-gradient(135deg, #7c3aed, #5b21b6)">
+          <p class="text-[rgba(255,255,255,0.7)] text-[11px]">Carga a Trasladar</p>
+          <p class="text-white text-[28px] font-bold">{{ servicio().vehiculos }}</p>
+          <lucide-angular [img]="TruckIcon" class="size-5 mx-auto mt-0.5" color="rgba(255,255,255,0.7)" [strokeWidth]="1.5" />
+        </div>
+        <div class="bg-[#1e293b] rounded-[10px] px-4 py-3 text-center">
+          <p class="text-[#9ca3af] text-[11px]">Horario Actual</p>
+          <p class="text-white text-[28px] font-bold">{{ servicio().hora }}</p>
+          <p class="text-[#9ca3af] text-[11px]">{{ servicio().fecha }}</p>
+        </div>
+      </div>
+
+      <!-- Date input -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Seleccionar Nueva Fecha *</label>
+        <input type="date" [ngModel]="nuevaFecha()" (ngModelChange)="nuevaFecha.set($event)" name="nuevaFecha"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+      </div>
+
+      <!-- Slot grid -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-3 block">Seleccionar Horario (Bloques de 1 hora) *</label>
+        <div class="flex items-center gap-3 mb-3 flex-wrap">
+          <div class="flex items-center gap-1.5">
+            <div class="size-4 border border-[#d1d5dc] rounded bg-white"></div>
+            <span class="text-[11px] text-[#6a7282]">Disponible</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <div class="size-4 rounded bg-[#155dfc]"></div>
+            <span class="text-[11px] text-[#6a7282]">Seleccionado</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <div class="size-4 rounded bg-[#1e293b]"></div>
+            <span class="text-[11px] text-[#6a7282]">Reservado</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-8 gap-1.5">
+          @for (s of slots(); track $index; let i = $index) {
+            <button type="button" (click)="s.estado !== 'ocupado' && slotSeleccionado.set(i)"
+              class="flex items-center justify-center h-9 rounded-[8px] border text-[12px] font-semibold transition-colors"
+              [class]="slotClass(s, i)">
+              {{ s.hora }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (slotSeleccionado() !== null) {
+        <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-2.5">
+          <div class="flex items-center gap-1.5">
+            <lucide-angular [img]="ClockIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+            <span class="text-[#155dfc] text-[13px] font-semibold">Horario Seleccionado: {{ slots()[slotSeleccionado()!].hora }}</span>
+          </div>
+          <p class="text-[#6a7282] text-[12px] mt-0.5">Fecha: {{ nuevaFecha() || servicio().fecha }}</p>
+        </div>
+      }
+
+      <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[10px] px-4 py-2.5">
+        <div class="flex items-start gap-2">
+          <lucide-angular [img]="AlertTriangleIcon" class="size-4 mt-0.5 shrink-0" color="#bb4d00" [strokeWidth]="1.5" />
+          <p class="text-[#bb4d00] text-[12px]"><strong>Nota Importante:</strong> Este cambio liberará la reserva anterior y notificará automáticamente al cliente sobre el nuevo horario.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-2">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[13px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="slotSeleccionado.set(null)"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[13px] font-medium rounded-[10px] h-10 flex items-center justify-center gap-1.5 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        <lucide-angular [img]="XCircleIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
+        Limpiar
+      </button>
+      <button type="button" (click)="onConfirmar()" [disabled]="slotSeleccionado() === null"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold rounded-[10px] h-10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+        <lucide-angular [img]="CheckCircle2Icon" class="size-4" color="white" [strokeWidth]="1.5" />
+        Confirmar Reprogramación
+      </button>
+    </div>
+  </div>
+</div>

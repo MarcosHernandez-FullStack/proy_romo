@@ -1,0 +1,121 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[520px] overflow-hidden">
+
+    <!-- Purple gradient header -->
+    <div class="px-6 py-5 flex items-center justify-between"
+      style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%)">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="CalendarIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Nueva Excepción</h2>
+          <p class="text-[#ddd6fe] text-[13px]">Configure un bloqueo en el calendario del sistema</p>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
+        <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+
+      <!-- Warning banner -->
+      <div class="bg-[#fff7ed] border border-[#fed7aa] rounded-[10px] px-4 py-3">
+        <div class="flex items-center gap-2 mb-1">
+          <lucide-angular [img]="AlertTriangleIcon" class="size-4" color="#c2410c" [strokeWidth]="1.5" />
+          <span class="text-[#c2410c] text-[12px] font-bold uppercase tracking-wider">Alcance de Bloqueo</span>
+        </div>
+        <p class="text-[#9a3412] text-[13px]">
+          Este bloqueo afecta tanto a <strong class="text-[#c2410c]">Clientes (Online)</strong> como a la operación del <strong class="text-[#c2410c]">Staff/Admin</strong>
+        </p>
+      </div>
+
+      <!-- Fecha de la Excepción -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Fecha de la Excepción *</label>
+        <input type="date" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)" name="fecha"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed]" />
+      </div>
+
+      <!-- Motivo de Excepción -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Motivo de Excepción *</label>
+        <select [ngModel]="tipo()" (ngModelChange)="tipo.set($event)" name="tipo"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] bg-white cursor-pointer">
+          @for (t of tiposExcepcion; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Alcance Temporal -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Alcance Temporal *</label>
+        <select [ngModel]="alcance()" (ngModelChange)="alcance.set($event)" name="alcance"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] bg-white cursor-pointer">
+          <option value="Día Completo">Día Completo (00:00 - 23:59)</option>
+          <option value="Rango de Horas">Rango de Horas</option>
+        </select>
+      </div>
+
+      <!-- Rango de Horas (conditional) -->
+      @if (alcance() === 'Rango de Horas') {
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Hora Inicio</label>
+            <input type="time" [ngModel]="horaInicio()" (ngModelChange)="horaInicio.set($event)" name="horaInicio"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed]" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Hora Fin</label>
+            <input type="time" [ngModel]="horaFin()" (ngModelChange)="horaFin.set($event)" name="horaFin"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed]" />
+          </div>
+        </div>
+      }
+
+      <!-- Descripción del Motivo -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Descripción del Motivo *</label>
+        <textarea [ngModel]="motivo()" (ngModelChange)="motivo.set($event)" name="motivo"
+          placeholder="Ej: Día feriado nacional - Sin operación de servicios"
+          rows="3"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] resize-none"></textarea>
+      </div>
+
+      <!-- Resumen de Configuración -->
+      <div class="bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] px-4 py-3">
+        <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-2">Resumen de Configuración</p>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <p class="text-[#9ca3af] text-[11px]">Fecha:</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ fecha() || 'No seleccionada' }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[11px]">Motivo:</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ tipo() }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[11px]">Alcance:</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ alcance() }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer buttons -->
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="onGuardar()" [disabled]="!esValido"
+        class="flex-1 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer"
+        style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%)">
+        Confirmar Excepción
+      </button>
+    </div>
+
+  </div>
+</div>

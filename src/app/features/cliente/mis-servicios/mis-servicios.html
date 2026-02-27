@@ -1,0 +1,486 @@
+<div class="p-4 md:p-8">
+
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-[30px] font-bold text-[#101828] leading-9">Gestión Integral de Servicios</h1>
+    <p class="text-[14px] text-[#6a7282] mt-1">Seguimiento operativo y financiero unificado</p>
+  </div>
+
+  <!-- KPIs -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+
+    <!-- Total -->
+    <div class="bg-white border border-[#e5e7eb] rounded-2xl shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="bg-[#f3f4f6] rounded-[10px] size-8 flex items-center justify-center">
+          <lucide-angular [img]="CarIcon" class="size-4" color="#6a7282" [strokeWidth]="2" />
+        </div>
+        <span class="text-[11px] font-semibold text-[#99a1af] uppercase tracking-wider">Total</span>
+      </div>
+      <p class="text-[30px] font-bold text-[#101828] leading-9">{{ totalServicios() }}</p>
+      <p class="text-[12px] text-[#6a7282] mt-1">Servicios registrados</p>
+    </div>
+
+    <!-- En Operación -->
+    <div class="bg-white border border-[#bedbff] rounded-2xl shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="bg-[#dbeafe] rounded-[10px] size-8 flex items-center justify-center">
+          <lucide-angular [img]="CarIcon" class="size-4" color="#1447e6" [strokeWidth]="2" />
+        </div>
+        <span class="text-[11px] font-semibold text-[#51a2ff] uppercase tracking-wider">En Operación</span>
+      </div>
+      <p class="text-[30px] font-bold text-[#1447e6] leading-9">{{ enOperacion() }}</p>
+      <p class="text-[12px] text-[#2b7fff] mt-1">Asignados + En Curso</p>
+    </div>
+
+    <!-- Pendiente -->
+    <div class="bg-white border border-[#fee685] rounded-2xl shadow-sm p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="bg-[#fef3c6] rounded-[10px] size-8 flex items-center justify-center">
+          <lucide-angular [img]="FileTextIcon" class="size-4" color="#bb4d00" [strokeWidth]="2" />
+        </div>
+        <span class="text-[11px] font-semibold text-[#ffb900] uppercase tracking-wider">Pendiente</span>
+      </div>
+      <p class="text-[30px] font-bold text-[#bb4d00] leading-9">{{ formatCosto(montoPendiente()) }}</p>
+      <p class="text-[12px] text-[#fe9a00] mt-1">Pendiente + Facturado</p>
+    </div>
+
+    <!-- Liquidado -->
+    <div class="rounded-2xl shadow-sm p-5" style="background: linear-gradient(154deg, #1447e6 0%, #155dfc 100%)">
+      <div class="flex items-center justify-between mb-4">
+        <div class="bg-white/15 rounded-[10px] size-8 flex items-center justify-center">
+          <lucide-angular [img]="DollarSignIcon" class="size-4" color="white" [strokeWidth]="2" />
+        </div>
+        <span class="text-[11px] font-semibold text-[#bedbff] uppercase tracking-wider">Liquidado</span>
+      </div>
+      <p class="text-[30px] font-bold text-white leading-9">{{ formatCosto(montoLiquidado()) }}</p>
+      <p class="text-[12px] text-[#bedbff] mt-1">Servicios pagados</p>
+    </div>
+
+  </div>
+
+  <!-- Toolbar -->
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div></div>
+    <button
+      class="flex items-center gap-2 bg-[#00a63e] text-white h-10 px-4 rounded-[10px] text-[14px] font-semibold shadow-sm hover:bg-[#008236] transition-colors cursor-pointer"
+    >
+      <lucide-angular [img]="DownloadIcon" class="size-4" color="white" [strokeWidth]="2" />
+      Exportar Reporte (.xlsx)
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="bg-white border border-[#e5e7eb] rounded-2xl shadow-sm mb-4 px-5 py-4">
+    <div class="flex flex-wrap items-center gap-3">
+      <!-- Búsqueda -->
+      <div class="relative flex-1 min-w-[180px]">
+        <lucide-angular [img]="SearchIcon" class="absolute left-3 top-1/2 -translate-y-1/2 size-4" color="#9ca3af" [strokeWidth]="2" />
+        <input
+          type="text"
+          placeholder="Buscar por ID, dirección o placa…"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          name="search"
+          class="w-full border border-[#d1d5dc] rounded-[10px] h-[38px] pl-9 pr-4 text-[14px] text-[#101828] placeholder-[rgba(10,10,10,0.5)] focus:outline-none focus:border-[#155dfc]"
+        />
+      </div>
+      <!-- Desde -->
+      <div class="flex items-center gap-2">
+        <span class="text-[12px] font-medium text-[#6a7282]">Desde</span>
+        <input
+          type="date"
+          [ngModel]="fechaDesde()"
+          (ngModelChange)="fechaDesde.set($event)"
+          name="fechaDesde"
+          class="border border-[#d1d5dc] rounded-[10px] h-[38px] px-3 text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc]"
+        />
+      </div>
+      <!-- Hasta -->
+      <div class="flex items-center gap-2">
+        <span class="text-[12px] font-medium text-[#6a7282]">Hasta</span>
+        <input
+          type="date"
+          [ngModel]="fechaHasta()"
+          (ngModelChange)="fechaHasta.set($event)"
+          name="fechaHasta"
+          class="border border-[#d1d5dc] rounded-[10px] h-[38px] px-3 text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc]"
+        />
+      </div>
+    </div>
+
+    <!-- Filtros de estado -->
+    <div class="flex items-center gap-3 mt-3 pt-3 border-t border-[#f3f4f6]">
+
+      <!-- Dropdown Est. Operativo -->
+      <div class="relative">
+        <button
+          type="button"
+          (click)="filtroOpOpen.set(!filtroOpOpen()); filtroAdminOpen.set(false)"
+          class="flex items-center gap-2 border rounded-[10px] h-[34px] px-3 text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-colors"
+          [class.border-[#155dfc]]="filtroOpOpen() || filtroOp().size > 0"
+          [class.bg-[#eff6ff]]="filtroOpOpen() || filtroOp().size > 0"
+          [class.text-[#155dfc]]="filtroOpOpen() || filtroOp().size > 0"
+          [class.border-[#d1d5dc]]="!filtroOpOpen() && filtroOp().size === 0"
+          [class.bg-white]="!filtroOpOpen() && filtroOp().size === 0"
+          [class.text-[#45556c]]="!filtroOpOpen() && filtroOp().size === 0"
+        >
+          Est. Operativo
+          @if (filtroOp().size > 0) {
+            <span class="bg-[#155dfc] text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">{{ filtroOp().size }}</span>
+          }
+          <lucide-angular [img]="filtroOpOpen() ? ChevronUpIcon : ChevronDownIcon" class="size-3" [color]="filtroOpOpen() || filtroOp().size > 0 ? '#155dfc' : '#45556c'" [strokeWidth]="2" />
+        </button>
+
+        @if (filtroOpOpen()) {
+          <div class="absolute top-[calc(100%+6px)] left-0 z-20 bg-white border border-[#e5e7eb] rounded-xl shadow-lg py-2 w-48">
+            <p class="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider px-3 pb-2">Est. Operativo</p>
+            @for (estado of estadosOp; track estado) {
+              <label class="flex items-center gap-3 px-3 py-2 hover:bg-[#f9fafb] cursor-pointer">
+                <input
+                  type="checkbox"
+                  [checked]="filtroOp().has(estado)"
+                  (change)="toggleFiltroOp(estado)"
+                  class="size-4 rounded border-[#d1d5dc] accent-[#155dfc] cursor-pointer"
+                />
+                <div class="rounded-full size-2 shrink-0" [style.background-color]="estadoOpDotColor(estado)"></div>
+                <span class="text-[13px] text-[#364153]">{{ estado }}</span>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Dropdown Est. Administrativo -->
+      <div class="relative">
+        <button
+          type="button"
+          (click)="filtroAdminOpen.set(!filtroAdminOpen()); filtroOpOpen.set(false)"
+          class="flex items-center gap-2 border rounded-[10px] h-[34px] px-3 text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-colors"
+          [class.border-[#155dfc]]="filtroAdminOpen() || filtroAdmin().size > 0"
+          [class.bg-[#eff6ff]]="filtroAdminOpen() || filtroAdmin().size > 0"
+          [class.text-[#155dfc]]="filtroAdminOpen() || filtroAdmin().size > 0"
+          [class.border-[#d1d5dc]]="!filtroAdminOpen() && filtroAdmin().size === 0"
+          [class.bg-white]="!filtroAdminOpen() && filtroAdmin().size === 0"
+          [class.text-[#008236]]="!filtroAdminOpen() && filtroAdmin().size === 0"
+        >
+          Est. Administrativo
+          @if (filtroAdmin().size > 0) {
+            <span class="bg-[#155dfc] text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">{{ filtroAdmin().size }}</span>
+          }
+          <lucide-angular [img]="filtroAdminOpen() ? ChevronUpIcon : ChevronDownIcon" class="size-3" [color]="filtroAdminOpen() || filtroAdmin().size > 0 ? '#155dfc' : '#008236'" [strokeWidth]="2" />
+        </button>
+
+        @if (filtroAdminOpen()) {
+          <div class="absolute top-[calc(100%+6px)] left-0 z-20 bg-white border border-[#e5e7eb] rounded-xl shadow-lg py-2 w-44">
+            <p class="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider px-3 pb-2">Est. Administrativo</p>
+            @for (estado of estadosAdmin; track estado) {
+              <label class="flex items-center gap-3 px-3 py-2 hover:bg-[#f9fafb] cursor-pointer">
+                <input
+                  type="checkbox"
+                  [checked]="filtroAdmin().has(estado)"
+                  (change)="toggleFiltroAdmin(estado)"
+                  class="size-4 rounded border-[#d1d5dc] accent-[#155dfc] cursor-pointer"
+                />
+                <span class="text-[13px] text-[#364153]">{{ estado }}</span>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white border border-[#e5e7eb] rounded-2xl shadow-sm overflow-hidden">
+
+    <!-- Contador -->
+    <div class="px-5 py-3 border-b border-[#f3f4f6]">
+      <p class="text-[12px] text-[#6a7282]">
+        Mostrando <span class="font-semibold text-[#364153]">{{ filtered().length }}</span> de
+        <span class="font-semibold text-[#364153]">{{ servicios().length }}</span> servicios
+      </p>
+    </div>
+
+    <div class="overflow-x-auto">
+    <!-- Header -->
+    <div class="grid bg-[#f9fafb] border-b border-[#e5e7eb] min-w-[900px]" style="grid-template-columns: 144px 1fr 142px 128px 144px 144px 80px">
+      @for (col of ['ID / Fecha', 'Trayecto', 'Vehículos', 'Costo (USD)', 'Est. Operativo', 'Est. Admin.', 'Ver']; track col) {
+        <div class="px-5 py-3">
+          <span class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider">{{ col }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Filas -->
+    @for (srv of filtered(); track srv.id) {
+      <div
+        class="grid border-b border-[#f3f4f6] hover:bg-[#fafafa] transition-colors min-w-[900px]"
+        style="grid-template-columns: 144px 1fr 142px 128px 144px 144px 80px; min-height: 71px"
+      >
+        <!-- ID / Fecha -->
+        <div class="px-5 py-4">
+          <p class="font-semibold text-[#101828] text-[14px] font-mono">{{ srv.id }}</p>
+          <p class="text-[12px] text-[#6a7282] mt-1">{{ srv.fecha }} · {{ srv.hora }}</p>
+        </div>
+
+        <!-- Trayecto -->
+        <div class="px-5 py-4 flex flex-col gap-1 justify-center">
+          <div class="flex items-center gap-2">
+            <div class="bg-[#00c950] rounded-full size-[6px] shrink-0"></div>
+            <span class="text-[12px] text-[#364153]">{{ srv.origen }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="bg-[#fb2c36] rounded-full size-[6px] shrink-0"></div>
+            <span class="text-[12px] text-[#364153]">{{ srv.destino }}</span>
+          </div>
+        </div>
+
+        <!-- Vehículos -->
+        <div class="px-5 py-4 flex items-center">
+          <div class="flex items-center gap-2 bg-[#f3f4f6] border border-[#e5e7eb] rounded-full px-3 h-[26px]">
+            <lucide-angular [img]="CarIcon" class="size-3" color="#364153" [strokeWidth]="2" />
+            <span class="text-[12px] font-semibold text-[#364153]">{{ vehiculosLabel(srv.vehiculos) }}</span>
+          </div>
+        </div>
+
+        <!-- Costo -->
+        <div class="px-5 py-4 flex items-center justify-end">
+          <span class="text-[14px] font-semibold text-[#101828]">{{ formatCosto(srv.costo) }}</span>
+        </div>
+
+        <!-- Est. Operativo -->
+        <div class="px-5 py-4 flex items-center">
+          <div class="flex items-center gap-2">
+            <div class="rounded-full size-2 shrink-0" [style.background-color]="estadoOpDotColor(srv.estadoOperativo)"></div>
+            <span class="text-[14px] font-medium" [class]="estadoOpClass(srv.estadoOperativo)">{{ srv.estadoOperativo }}</span>
+          </div>
+        </div>
+
+        <!-- Est. Admin -->
+        <div class="px-5 py-4 flex items-center">
+          @let s = estadoAdminClass(srv.estadoAdmin);
+          <div
+            class="rounded-full px-3 h-[26px] flex items-center border text-[12px] font-semibold"
+            [style.background-color]="s.bg"
+            [style.border-color]="s.border"
+            [style.color]="s.text"
+          >{{ srv.estadoAdmin }}</div>
+        </div>
+
+        <!-- Ver -->
+        <div class="px-5 py-4 flex items-center justify-center">
+          <button
+            (click)="verDetalle(srv.id)"
+            class="bg-white border border-[#e5e7eb] rounded-[10px] size-8 flex items-center justify-center hover:border-[#155dfc] hover:bg-[#eff6ff] transition-colors cursor-pointer"
+          >
+            <lucide-angular [img]="EyeIcon" class="size-4" color="#6a7282" [strokeWidth]="2" />
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Footer totales -->
+    <div class="bg-[#f9fafb] border-t border-[#e5e7eb] min-w-[900px]">
+      <!-- Total liquidado -->
+      <div class="grid border-b border-[#f3f4f6]" style="grid-template-columns: 1fr 128px 1fr; min-height: 49px">
+        <div class="flex items-center justify-end gap-3 px-5">
+          <div class="bg-[#00c950] rounded-full size-2"></div>
+          <span class="text-[11px] font-semibold text-[#4a5565] uppercase tracking-wider">Total Liquidado</span>
+          <span class="text-[12px] text-[#99a1af]">(Vista Actual) · 2 reg.</span>
+        </div>
+        <div class="flex items-center justify-end px-5">
+          <span class="text-[16px] font-bold text-[#00a63e]">{{ formatCosto(montoLiquidado()) }}</span>
+        </div>
+        <div></div>
+      </div>
+      <!-- Total pendiente -->
+      <div class="grid" style="grid-template-columns: 1fr 128px 1fr; min-height: 49px">
+        <div class="flex items-center justify-end gap-3 px-5">
+          <div class="bg-[#fe9a00] rounded-full size-2"></div>
+          <span class="text-[11px] font-semibold text-[#4a5565] uppercase tracking-wider">Total Pendiente</span>
+          <span class="text-[12px] text-[#99a1af]">(solo Finalizados) · 2 reg.</span>
+        </div>
+        <div class="flex items-center justify-end px-5">
+          <span class="text-[16px] font-bold text-[#e17100]">{{ formatCosto(montoPendiente()) }}</span>
+        </div>
+        <div></div>
+      </div>
+    </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL – Detalle del Servicio -->
+@if (showDetalle()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="cerrarDetalle()"></div>
+
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[600px] max-h-[85vh] overflow-y-auto mx-4">
+
+      <!-- Header -->
+      <div class="sticky top-0 bg-white border-b border-[#e5e7eb] px-6 py-5 rounded-t-2xl z-10">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-[20px] font-bold text-[#101828]">Detalle del Servicio</h2>
+            @if (detalle()) {
+              <p class="text-[13px] text-[#6a7282] font-mono mt-0.5">{{ detalle()!.id }}</p>
+            }
+          </div>
+          <button (click)="cerrarDetalle()" class="text-[#6a7282] hover:text-[#101828] mt-1 cursor-pointer">
+            <lucide-angular [img]="XIcon" class="size-5" color="currentColor" [strokeWidth]="2" />
+          </button>
+        </div>
+
+        @if (detalle()) {
+          <div class="flex items-center gap-3 mt-3">
+            <!-- Estado Operativo -->
+            @let dot = estadoOpDotColor(detalle()!.estadoOperativo);
+            <div class="flex items-center gap-2 bg-[#f9fafb] border border-[#e5e7eb] rounded-full px-3 h-7">
+              <div class="rounded-full size-2 shrink-0" [style.background-color]="dot"></div>
+              <span class="text-[13px] font-medium" [class]="estadoOpClass(detalle()!.estadoOperativo)">{{ detalle()!.estadoOperativo }}</span>
+            </div>
+            <!-- Estado Admin -->
+            @let sa = estadoAdminClass(detalle()!.estadoAdmin);
+            <div
+              class="flex items-center rounded-full px-3 h-7 border text-[13px] font-semibold"
+              [style.background-color]="sa.bg"
+              [style.border-color]="sa.border"
+              [style.color]="sa.text"
+            >{{ detalle()!.estadoAdmin }}</div>
+          </div>
+        }
+      </div>
+
+      @if (detalleLoading()) {
+        <div class="flex items-center justify-center py-16">
+          <p class="text-[#6a7282]">Cargando...</p>
+        </div>
+      }
+
+      @if (detalle() && !detalleLoading()) {
+        <div class="px-6 py-6 flex flex-col gap-6">
+
+          <!-- Trayecto -->
+          <div class="bg-[#f9fafb] border border-[#e5e7eb] rounded-xl p-4">
+            <div class="flex flex-col gap-3">
+              <div class="flex items-center gap-3">
+                <div class="bg-[#00c950] rounded-full size-3 shrink-0"></div>
+                <span class="text-[14px] text-[#364153]">{{ detalle()!.origen }}</span>
+              </div>
+              <div class="w-px h-4 bg-[#e5e7eb] ml-[5px]"></div>
+              <div class="flex items-center gap-3">
+                <div class="bg-[#fb2c36] rounded-full size-3 shrink-0"></div>
+                <span class="text-[14px] text-[#364153]">{{ detalle()!.destino }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloque horario -->
+          <div class="bg-[#eff6ff] border border-[#bedbff] rounded-xl p-4">
+            <p class="text-[11px] font-semibold text-[#1447e6] uppercase tracking-wider mb-2">Bloque Horario</p>
+            <div class="flex items-center gap-3">
+              <lucide-angular [img]="CheckCircleIcon" class="size-5 shrink-0" color="#155dfc" [strokeWidth]="2" />
+              <span class="text-[18px] font-bold text-[#1447e6]">{{ detalle()!.horaInicio }} – {{ detalle()!.horaFin }}</span>
+              <span class="text-[14px] text-[#155dfc]">{{ detalle()!.duracionHoras }} h</span>
+            </div>
+            <p class="text-[12px] text-[#4a7bcc] mt-1">{{ detalle()!.fecha }} · {{ detalle()!.hora }}</p>
+          </div>
+
+          <!-- Vehículos trasladados -->
+          <div>
+            <p class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider mb-3">
+              Vehículos Trasladados ({{ detalle()!.vehiculos }})
+            </p>
+            <div class="bg-[#f9fafb] border border-[#e5e7eb] rounded-xl p-4">
+              <div class="flex items-center gap-4">
+                <span class="bg-[#155dfc] text-white text-[12px] font-bold size-7 rounded-lg flex items-center justify-center shrink-0">{{ detalle()!.vehiculos }}</span>
+                <div class="flex gap-6 flex-1">
+                  <div>
+                    <p class="text-[11px] text-[#9ca3af]">Tipo</p>
+                    <p class="text-[13px] font-semibold text-[#364153] capitalize">{{ detalle()!.tipoVehiculo }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[11px] text-[#9ca3af]">Placa</p>
+                    <p class="text-[13px] font-semibold text-[#364153] font-mono">{{ detalle()!.placa }}</p>
+                  </div>
+                  <div>
+                    <p class="text-[11px] text-[#9ca3af]">Detalle</p>
+                    <p class="text-[13px] font-semibold text-[#364153]">{{ detalle()!.descripcionVehiculo }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trazabilidad administrativa -->
+          <div>
+            <p class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider mb-3">Trazabilidad Administrativa</p>
+            <div class="flex flex-col gap-3">
+              @for (item of detalle()!.trazabilidad; track item.estado) {
+                <div class="flex items-start gap-4">
+                  <div
+                    class="size-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    [style.background-color]="trazabilidadColor(item.color) + '20'"
+                  >
+                    <lucide-angular [img]="CheckCircleIcon" class="size-4" [color]="trazabilidadColor(item.color)" [strokeWidth]="2" />
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-[14px] font-semibold text-[#101828]">{{ item.estado }}</p>
+                    <p class="text-[12px] text-[#6a7282]">{{ item.descripcion }}</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <p class="text-[12px] font-medium text-[#4a5565]">{{ item.fecha }}</p>
+                    <p class="text-[12px] text-[#9ca3af]">{{ item.hora }}</p>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Resumen de Cobro -->
+          <div class="bg-[#155dfc] rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-4">
+              <lucide-angular [img]="DollarSignIcon" class="size-4 shrink-0" color="white" [strokeWidth]="2" />
+              <p class="text-[11px] font-semibold text-white uppercase tracking-wider">Resumen de Cobro</p>
+            </div>
+            <div class="flex flex-col gap-2 mb-4">
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-[#bedbff]">Vehículos trasladados</span>
+                <span class="text-[13px] text-white font-medium">{{ detalle()!.vehiculos }} unidad</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-[#bedbff]">Bloque de servicio</span>
+                <span class="text-[13px] text-white font-medium">{{ detalle()!.horaInicio }} – {{ detalle()!.horaFin }} ({{ detalle()!.duracionHoras }} h)</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-[#bedbff]">Estado de pago</span>
+                <span class="text-[13px] text-white font-medium">{{ detalle()!.estadoAdmin }}</span>
+              </div>
+            </div>
+            <div class="border-t border-white/20 pt-4 flex items-center justify-between">
+              <span class="text-[15px] font-bold text-white">Costo Final del Servicio</span>
+              <span class="text-[22px] font-bold text-white">{{ formatCosto(detalle()!.costo) }} <span class="text-[#bedbff] text-[13px] font-normal">USD</span></span>
+            </div>
+          </div>
+
+          <!-- Fecha -->
+          <div class="flex items-center gap-2 text-[12px] text-[#9ca3af]">
+            <lucide-angular [img]="CheckCircleIcon" class="size-4" color="#9ca3af" [strokeWidth]="2" />
+            <span>{{ detalle()!.fecha }}</span>
+          </div>
+
+          <!-- Botón cerrar -->
+          <button
+            (click)="cerrarDetalle()"
+            class="w-full h-[44px] border border-[#d1d5dc] rounded-[10px] text-[#364153] text-[15px] font-medium hover:bg-[#f9fafb] transition-colors cursor-pointer"
+          >Cerrar</button>
+
+        </div>
+      }
+
+    </div>
+  </div>
+}

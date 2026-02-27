@@ -1,0 +1,84 @@
+<div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6">
+
+  <!-- Section header -->
+  <div class="flex items-center gap-3 mb-5">
+    <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
+      <span class="text-white text-[12px] font-bold">0</span>
+    </div>
+    <div>
+      <h2 class="text-[#101828] text-[18px] font-bold">Tipo de Carga</h2>
+      <p class="text-[#6a7282] text-[13px]">Seleccione el tipo de servicio a reservar</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+
+    <!-- Carga Estándar -->
+    <button type="button" (click)="tipoCargaChange.emit('estandar')"
+      class="flex items-start gap-4 p-5 rounded-[14px] border-2 transition-all cursor-pointer text-left"
+      [class.border-[#155dfc]]="tipoCarga() === 'estandar'"
+      [class.bg-[#eff6ff]]="tipoCarga() === 'estandar'"
+      [class.border-[#e5e7eb]]="tipoCarga() !== 'estandar'"
+      [class.bg-white]="tipoCarga() !== 'estandar'">
+      <div class="size-12 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
+        [class.bg-[#155dfc]]="tipoCarga() === 'estandar'"
+        [class.bg-[#f3f4f6]]="tipoCarga() !== 'estandar'">
+        <lucide-angular [img]="TruckIcon" class="size-6"
+          [color]="tipoCarga() === 'estandar' ? 'white' : '#6a7282'"
+          [strokeWidth]="1.5" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <p class="text-[#101828] text-[15px] font-bold">Carga Estándar</p>
+          @if (tipoCarga() === 'estandar') {
+            <span class="bg-[#155dfc] text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0">Seleccionado</span>
+          }
+        </div>
+        <p class="text-[#155dfc] text-[12px] font-semibold mb-1.5">1 Vehículo</p>
+        <p class="text-[#6a7282] text-[12px] leading-relaxed">Servicio de transporte para un único vehículo con grúa estándar</p>
+      </div>
+    </button>
+
+    <!-- Carga Múltiple -->
+    <button type="button" (click)="tipoCargaChange.emit('multiple')"
+      class="flex items-start gap-4 p-5 rounded-[14px] border-2 transition-all cursor-pointer text-left"
+      [class.border-[#155dfc]]="tipoCarga() === 'multiple'"
+      [class.bg-[#eff6ff]]="tipoCarga() === 'multiple'"
+      [class.border-[#e5e7eb]]="tipoCarga() !== 'multiple'"
+      [class.bg-white]="tipoCarga() !== 'multiple'">
+      <div class="size-12 rounded-[10px] flex items-center justify-center shrink-0 transition-colors"
+        [class.bg-[#155dfc]]="tipoCarga() === 'multiple'"
+        [class.bg-[#f3f4f6]]="tipoCarga() !== 'multiple'">
+        <lucide-angular [img]="LayersIcon" class="size-6"
+          [color]="tipoCarga() === 'multiple' ? 'white' : '#6a7282'"
+          [strokeWidth]="1.5" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-2 mb-1">
+          <p class="text-[#101828] text-[15px] font-bold">Carga Múltiple</p>
+          @if (tipoCarga() === 'multiple') {
+            <span class="bg-[#155dfc] text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0">Seleccionado</span>
+          }
+        </div>
+        <p class="text-[#155dfc] text-[12px] font-semibold mb-1.5">2+ Vehículos</p>
+        <p class="text-[#6a7282] text-[12px] leading-relaxed">Operativo especial para traslado de múltiples vehículos simultáneamente</p>
+      </div>
+    </button>
+
+  </div>
+
+  <!-- Cantidad de Vehículos (solo para Carga Múltiple) -->
+  @if (tipoCarga() === 'multiple') {
+    <div class="mt-4 pt-4 border-t border-[#e5e7eb]">
+      <label class="block text-[#364153] text-[13px] font-semibold mb-1.5">
+        Cantidad de Vehículos
+      </label>
+      <input type="number" min="2" max="10"
+        [ngModel]="cantidadVehiculos()"
+        (ngModelChange)="cantidadVehiculosChange.emit(+$event)"
+        class="w-40 border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+      <p class="text-[#6a7282] text-[12px] mt-1.5">Mínimo 2, máximo 10 vehículos por servicio</p>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,49 @@
+<div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
+
+  <!-- Section header -->
+  <div class="flex items-center gap-3">
+    <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
+      <span class="text-white text-[12px] font-bold">3</span>
+    </div>
+    <div>
+      <h2 class="text-[#101828] text-[18px] font-bold">Detalles del Vehículo y Confirmación</h2>
+      <p class="text-[#6a7282] text-[13px]">Complete la información del vehículo a transportar</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tipo de Vehículo *</label>
+      <select [ngModel]="tipoVehiculo()" (ngModelChange)="tipoVehiculoChange.emit($event)" name="tipoVehiculo"
+        class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
+        <option value="">Seleccionar tipo...</option>
+        <option value="Sedán">Sedán</option>
+        <option value="SUV">SUV</option>
+        <option value="Camioneta">Camioneta</option>
+        <option value="Pickup">Pickup</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div>
+      <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Detalles del Vehículo</label>
+      <input type="text" [ngModel]="detallesVehiculo()" (ngModelChange)="detallesVehiculoChange.emit($event)" name="detalles"
+        placeholder="Ej. Toyota Corolla 2020, Gris"
+        class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+    </div>
+  </div>
+
+  <div>
+    <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Observaciones Adicionales</label>
+    <textarea [ngModel]="observaciones()" (ngModelChange)="observacionesChange.emit($event)" name="observaciones"
+      placeholder="Detalles adicionales del servicio, instrucciones especiales, contacto directo..."
+      rows="3"
+      class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] resize-none"></textarea>
+  </div>
+
+  <button type="button" (click)="confirmar.emit()"
+    [disabled]="!step1Complete() || !step2Complete() || !tipoVehiculo()"
+    class="w-full bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-[10px] h-12 transition-colors cursor-pointer flex items-center justify-center gap-2">
+    <lucide-angular [img]="PhoneIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+    Confirmar Reserva Telefónica
+  </button>
+</div>

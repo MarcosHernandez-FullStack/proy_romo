@@ -1,0 +1,70 @@
+<div class="p-6 flex flex-col gap-4">
+
+  <!-- Header -->
+  <div>
+    <h2 class="text-[#101828] text-[20px] font-bold">Configuración de Horarios por Día</h2>
+    <p class="text-[#4a5565] text-[14px] mt-0.5">Defina los horarios de operación para cada día de la semana</p>
+    <div class="mt-3">
+      <span class="inline-flex items-center gap-1.5 bg-[#eff6ff] text-[#155dfc] text-[13px] font-medium border border-[#bedbff] rounded-full px-3 py-1">
+        <lucide-angular [img]="InfoIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
+        Alcance: Configuración para Clientes Online
+      </span>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="border border-[#e5e7eb] rounded-[10px] overflow-hidden">
+    <div class="grid grid-cols-5 bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5">
+      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">DÍA</span>
+      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">ESTADO</span>
+      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">HORA INICIO</span>
+      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">HORA FIN</span>
+      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">HORARIO CLIENTE</span>
+    </div>
+    @for (h of editados(); track h.dia) {
+      <div class="grid grid-cols-5 items-center px-4 py-3 border-b border-[#e5e7eb] last:border-0 hover:bg-[#fafafa] transition-colors">
+        <span class="text-[#101828] text-[14px] font-medium">{{ h.dia }}</span>
+        <div>
+          <button type="button" (click)="toggleActivo($index)"
+            class="text-[13px] font-semibold rounded-full px-2.5 py-0.5 cursor-pointer transition-colors"
+            [class.bg-[#f0fdf4]]="h.activo"
+            [class.text-[#008236]]="h.activo"
+            [class.hover:bg-[#dcfce7]]="h.activo"
+            [class.bg-[#fef2f2]]="!h.activo"
+            [class.text-[#c10007]]="!h.activo"
+            [class.hover:bg-[#fee2e2]]="!h.activo">
+            {{ h.activo ? 'Activo' : 'Inactivo' }}
+          </button>
+        </div>
+        <input type="time" [ngModel]="h.abre" (ngModelChange)="updateAbre($index, $event)" [disabled]="!h.activo"
+          class="w-24 border border-[#d1d5dc] rounded-lg px-2 py-1.5 text-[13px] text-[#101828] disabled:opacity-40 disabled:bg-[#f3f4f6] focus:outline-none focus:border-[#155dfc]" />
+        <input type="time" [ngModel]="h.cierra" (ngModelChange)="updateCierra($index, $event)" [disabled]="!h.activo"
+          class="w-24 border border-[#d1d5dc] rounded-lg px-2 py-1.5 text-[13px] text-[#101828] disabled:opacity-40 disabled:bg-[#f3f4f6] focus:outline-none focus:border-[#155dfc]" />
+        <span class="text-[#4a5565] text-[13px]">{{ horarioClienteLabel(h) }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Warning note -->
+  <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[10px] px-4 py-3">
+    <div class="flex items-center gap-2 mb-2">
+      <lucide-angular [img]="AlertTriangleIcon" class="size-4" color="#bb4d00" [strokeWidth]="1.5" />
+      <span class="text-[#bb4d00] text-[14px] font-semibold">Información Importante</span>
+    </div>
+    <ul class="text-[#e17100] text-[12px] space-y-0.5 list-none">
+      <li>• Los clientes solo pueden reservar en los horarios configurados aquí</li>
+      <li>• Los administradores tienen acceso 24/7 independientemente de estos horarios</li>
+      <li>• Si desactiva un día con servicios programados, recibirá una alerta de conflicto</li>
+    </ul>
+  </div>
+
+  <!-- Save button -->
+  <div class="flex justify-end">
+    <button type="button" (click)="onGuardar()"
+      class="flex items-center gap-2 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] px-5 h-10 transition-colors cursor-pointer">
+      <lucide-angular [img]="SaveIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      Guardar Horarios
+    </button>
+  </div>
+
+</div>

@@ -1,0 +1,137 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[600px] overflow-hidden" style="max-height: 90vh; overflow-y: auto;">
+
+    <!-- Green header -->
+    <div class="px-6 py-5 sticky top-0 z-10" style="background: linear-gradient(135deg, #00a63e, #008236)">
+      <div class="flex items-center gap-3">
+        <div class="size-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+          <lucide-angular [img]="PhoneIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        </div>
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Confirmación de Reserva Telefónica</h2>
+          <p class="text-[#dcfce7] text-[13px]">Revise el desglose técnico antes de confirmar</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 flex flex-col gap-5">
+
+      <!-- Desglose Técnico -->
+      <div class="border border-[#e5e7eb] rounded-[14px] overflow-hidden">
+        <div class="px-4 py-3 bg-[#f9fafb] border-b border-[#e5e7eb] flex items-center gap-2">
+          <lucide-angular [img]="NavigationIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          <span class="text-[#101828] text-[14px] font-bold">Desglose Técnico del Motor de Cálculo</span>
+        </div>
+
+        <!-- Distancia -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-[#f3f4f6]">
+          <div>
+            <p class="text-[#101828] text-[13px] font-semibold">Distancia Total</p>
+            <p class="text-[#6a7282] text-[11px]">Calculada por GoogleMaps API</p>
+          </div>
+          <span class="text-[#101828] text-[16px] font-bold">{{ datos().distanciaKm }} km</span>
+        </div>
+
+        <!-- Tiempo -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-[#f3f4f6]">
+          <div>
+            <p class="text-[#101828] text-[13px] font-semibold">Tiempo Google Maps</p>
+            <p class="text-[#6a7282] text-[11px]">24 km/h promedio ciudad</p>
+          </div>
+          <span class="text-[#101828] text-[16px] font-bold">{{ datos().tiempoMin }} min</span>
+        </div>
+
+        <!-- Margen -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-[#f3f4f6]">
+          <div>
+            <p class="text-[#101828] text-[13px] font-semibold">Margen de Maniobra</p>
+            <p class="text-[#6a7282] text-[11px]">Carga y descarga del vehículo</p>
+          </div>
+          <span class="text-[#101828] text-[16px] font-bold">{{ datos().margenManiobra }} min</span>
+        </div>
+
+        <!-- Bloques (purple) -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-[#e9d5ff] bg-[#faf5ff]">
+          <div>
+            <p class="text-[#59168b] text-[13px] font-semibold">Bloques Requeridos (Total)</p>
+            <p class="text-[#8200db] text-[11px]">
+              ({{ datos().tiempoMin }} + {{ datos().margenManiobra }}) ÷ 60 = {{ datos().bloques }} bloque(s)
+            </p>
+          </div>
+          <span class="text-[#59168b] text-[18px] font-bold">{{ datos().bloques }} bloques</span>
+        </div>
+
+        <!-- Precio (green) -->
+        <div class="flex items-center justify-between px-4 py-3 bg-[#f0fdf4]">
+          <div>
+            <p class="text-[#0d542b] text-[13px] font-semibold">Cálculo de Precio</p>
+            <p class="text-[#008236] text-[11px]">{{ datos().distanciaKm }} km × ${{ datos().tarifaKm }} USD</p>
+          </div>
+          <span class="text-[#008236] text-[18px] font-bold">$ {{ datos().costoTotal }} USD</span>
+        </div>
+      </div>
+
+      <!-- Resumen del Servicio -->
+      <div class="border border-[#e5e7eb] rounded-[14px] overflow-hidden">
+        <div class="px-4 py-3 bg-[#f9fafb] border-b border-[#e5e7eb] flex items-center gap-2">
+          <lucide-angular [img]="CalendarDaysIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          <span class="text-[#101828] text-[14px] font-bold">Resumen del Servicio</span>
+        </div>
+        <div class="p-4 grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Cliente</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ datos().cliente }}</p>
+          </div>
+          <div>
+            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Fecha y Hora</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ datos().horaSlot }} — {{ datos().fechaLabel }}</p>
+          </div>
+          <div>
+            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Tipo de Vehículo</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ datos().tipoVehiculo || '—' }}</p>
+          </div>
+          <div>
+            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Tipo de Carga</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ datos().tipoCarga }}</p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Origen</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ datos().origen }}</p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Destino</p>
+            <p class="text-[#101828] text-[13px] font-semibold">{{ datos().destino }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total banner -->
+      <div class="rounded-[14px] px-5 py-4 flex items-center justify-between"
+        style="background: linear-gradient(135deg, #00a63e, #008236)">
+        <div class="flex items-center gap-3">
+          <lucide-angular [img]="DollarSignIcon" class="size-6" color="white" [strokeWidth]="1.5" />
+          <div>
+            <p class="text-[#dcfce7] text-[12px] font-semibold">Total a Cobrar al Cliente</p>
+            <p class="text-[#b0f7cb] text-[11px]">USD — Dólares</p>
+          </div>
+        </div>
+        <span class="text-white text-[38px] font-bold">$ {{ datos().costoTotal }}</span>
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3 sticky bottom-0 bg-white">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-11 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="confirmar.emit()"
+        class="flex-1 bg-[#00a63e] hover:bg-[#008236] text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer flex items-center justify-center gap-2">
+        <lucide-angular [img]="CheckCircleIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+        Confirmar y Crear Servicio
+      </button>
+    </div>
+
+  </div>
+</div>

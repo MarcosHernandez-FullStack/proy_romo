@@ -1,0 +1,84 @@
+<div class="min-h-screen flex items-center justify-center px-4"
+  style="background: linear-gradient(150deg, #0f172b 0%, #1c398e 50%, #0f172b 100%)">
+
+  <div class="w-full max-w-[448px]">
+    <!-- Header -->
+    <div class="flex flex-col items-center mb-8">
+      <div class="size-20 rounded-2xl flex items-center justify-center mb-6 shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)]"
+        style="background: linear-gradient(135deg, #2b7fff 0%, #155dfc 100%)">
+        <lucide-angular [img]="ShieldIcon" class="size-12" color="white" [strokeWidth]="1.5" />
+      </div>
+      <h1 class="text-white text-[30px] font-bold text-center leading-9">Backoffice Administrativo</h1>
+      <p class="text-[#bedbff] text-[16px] text-center mt-1">Sistema de Gestión Interna - CraneManager</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)] px-5 py-6 sm:px-8 sm:py-8">
+      <div class="mb-6">
+        <h2 class="text-[#101828] text-[24px] font-bold">Acceso para Staff</h2>
+        <p class="text-[#4a5565] text-[14px] mt-0.5">Ingrese sus credenciales corporativas</p>
+      </div>
+
+      <form (ngSubmit)="submit()" class="flex flex-col gap-5">
+        <!-- Email -->
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[#364153] text-[14px] font-medium">Correo Electrónico Corporativo</label>
+          <div class="relative">
+            <div class="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-[#6a7282]">
+              <lucide-angular [img]="MailIcon" class="size-5" color="#6a7282" [strokeWidth]="1.5" />
+            </div>
+            <input type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" name="email"
+              placeholder="usuario@cranemanager.com"
+              class="w-full border border-[#d1d5dc] rounded-[10px] pl-10 pr-3 py-[11px] text-[16px] text-[#101828] placeholder-[rgba(10,10,10,0.5)] focus:outline-none focus:border-[#155dfc] transition-colors" />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-[#364153] text-[14px] font-medium">Contraseña</label>
+            <span class="text-[#155dfc] text-[14px] font-medium cursor-pointer hover:underline">¿Olvidaste tu contraseña?</span>
+          </div>
+          <div class="relative">
+            <div class="absolute left-3 top-1/2 -translate-y-1/2">
+              <lucide-angular [img]="LockIcon" class="size-5" color="#6a7282" [strokeWidth]="1.5" />
+            </div>
+            <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password"
+              placeholder="••••••••"
+              class="w-full border border-[#d1d5dc] rounded-[10px] pl-10 pr-3 py-[11px] text-[16px] text-[#101828] placeholder-[rgba(10,10,10,0.5)] focus:outline-none focus:border-[#155dfc] transition-colors" />
+          </div>
+        </div>
+
+        <!-- Error -->
+        @if (error()) {
+          <p class="text-[#c10007] text-[13px] bg-[#fef2f2] border border-[#ffa2a2] rounded-lg px-3 py-2">{{ error() }}</p>
+        }
+
+        <!-- Submit -->
+        <button type="submit" [disabled]="loading()"
+          class="w-full bg-[#155dfc] hover:bg-[#1447e6] text-white text-[16px] font-medium rounded-[10px] h-10 flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-60">
+          <lucide-angular [img]="LogInIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+          Ingresar al Panel de Control
+        </button>
+      </form>
+
+      <!-- Footer note -->
+      <div class="border-t border-[#e5e7eb] mt-6 pt-5">
+        <p class="text-[#6a7282] text-[12px] text-center">🔒 Acceso seguro protegido con encriptación SSL</p>
+      </div>
+    </div>
+
+    <!-- Bottom links -->
+    <div class="flex gap-4 mt-6">
+      <a routerLink="/login"
+        class="flex-1 border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.1)] rounded-[10px] h-10 flex items-center justify-center text-white text-[14px] hover:bg-[rgba(255,255,255,0.15)] transition-colors cursor-pointer">
+        → Portal Cliente
+      </a>
+      <button type="button"
+        class="flex-1 border border-[rgba(255,255,255,0.2)] bg-[rgba(255,255,255,0.1)] rounded-[10px] h-10 flex items-center justify-center text-white text-[14px] font-medium hover:bg-[rgba(255,255,255,0.15)] transition-colors cursor-pointer">
+        → App Operador
+      </button>
+    </div>
+    <p class="text-[#bedbff] text-[14px] text-center mt-4">¿Problemas de acceso? Contacte al administrador de sistemas</p>
+  </div>
+</div>

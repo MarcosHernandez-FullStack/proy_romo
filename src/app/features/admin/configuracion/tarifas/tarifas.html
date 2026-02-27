@@ -1,0 +1,224 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Tarifa Global card -->
+  <div class="bg-gradient-to-r from-[#155dfc] to-[#1447e6] rounded-[14px] shadow-sm p-6">
+    <div class="flex items-start justify-between mb-5">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="DollarSignIcon" class="size-6" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h3 class="text-white text-[20px] font-bold">Tarifa Global (Default)</h3>
+          <p class="text-[#dbeafe] text-[13px]">Tarifa aplicada a clientes sin tarifa personalizada</p>
+        </div>
+      </div>
+      <button type="button"
+        class="flex items-center gap-2 bg-[#e5e7eb] text-[#1e2939] text-[13px] font-medium rounded-[10px] px-3 h-8 hover:bg-[#d1d5dc] transition-colors cursor-pointer">
+        <lucide-angular [img]="SaveIcon" class="size-3.5" color="#1e2939" [strokeWidth]="1.5" />
+        Guardar
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="text-[#dbeafe] text-[13px] font-semibold mb-2 block">Tarifa Base (USD)</label>
+        <input type="number" [ngModel]="tarifaBaseGlobal()" (ngModelChange)="tarifaBaseGlobal.set(+$event)" name="tarifaBase"
+          class="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.3)] rounded-[10px] px-4 py-3.5 text-white text-[24px] font-bold focus:outline-none focus:border-white" />
+      </div>
+      <div>
+        <label class="text-[#dbeafe] text-[13px] font-semibold mb-2 block">Tarifa por Km (USD)</label>
+        <input type="number" [ngModel]="tarifaKmGlobal()" (ngModelChange)="tarifaKmGlobal.set(+$event)" name="tarifaKm"
+          class="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.3)] rounded-[10px] px-4 py-3.5 text-white text-[24px] font-bold focus:outline-none focus:border-white" />
+      </div>
+    </div>
+
+    <div class="bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.2)] rounded-[10px] px-4 py-3">
+      <p class="text-white text-[13px] font-semibold mb-1">Vista Previa:</p>
+      <p class="text-[#dbeafe] text-[12px]">{{ previewCosto() }}</p>
+    </div>
+  </div>
+
+  <!-- Tarifas personalizadas -->
+  <div>
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <h2 class="text-[#101828] text-[20px] font-semibold">Tarifas Personalizadas por Cliente</h2>
+        <p class="text-[#4a5565] text-[13px] mt-0.5">Configure tarifas específicas para cada cliente B2B</p>
+      </div>
+      <button type="button" (click)="onAbrirNueva()"
+        class="flex items-center gap-2 bg-[#155dfc] text-white text-[13px] font-semibold rounded-[10px] px-3 h-8 hover:bg-[#1447e6] transition-colors cursor-pointer">
+        <lucide-angular [img]="PlusIcon" class="size-3.5" color="white" [strokeWidth]="1.5" />
+        Nueva Tarifa
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm px-5 py-4 mb-4">
+      <div class="relative">
+        <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+        <input type="text" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" name="busqueda"
+          placeholder="Buscar por cliente o ID..."
+          class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+    <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
+      <div class="grid grid-cols-[1.8fr_1fr_1fr_1.5fr_0.7fr] gap-3 bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-2.5 min-w-[600px]">
+        @for (col of ['CLIENTE', 'TARIFA BASE (USD)', 'TARIFA X KM (USD)', 'VIGENCIA', 'ACCIONES']; track col) {
+          <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">{{ col }}</span>
+        }
+      </div>
+
+      @if (tarifasFiltradas().length === 0) {
+        <div class="py-10 flex flex-col items-center gap-2 text-[#9ca3af]">
+          <lucide-angular [img]="DollarSignIcon" class="size-7" color="#d1d5dc" [strokeWidth]="1" />
+          <p class="text-[13px]">No hay tarifas personalizadas</p>
+        </div>
+      }
+
+      @for (t of tarifasFiltradas(); track t.clienteId) {
+        <div class="grid grid-cols-[1.8fr_1fr_1fr_1.5fr_0.7fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[600px]">
+          <div>
+            <p class="text-[#101828] text-[14px] font-semibold">{{ getNombreCliente(t.clienteId) }}</p>
+            <p class="text-[#6a7282] text-[12px]">ID: {{ t.clienteId }}</p>
+          </div>
+          <p class="text-[#008236] text-[14px] font-bold">${{ t.tarifaBase }}</p>
+          <p class="text-[#1447e6] text-[14px] font-bold">${{ t.tarifaKm }}/km</p>
+          <div>
+            <p class="text-[#4a5565] text-[12px]">Desde {{ t.vigenciaDesde }}</p>
+            <p class="text-[#4a5565] text-[12px]">Hasta {{ t.vigenciaHasta ?? 'Indefinida' }}</p>
+          </div>
+          <div class="flex items-center gap-1">
+            <button type="button" (click)="onAbrirEditar(t)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer">
+              <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+            </button>
+            <button type="button" (click)="eliminarTarifa(t.clienteId)"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer">
+              <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- Modal: Nueva / Editar Tarifa B2B (shared form state) -->
+@if (showNueva() || tarifaEditar()) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[500px] overflow-hidden">
+
+      <!-- Green header -->
+      <div class="px-6 py-5 flex items-center justify-between"
+        style="background: linear-gradient(135deg, #00a63e 0%, #008236 100%)">
+        <div class="flex items-center gap-3">
+          <lucide-angular [img]="DollarSignIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+          <div>
+            <h2 class="text-white text-[20px] font-bold">{{ tarifaEditar() ? 'Editar' : 'Nueva' }} Tarifa B2B</h2>
+            <p class="text-[#dcfce7] text-[13px]">Configure la tarifa personalizada para el cliente</p>
+          </div>
+        </div>
+        <button type="button" (click)="tarifaEditar() ? tarifaEditar.set(null) : showNueva.set(false)"
+          class="size-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
+          <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        </button>
+      </div>
+
+      <div class="p-6 flex flex-col gap-4">
+
+        <!-- Cliente -->
+        <div>
+          <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Seleccionar Cliente *</label>
+          <select [ngModel]="formClienteId()" (ngModelChange)="formClienteId.set($event)" name="formClienteId"
+            [disabled]="!!tarifaEditar()"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#00a63e] bg-white cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+            <option value="">-- Seleccione un cliente --</option>
+            @for (c of clientes(); track c.id) {
+              @if (c.activo) {
+                <option [value]="c.id">{{ c.empresa }}</option>
+              }
+            }
+          </select>
+          <p class="text-[#6a7282] text-[12px] mt-1">Los clientes provienen del módulo Clientes B2B</p>
+        </div>
+
+        <!-- Tarifa Base + Tarifa km -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tarifa Base (USD) *</label>
+            <input type="number" min="0"
+              [ngModel]="formTarifaBase()" (ngModelChange)="formTarifaBase.set(+$event)" name="formTarifaBase"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[22px] font-bold text-[#101828] focus:outline-none focus:border-[#00a63e]" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tarifa x Km (USD) *</label>
+            <input type="number" min="0"
+              [ngModel]="formTarifaKm()" (ngModelChange)="formTarifaKm.set(+$event)" name="formTarifaKm"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[22px] font-bold text-[#101828] focus:outline-none focus:border-[#00a63e]" />
+          </div>
+        </div>
+
+        <!-- Vigencia Desde + Hasta -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Vigencia Desde *</label>
+            <input type="date"
+              [ngModel]="formVigenciaDesde()" (ngModelChange)="formVigenciaDesde.set($event)" name="formVigenciaDesde"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#00a63e]" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Vigencia Hasta *</label>
+            <input type="date"
+              [ngModel]="formVigenciaHasta()" (ngModelChange)="formVigenciaHasta.set($event)" name="formVigenciaHasta"
+              [disabled]="formVigenciaIndefinida()"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#00a63e] disabled:opacity-40 disabled:bg-[#f3f4f6]" />
+          </div>
+        </div>
+
+        <!-- Vigencia Indefinida checkbox -->
+        <label class="flex items-start gap-3 cursor-pointer select-none">
+          <div class="mt-0.5 size-4 rounded flex items-center justify-center border-2 shrink-0 transition-colors"
+            [class.bg-[#00a63e]]="formVigenciaIndefinida()"
+            [class.border-[#00a63e]]="formVigenciaIndefinida()"
+            [class.border-[#d1d5dc]]="!formVigenciaIndefinida()"
+            (click)="formVigenciaIndefinida.set(!formVigenciaIndefinida())">
+            @if (formVigenciaIndefinida()) {
+              <svg class="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            }
+          </div>
+          <div>
+            <p class="text-[#101828] text-[14px] font-semibold">Vigencia Indefinida</p>
+            <p class="text-[#6a7282] text-[12px]">La tarifa no tendrá fecha de expiración y estará activa permanentemente</p>
+          </div>
+        </label>
+
+        <!-- Vista Previa -->
+        <div class="bg-[#f0fdf4] border border-[#7bf1a8] rounded-[10px] px-4 py-3">
+          <p class="text-[#008236] text-[12px] font-semibold mb-0.5">Vista Previa del Cálculo:</p>
+          <p class="text-[#008236] text-[13px]">{{ previewFormCosto() }}</p>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+        <button type="button" (click)="tarifaEditar() ? tarifaEditar.set(null) : showNueva.set(false)"
+          class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button"
+          (click)="tarifaEditar() ? onGuardarEditar() : onGuardarNueva()"
+          [disabled]="!formEsValido"
+          class="flex-1 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer"
+          style="background: linear-gradient(135deg, #00a63e 0%, #008236 100%)">
+          {{ tarifaEditar() ? 'Actualizar Tarifa' : 'Crear Tarifa' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

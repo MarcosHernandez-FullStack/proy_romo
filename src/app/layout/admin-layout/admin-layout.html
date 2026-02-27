@@ -1,0 +1,27 @@
+<div class="flex h-screen overflow-hidden bg-[#f9fafb]">
+
+  <!-- Backdrop mobile -->
+  @if (sidebarAbierta()) {
+    <div class="fixed inset-0 bg-black/50 z-40 md:hidden" (click)="sidebarAbierta.set(false)"></div>
+  }
+
+  <!-- Sidebar (drawer en mobile, estático en desktop) -->
+  <div [class]="sidebarClass()">
+    <app-admin-sidebar />
+  </div>
+
+  <!-- Contenido principal -->
+  <main class="flex-1 overflow-y-auto min-w-0">
+
+    <!-- Barra superior solo en mobile -->
+    <div class="sticky top-0 z-30 bg-white border-b border-[#e5e7eb] flex items-center h-14 px-4 md:hidden">
+      <button type="button" (click)="sidebarAbierta.set(true)"
+        class="size-9 flex items-center justify-center rounded-lg hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+        <lucide-angular [img]="MenuIcon" class="size-5" color="#374151" [strokeWidth]="1.5" />
+      </button>
+      <span class="ml-3 text-[#101828] text-[16px] font-bold">Admin Panel</span>
+    </div>
+
+    <router-outlet />
+  </main>
+</div>

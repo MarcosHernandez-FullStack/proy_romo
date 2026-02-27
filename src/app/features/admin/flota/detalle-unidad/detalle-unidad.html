@@ -1,0 +1,179 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[560px] overflow-hidden">
+
+    <!-- Blue header with tabs inside -->
+    <div class="px-6 pt-5 pb-0 flex flex-col gap-4 bg-[#155dfc]"
+      style="background: linear-gradient(135deg, #155dfc 0%, #1447e6 100%)">
+
+      <!-- Title row -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <lucide-angular [img]="TruckIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+          <div>
+            <h2 class="text-white text-[20px] font-bold">Detalle de Unidad: {{ unidad().placa }}</h2>
+            <p class="text-[#bedbff] text-[13px]">{{ unidad().marca }} {{ unidad().modelo }}</p>
+          </div>
+        </div>
+        <button type="button" (click)="cerrar.emit()"
+          class="size-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
+          <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        </button>
+      </div>
+
+      <!-- Tabs (inside header) -->
+      <div class="flex items-center gap-2">
+        <button type="button" (click)="tab.set('info')"
+          class="px-4 py-1.5 rounded-t-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+          [class.bg-white]="tab() === 'info'"
+          [class.text-[#155dfc]]="tab() === 'info'"
+          [class.bg-transparent]="tab() !== 'info'"
+          [class.text-white]="tab() !== 'info'"
+          [class.border]="tab() !== 'info'"
+          [class.border-white/50]="tab() !== 'info'">
+          Información General
+        </button>
+        <button type="button" (click)="tab.set('bitacora')"
+          class="px-4 py-1.5 rounded-t-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+          [class.bg-white]="tab() === 'bitacora'"
+          [class.text-[#155dfc]]="tab() === 'bitacora'"
+          [class.bg-transparent]="tab() !== 'bitacora'"
+          [class.text-white]="tab() !== 'bitacora'"
+          [class.border]="tab() !== 'bitacora'"
+          [class.border-white/50]="tab() !== 'bitacora'">
+          Bitácora de Mantenimiento
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Tab: Información General -->
+    @if (tab() === 'info') {
+      <div class="p-6 flex flex-col gap-4">
+
+        <!-- Field grid -->
+        <div class="grid grid-cols-2 gap-x-6 gap-y-4">
+
+          <div>
+            <p class="text-[#9ca3af] text-[12px] mb-0.5">ID Unidad</p>
+            <p class="text-[#101828] text-[15px] font-bold font-mono">{{ unidad().id }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[12px] mb-0.5">Placa</p>
+            <p class="text-[#101828] text-[15px] font-bold font-mono">{{ unidad().placa }}</p>
+          </div>
+
+          <div class="col-span-1">
+            <p class="text-[#9ca3af] text-[12px] mb-0.5">Marca / Modelo</p>
+            <p class="text-[#101828] text-[15px] font-semibold">{{ unidad().marca }} {{ unidad().modelo }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[12px] mb-0.5">Año</p>
+            <p class="text-[#101828] text-[15px] font-semibold">{{ unidad().anio }}</p>
+          </div>
+
+          <div>
+            <p class="text-[#9ca3af] text-[12px] mb-0.5">Capacidad de Carga</p>
+            <p class="text-[#7c3aed] text-[15px] font-semibold">
+              {{ unidad().capacidad }} Vehículo{{ unidad().capacidad > 1 ? 's' : '' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[12px] mb-0.5">Estado Actual</p>
+            <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[12px] font-semibold"
+              [class]="estadoClass(unidad().estado)">
+              @if (unidad().estado === 'Operativa') {
+                <lucide-angular [img]="CheckCircleIcon" class="size-3.5" color="#166534" [strokeWidth]="2" />
+              } @else if (unidad().estado === 'En Taller') {
+                <lucide-angular [img]="WrenchIcon" class="size-3.5" color="#854d0e" [strokeWidth]="2" />
+              }
+              {{ unidad().estado }}
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Vencimiento de Seguro box -->
+        <div class="rounded-[12px] border px-4 py-3 flex items-center justify-between"
+          [class]="vencimientoBoxClass(seguroBadge(unidad().vencimientoSeguro))">
+          <div>
+            <p class="text-[12px] font-semibold mb-0.5"
+              [class]="vencimientoTextClass(seguroBadge(unidad().vencimientoSeguro))">
+              Vencimiento de Seguro:
+            </p>
+            <p class="text-[16px] font-bold"
+              [class]="vencimientoTextClass(seguroBadge(unidad().vencimientoSeguro))">
+              {{ formatFechaLarga(unidad().vencimientoSeguro) }}
+            </p>
+          </div>
+          <span class="text-[11px] font-bold border rounded-full px-2.5 py-0.5"
+            [class]="vencimientoBadgeClass(seguroBadge(unidad().vencimientoSeguro))">
+            {{ seguroBadge(unidad().vencimientoSeguro) }}
+          </span>
+        </div>
+
+      </div>
+    }
+
+    <!-- Tab: Bitácora -->
+    @if (tab() === 'bitacora') {
+      <div class="p-6 flex flex-col gap-4">
+
+        <h3 class="text-[#101828] text-[16px] font-bold">Historial Cronológico de Mantenimiento</h3>
+
+        @if (bitacora().length === 0) {
+          <div class="py-10 flex flex-col items-center gap-2 text-[#9ca3af]">
+            <lucide-angular [img]="BookOpenIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+            <p class="text-[14px]">Sin registros en la bitácora</p>
+          </div>
+        }
+
+        @for (entry of bitacora(); track entry.fecha) {
+          <div class="border rounded-[12px] p-4 flex gap-3"
+            [class]="entry.tipo.toLowerCase().includes('retorno') ? 'bg-[#f0fdf4] border-[#bbf7d0]' : 'bg-[#fffbeb] border-[#fde68a]'">
+
+            <!-- Icon circle -->
+            <div class="shrink-0 size-10 rounded-full flex items-center justify-center"
+              [class]="entry.tipo.toLowerCase().includes('retorno') ? 'bg-[#dcfce7]' : 'bg-[#fef9c3]'">
+              <lucide-angular [img]="bitacoraTipoIcon(entry.tipo)" class="size-5"
+                [color]="entry.tipo.toLowerCase().includes('retorno') ? '#166534' : '#854d0e'"
+                [strokeWidth]="1.5" />
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <p class="text-[#101828] text-[14px] font-bold">{{ entry.tipo }}</p>
+                <p class="text-[#9ca3af] text-[12px] whitespace-nowrap shrink-0">{{ entry.fecha }}</p>
+              </div>
+              <div class="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <p class="text-[#9ca3af] text-[11px]">Responsable:</p>
+                  <p class="text-[#101828] text-[13px] font-semibold">{{ entry.responsable }}</p>
+                </div>
+                <div>
+                  <p class="text-[#9ca3af] text-[11px]">Kilometraje Registrado:</p>
+                  <p class="text-[#101828] text-[13px] font-semibold">{{ entry.kilometraje.toLocaleString() }} km</p>
+                </div>
+              </div>
+              <p class="text-[#4a5565] text-[13px]">
+                <span class="font-semibold text-[#364153]">{{ bitacoraNotaLabel(entry.tipo) }}</span>
+                {{ entry.nota }}
+              </p>
+            </div>
+
+          </div>
+        }
+
+      </div>
+    }
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-[#e5e7eb]">
+      <button type="button" (click)="cerrar.emit()"
+        class="w-full border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>

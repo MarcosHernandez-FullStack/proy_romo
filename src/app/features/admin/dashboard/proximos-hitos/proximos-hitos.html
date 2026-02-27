@@ -1,0 +1,79 @@
+<div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6">
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-2">
+      <div class="size-10 bg-[#dbeafe] rounded-[10px] flex items-center justify-center shrink-0">
+        <lucide-angular [img]="CalendarIcon" class="size-5" color="#155dfc" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <h2 class="text-[#101828] text-[18px] font-bold">Próximos Hitos</h2>
+        <p class="text-[#6a7282] text-[12px]">Servicios en las próximas 4 horas</p>
+      </div>
+    </div>
+    <a routerLink="/admin/operaciones"
+      class="bg-[#155dfc] text-white text-[14px] font-semibold rounded-[10px] px-4 h-9 flex items-center gap-1.5 hover:bg-[#1447e6] transition-colors cursor-pointer">
+      <lucide-angular [img]="ArrowRightIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      Ver Todos
+    </a>
+  </div>
+
+  <div class="grid grid-cols-3 gap-4">
+    @for (hito of hitos(); track hito.id) {
+      <div class="border rounded-[10px] px-4 pt-4 pb-3 flex flex-col gap-3"
+        [class.bg-[#fef2f2]]="hito.critico"
+        [class.border-[#ffa2a2]]="hito.critico"
+        [class.bg-[#f9fafb]]="!hito.critico"
+        [class.border-[#e5e7eb]]="!hito.critico">
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="ClockIcon" class="size-4" [color]="hito.critico ? '#c10007' : '#1447e6'" [strokeWidth]="1.5" />
+            <span class="text-[18px] font-bold" [class.text-[#c10007]]="hito.critico" [class.text-[#1447e6]]="!hito.critico">{{ hito.hora }}</span>
+          </div>
+          @if (hito.critico) {
+            <span class="bg-[rgba(231,0,11,0.53)] text-white text-[12px] font-bold rounded-full px-2 py-0.5">SIN ASIGNAR</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="TruckIcon" class="size-3.5" color="#4a5565" [strokeWidth]="1.5" />
+            <span class="text-[#101828] text-[14px] font-bold">{{ hito.placa }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="UsersIcon" class="size-3.5" [color]="hito.critico ? '#c10007' : '#364153'" [strokeWidth]="1.5" />
+            <span class="text-[12px] font-semibold" [class.text-[#c10007]]="hito.critico" [class.text-[#364153]]="!hito.critico">
+              {{ hito.operador ?? 'Pendiente de asignación' }}
+            </span>
+          </div>
+          <div class="border-t border-[#e5e7eb] pt-2 flex flex-col gap-1">
+            <p class="text-[#4a5565] text-[12px] font-medium">{{ hito.cliente }}</p>
+            <p class="text-[#99a1af] text-[12px] font-mono">ID: {{ hito.id }}</p>
+          </div>
+        </div>
+
+        <div class="border-t border-[#e5e7eb] pt-2">
+          <a routerLink="/admin/operaciones"
+            class="text-[12px] font-semibold cursor-pointer hover:underline"
+            [class.text-[#e7000b]]="hito.critico"
+            [class.text-[#155dfc]]="!hito.critico">
+            {{ hito.critico ? 'Asignar ahora' : 'Ver detalle' }} →
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="border-t border-[#e5e7eb] mt-4 pt-3 flex items-center justify-between">
+    <p class="text-[#4a5565] text-[12px]">Mostrando los próximos <strong class="text-[#101828]">{{ hitos().length }} servicios</strong> de las próximas 4 horas</p>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5">
+        <div class="size-2 bg-[#fb2c36] rounded-full"></div>
+        <span class="text-[12px]"><strong class="text-[#c10007]">1</strong> <span class="text-[#4a5565]">sin asignar</span></span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <div class="size-2 bg-[#00c950] rounded-full"></div>
+        <span class="text-[12px]"><strong class="text-[#008236]">2</strong> <span class="text-[#4a5565]">asignados</span></span>
+      </div>
+    </div>
+  </div>
+</div>

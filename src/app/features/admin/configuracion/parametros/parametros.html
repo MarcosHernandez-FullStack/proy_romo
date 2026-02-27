@@ -1,0 +1,61 @@
+<div class="flex flex-col gap-6">
+  <div>
+    <h2 class="text-[#101828] text-[20px] font-semibold">Parámetros Operativos Globales</h2>
+    <p class="text-[#4a5565] text-[13px] mt-0.5">Configure los parámetros que afectan a todos los servicios</p>
+  </div>
+
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-6">
+    <!-- 2x2 grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Umbral de Larga Distancia (Km)</label>
+        <input type="number" [ngModel]="umbralLargaDistanciaKm()" (ngModelChange)="umbralLargaDistanciaKm.set(+$event)" name="umbralLargaDist"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">A partir de este valor se aplica tiempo de retorno</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Margen de Maniobra (minutos)</label>
+        <input type="number" [ngModel]="margenManiobraMin()" (ngModelChange)="margenManiobraMin.set(+$event)" name="margenManiobra"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Minutos adicionales para carga y descarga</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Umbral de Tolerancia (minutos)</label>
+        <input type="number" [ngModel]="umbralToleranciaMin()" (ngModelChange)="umbralToleranciaMin.set(+$event)" name="umbralTolerancia"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Margen de minutos para redondeo de horarios</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tiempo de Retorno Base (minutos)</label>
+        <input type="number" [ngModel]="tiempoRetornoBaseMin()" (ngModelChange)="tiempoRetornoBaseMin.set(+$event)" name="tiempoRetorno"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Minutos de reposicionamiento en viajes cortos</p>
+      </div>
+    </div>
+
+    <!-- Info box -->
+    <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[12px] p-5">
+      <div class="flex items-start gap-3">
+        <lucide-angular [img]="InfoIcon" class="size-5 flex-shrink-0 mt-0.5" color="#193cb8" [strokeWidth]="1.5" />
+        <div>
+          <p class="text-[#1c398e] text-[15px] font-semibold mb-2">Información de Parámetros</p>
+          <ul class="flex flex-col gap-1.5">
+            <li class="text-[#193cb8] text-[13px]"><strong>Umbral Larga Distancia:</strong> A partir de {{ umbralLargaDistanciaKm() }} km se suma el tiempo de retorno</li>
+            <li class="text-[#193cb8] text-[13px]"><strong>Margen de Maniobra:</strong> Se agregan {{ margenManiobraMin() }} minutos para carga/descarga</li>
+            <li class="text-[#193cb8] text-[13px]"><strong>Umbral Tolerancia:</strong> Margen de {{ umbralToleranciaMin() }} minutos para redondeo</li>
+            <li class="text-[#193cb8] text-[13px]"><strong>Tiempo Retorno:</strong> {{ tiempoRetornoBaseMin() }} minutos de reposicionamiento en viajes cortos</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save -->
+    <div class="flex justify-end">
+      <button type="button"
+        class="flex items-center gap-2 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] px-5 h-10 transition-colors cursor-pointer">
+        <lucide-angular [img]="SaveIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+        Guardar Parámetros
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,102 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[560px] overflow-hidden">
+    <div class="bg-[#155dfc] px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="UsersIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Editar Cliente B2B</h2>
+          <p class="text-[#bedbff] text-[13px]">{{ cliente().id }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.2)] transition-colors cursor-pointer">
+        <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <div class="p-6 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+      <!-- DATOS DE CONTACTO -->
+      <div>
+        <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-3">Datos de Contacto</p>
+        <div class="flex flex-col gap-3">
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Razón Social *</label>
+            <input type="text" [ngModel]="empresa()" (ngModelChange)="empresa.set($event)" name="empresa"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Contacto *</label>
+              <input type="text" [ngModel]="contacto()" (ngModelChange)="contacto.set($event)" name="contacto"
+                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+            </div>
+            <div>
+              <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Teléfono</label>
+              <input type="tel" [ngModel]="telefono()" (ngModelChange)="telefono.set($event)" name="telefono"
+                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+            </div>
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Correo Electrónico *</label>
+            <input type="email" [ngModel]="correo()" (ngModelChange)="correo.set($event)" name="correo"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+        </div>
+      </div>
+
+      <!-- CREDENCIALES DE ACCESO -->
+      <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[12px] p-4">
+        <p class="text-[#bb4d00] text-[11px] font-bold uppercase tracking-wider mb-1">Credenciales de Acceso</p>
+        <p class="text-[#e17100] text-[12px] mb-3">Contraseña de acceso al portal del cliente</p>
+        <div class="flex flex-col gap-3">
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">ID de Usuario (Login)</label>
+            <input type="text" [ngModel]="loginId()" (ngModelChange)="loginId.set($event)" name="loginId"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Contraseña Fija</label>
+            <div class="flex gap-2">
+              <input type="text" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password"
+                class="flex-1 border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+              <button type="button" (click)="generarPassword()"
+                class="flex items-center gap-1.5 bg-[#e17100] text-white text-[13px] font-semibold rounded-[10px] px-3 h-10 hover:bg-[#bb4d00] transition-colors cursor-pointer shrink-0">
+                <lucide-angular [img]="RefreshCwIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+                Generar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TARIFARIO PERSONALIZADO -->
+      <div class="bg-[#f0fdf4] border border-[#7bf1a8] rounded-[12px] p-4">
+        <p class="text-[#008236] text-[11px] font-bold uppercase tracking-wider mb-1">Tarifario Personalizado</p>
+        <p class="text-[#00a63e] text-[12px] mb-3">Si queda en 0, se usarán los valores globales del sistema</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Tarifa Base (USD)</label>
+            <input type="number" [ngModel]="tarifaBase()" (ngModelChange)="tarifaBase.set(+$event)" name="tarifaBase"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Tarifa KM (USD)</label>
+            <input type="number" [ngModel]="tarifaKm()" (ngModelChange)="tarifaKm.set(+$event)" name="tarifaKm"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="onGuardar()"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>

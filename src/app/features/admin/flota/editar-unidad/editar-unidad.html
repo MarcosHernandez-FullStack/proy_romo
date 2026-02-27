@@ -1,0 +1,81 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[480px] overflow-hidden">
+    <div class="bg-[#155dfc] px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <lucide-angular [img]="PencilIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+        <div>
+          <h2 class="text-white text-[20px] font-bold">Editar Unidad</h2>
+          <p class="text-[#bedbff] text-[13px]">{{ unidad().id }} — {{ unidad().placa }}</p>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.2)] transition-colors cursor-pointer">
+        <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <div class="p-6 flex flex-col gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Placa *</label>
+          <input type="text" [ngModel]="placa()" (ngModelChange)="placa.set($event)" name="placa"
+            placeholder="Ej: ABC-123"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Año *</label>
+          <input type="number" [ngModel]="anio()" (ngModelChange)="anio.set($event)" name="anio"
+            placeholder="2024"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Marca *</label>
+          <input type="text" [ngModel]="marca()" (ngModelChange)="marca.set($event)" name="marca"
+            placeholder="Ej: Ford"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Modelo *</label>
+          <input type="text" [ngModel]="modelo()" (ngModelChange)="modelo.set($event)" name="modelo"
+            placeholder="Ej: F-550 Super Duty"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Capacidad (Vehículos)</label>
+          <input type="number" [ngModel]="capacidad()" (ngModelChange)="capacidad.set(+$event)" name="capacidad"
+            min="1" max="10"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+        <div>
+          <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Estado</label>
+          <select [ngModel]="estado()" (ngModelChange)="estado.set($event)" name="estado"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]">
+            @for (e of estados; track e) {
+              <option [value]="e">{{ e }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Vencimiento Seguro</label>
+        <input type="date" [ngModel]="vencimientoSeguro()" (ngModelChange)="vencimientoSeguro.set($event)" name="vencimiento"
+          class="w-full border border-[#ffd230] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#e17100]" />
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="onGuardar()" [disabled]="!esValido"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        Guardar Cambios
+      </button>
+    </div>
+  </div>
+</div>
