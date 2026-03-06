@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, of, tap } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import {
   BitacoraEntry,
@@ -15,32 +16,50 @@ import {
   UnidadFlota,
   UsuarioAdmin,
 } from '../../models/admin.model';
+import { LoginRequest, LoginResponse } from '../../models/auth.model';
+
+const API = 'http://localhost:5016/api';
+const STORAGE_KEY = 'crane_admin';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
+  private readonly http   = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly _adminEmail = signal<string | null>(this.loadAdmin());
+  private readonly _session = signal<LoginResponse | null>(this.loadSession());
 
-  readonly adminEmail = this._adminEmail.asReadonly();
+  readonly session = this._session.asReadonly();
 
-  // TODO: reemplazar con this.http.post('/api/admin/auth/login', { email, password })
-  loginAdmin(email: string, password: string): boolean {
-    if (email.includes('@cranemanager.com') && password.length > 0) {
-      localStorage.setItem('crane_admin', email);
-      this._adminEmail.set(email);
-      return true;
-    }
-    return false;
+  loginAdmin(email: string, password: string): Observable<LoginResponse> {
+    const body: LoginRequest = { identificador: email, contrasena: password };
+    return this.http.post<LoginResponse>(`${API}/auth/login`, body).pipe(
+      tap(res => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(res));
+        this._session.set(res);
+      })
+    );
   }
 
   logoutAdmin(): void {
-    localStorage.removeItem('crane_admin');
-    this._adminEmail.set(null);
+    localStorage.removeItem(STORAGE_KEY);
+    this._session.set(null);
     this.router.navigate(['/admin/login']);
   }
 
   isAdminLoggedIn(): boolean {
-    return this._adminEmail() !== null;
+    return this._session() !== null;
+  }
+
+  getToken(): string | null {
+    return this._session()?.token ?? null;
+  }
+
+  private loadSession(): LoginResponse | null {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/operaciones')
@@ -98,9 +117,6 @@ export class AdminService {
     return of(SERVICIOS_REPORTE).pipe(delay(300));
   }
 
-  private loadAdmin(): string | null {
-    return localStorage.getItem('crane_admin');
-  }
 }
 
 const CLIENTES_B2B: ClienteB2B[] = [

@@ -12,7 +12,7 @@ import { AdminService } from '../../../core/services/admin.service';
 })
 export class LoginAdminComponent {
   private readonly adminSvc = inject(AdminService);
-  private readonly router = inject(Router);
+  private readonly router   = inject(Router);
 
   protected readonly ShieldIcon = Shield;
   protected readonly MailIcon = Mail;
@@ -27,16 +27,24 @@ export class LoginAdminComponent {
   protected submit(): void {
     this.error.set('');
     if (!this.email() || !this.password()) {
-      this.error.set('Ingrese sus credenciales corporativas.');
+      this.error.set('Ingrese sus credenciales.');
       return;
     }
     this.loading.set(true);
-    const ok = this.adminSvc.loginAdmin(this.email(), this.password());
-    this.loading.set(false);
-    if (ok) {
-      this.router.navigate(['/admin/dashboard']);
-    } else {
-      this.error.set('Credenciales inválidas. Use un correo @cranemanager.com.');
-    }
+    this.adminSvc.loginAdmin(this.email(), this.password()).subscribe({
+      next: (res) => {
+        if (res.rol !== 'ADMINISTRADOR') {
+          this.adminSvc.logoutAdmin();
+          this.loading.set(false);
+          this.error.set('Acceso solo para administradores.');
+          return;
+        }
+        this.router.navigate(['/admin/dashboard']);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.error.set('Credenciales incorrectas o usuario inactivo.');
+      },
+    });
   }
 }
