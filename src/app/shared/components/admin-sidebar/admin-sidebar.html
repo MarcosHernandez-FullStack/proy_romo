@@ -26,8 +26,14 @@
     }
   </nav>
 
-  <!-- Cerrar Sesión -->
-  <div class="border-t border-[#314158] px-4 py-4 shrink-0">
+  <!-- Footer / User -->
+  <div class="border-t border-[#314158] px-4 pt-4 pb-4 flex flex-col gap-3 shrink-0">
+    <!-- User info -->
+    <div class="bg-[#314158] rounded-[10px] px-3 py-3">
+      <p class="text-[#90a1b9] text-xs leading-4">Usuario</p>
+      <p class="text-white text-sm font-medium truncate mt-1">{{ adminSvc.session()?.correo }}</p>
+    </div>
+    <!-- Cerrar Sesión -->
     <button type="button" (click)="adminSvc.logoutAdmin()"
       class="flex items-center gap-3 h-12 px-4 rounded-[10px] w-full hover:bg-[rgba(255,255,255,0.05)] transition-colors cursor-pointer">
       <lucide-angular [img]="LogOutIcon" class="size-5 shrink-0" color="#d1d5dc" [strokeWidth]="1.5" />

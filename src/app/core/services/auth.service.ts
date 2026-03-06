@@ -14,7 +14,6 @@ export class AuthService {
   private readonly _session = signal<LoginResponse | null>(this.loadSession());
 
   readonly session = this._session.asReadonly();
-  readonly user = this._session.asReadonly();
 
   login(alias: string, password: string): Observable<LoginResponse> {
     const body: LoginRequest = { identificador: alias, contrasena: password };
