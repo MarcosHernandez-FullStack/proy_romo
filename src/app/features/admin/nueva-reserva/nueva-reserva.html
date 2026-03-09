@@ -27,71 +27,12 @@
       [destino]="destino()"
       (clienteIdChange)="clienteId.set($event)"
       (origenChange)="origen.set($event)"
-      (destinoChange)="destino.set($event)" />
+      (destinoChange)="destino.set($event)"
+      (rutaChange)="onRutaChange($event)" />
   }
 
-  <!-- Metric Cards + Bloque Operativo Banner (shown after step 1 complete) -->
+  <!-- Section 2: Selección de Agenda (shown after step 1 complete) -->
   @if (step1Complete()) {
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-
-      <!-- Distancia Total -->
-      <div class="rounded-[14px] border border-[#8ec5ff] px-5 py-4 flex flex-col gap-1"
-        style="background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 100%)">
-        <div class="flex items-center gap-2 mb-1">
-          <lucide-angular [img]="NavigationIcon" class="size-5" color="#155dfc" [strokeWidth]="1.5" />
-          <span class="text-[#1447e6] text-[13px] font-semibold">Distancia Total</span>
-        </div>
-        <p class="text-[#1c398e] text-[32px] font-bold leading-none">{{ distanciaKm() }} km</p>
-        <p class="text-[#4a7fd4] text-[12px] mt-1">Ruta calculada</p>
-      </div>
-
-      <!-- Tiempo Estimado -->
-      <div class="rounded-[14px] border border-[#7bf1a8] px-5 py-4 flex flex-col gap-1"
-        style="background: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 100%)">
-        <div class="flex items-center gap-2 mb-1">
-          <lucide-angular [img]="ClockIcon" class="size-5" color="#008236" [strokeWidth]="1.5" />
-          <span class="text-[#008236] text-[13px] font-semibold">Tiempo Estimado</span>
-        </div>
-        <p class="text-[#0d542b] text-[32px] font-bold leading-none">{{ tiempoMin() }} min</p>
-        <p class="text-[#008236] text-[12px] mt-1">Tiempo de trayecto</p>
-      </div>
-
-      <!-- Costo Estimado -->
-      <div class="rounded-[14px] border border-[#dab2ff] px-5 py-4 flex flex-col gap-1"
-        style="background: linear-gradient(160deg, #faf5ff 0%, #f3e8ff 100%)">
-        <div class="flex items-center gap-2 mb-1">
-          <lucide-angular [img]="DollarSignIcon" class="size-5" color="#8200db" [strokeWidth]="1.5" />
-          <span class="text-[#8200db] text-[13px] font-semibold">Costo Estimado</span>
-        </div>
-        <p class="text-[#59168b] text-[32px] font-bold leading-none">${{ costoTotal() }}</p>
-        <p class="text-[#8200db] text-[12px] mt-1">USD</p>
-      </div>
-
-    </div>
-
-    <!-- Bloque Operativo Banner -->
-    <div class="rounded-[14px] border border-[#4f39f6] px-6 py-5 flex flex-wrap items-center justify-between gap-4 shadow-lg"
-      style="background: linear-gradient(135deg, #4f39f6 0%, #9810fa 100%)">
-      <div class="flex items-center gap-4">
-        <div class="size-14 bg-white/20 rounded-[12px] flex items-center justify-center shrink-0">
-          <lucide-angular [img]="ClockIcon" class="size-7" color="white" [strokeWidth]="1.5" />
-        </div>
-        <div>
-          <p class="text-[#c6d2ff] text-[13px] font-semibold">Capacidad Operativa Requerida</p>
-          <p class="text-white text-[28px] font-bold leading-none">
-            {{ bloques() }} Bloque{{ bloques() > 1 ? 's' : '' }} Operativo{{ bloques() > 1 ? 's' : '' }}
-          </p>
-          <p class="text-[#c6d2ff] text-[13px] mt-0.5">
-            Equivalente a {{ tiempoMin() }} minutos de servicio
-          </p>
-        </div>
-      </div>
-      <div class="size-12 bg-white/25 border border-white/40 rounded-[10px] flex items-center justify-center">
-        <span class="text-white text-[20px] font-bold">{{ bloques() }}</span>
-      </div>
-    </div>
-
-    <!-- Section 2: Selección de Agenda -->
     <app-seleccion-agenda
       [fechas]="fechas()"
       [fechaIdx]="fechaIdx()"

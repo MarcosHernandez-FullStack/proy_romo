@@ -45,8 +45,8 @@
         <lucide-angular [img]="MapPinIcon" class="size-4" color="#00a63e" [strokeWidth]="1.5" />
         Dirección de Origen *
       </label>
-      <input type="text" [ngModel]="origen()" (ngModelChange)="origenChange.emit($event)" name="origen"
-        placeholder="Ej. Av. Corrientes 1234, CABA..."
+      <input #origenInput type="text" [ngModel]="origen()" (ngModelChange)="origenChange.emit($event)" name="origen"
+        placeholder="Ej. Av. España 1234, Trujillo..."
         class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
     </div>
     <div>
@@ -54,19 +54,93 @@
         <lucide-angular [img]="NavigationIcon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
         Dirección de Destino *
       </label>
-      <input type="text" [ngModel]="destino()" (ngModelChange)="destinoChange.emit($event)" name="destino"
-        placeholder="Ej. Av. 9 de Julio 567, CABA..."
+      <input #destinoInput type="text" [ngModel]="destino()" (ngModelChange)="destinoChange.emit($event)" name="destino"
+        placeholder="Ej. Av. Larco 567, Trujillo..."
         class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
     </div>
   </div>
 
-  <!-- Map placeholder -->
-  <div class="rounded-[12px] border border-[#e5e7eb] overflow-hidden bg-[#f3f4f6]" style="height: 180px;">
-    <div class="w-full h-full flex flex-col items-center justify-center gap-2">
-      <lucide-angular [img]="MapPinIcon" class="size-10" color="#d1d5dc" [strokeWidth]="1" />
-      <p class="text-[#9ca3af] text-[13px] font-medium">Mapa de Referencia</p>
-      <p class="text-[#9ca3af] text-[11px]">Visualización de Ruta</p>
+  <!-- Mapa y ruta óptima -->
+  <div class="flex flex-col gap-3">
+
+    @if (cargando()) {
+      <p class="text-center text-[#6a7282] text-[13px]">Calculando ruta...</p>
+    }
+
+    @if (error()) {
+      <p class="text-[#e7000b] text-[12px] text-center">{{ error() }}</p>
+    }
+
+    <div>
+      <p class="flex items-center gap-1.5 text-[#364153] text-[13px] font-semibold mb-1.5">
+        <lucide-angular [img]="NavigationIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+        Mapa de Referencia - Visualización de Ruta
+      </p>
+      <div #mapContainer class="rounded-[12px] border border-[#e5e7eb] overflow-hidden" style="height: 260px;"></div>
     </div>
+
+    @if (ruta()) {
+
+      <!-- 3 cards: Distancia, Tiempo, Costo -->
+      <div class="grid grid-cols-3 gap-3">
+
+        <div class="rounded-[12px] border border-[#8ec5ff] px-4 py-3 flex flex-col gap-1"
+          style="background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 100%)">
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <lucide-angular [img]="NavigationIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+            <span class="text-[#1447e6] text-[12px] font-semibold">Distancia Total</span>
+          </div>
+          <p class="text-[#1c398e] text-[26px] font-bold leading-none">{{ ruta()!.distanciaTexto }}</p>
+        </div>
+
+        <div class="rounded-[12px] border border-[#7bf1a8] px-4 py-3 flex flex-col gap-1"
+          style="background: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 100%)">
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <lucide-angular [img]="ClockIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
+            <span class="text-[#008236] text-[12px] font-semibold">Tiempo Estimado</span>
+          </div>
+          <p class="text-[#0d542b] text-[26px] font-bold leading-none">{{ ruta()!.tiempoTexto }}</p>
+          <p class="text-[#008236] text-[11px]">Tiempo de trayecto estimado</p>
+        </div>
+
+        <div class="rounded-[12px] border border-[#dab2ff] px-4 py-3 flex flex-col gap-1"
+          style="background: linear-gradient(160deg, #faf5ff 0%, #f3e8ff 100%)">
+          <div class="flex items-center gap-1.5 mb-0.5">
+            <lucide-angular [img]="NavigationIcon" class="size-4" color="#8200db" [strokeWidth]="1.5" />
+            <span class="text-[#8200db] text-[12px] font-semibold">Costo Estimado</span>
+          </div>
+          <p class="text-[#59168b] text-[26px] font-bold leading-none">${{ costoEstimado() }}</p>
+          <p class="text-[#8200db] text-[11px]">USD</p>
+        </div>
+
+      </div>
+
+      <!-- Bloque Operativo Banner -->
+      <div class="rounded-[12px] border border-[#4f39f6] px-5 py-4 flex items-center justify-between gap-4"
+        style="background: linear-gradient(135deg, #4f39f6 0%, #9810fa 100%)">
+        <div class="flex items-center gap-3">
+          <div class="size-10 bg-white/20 rounded-[10px] flex items-center justify-center shrink-0">
+            <lucide-angular [img]="ClockIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+          </div>
+          <div>
+            <p class="text-[#c6d2ff] text-[12px] font-semibold">Capacidad Operativa Requerida</p>
+            <p class="text-white text-[22px] font-bold leading-none">
+              {{ bloquesOperativos() }} Bloque{{ bloquesOperativos()! > 1 ? 's' : '' }} Operativo{{ bloquesOperativos()! > 1 ? 's' : '' }}
+            </p>
+            <p class="text-[#c6d2ff] text-[12px] mt-0.5">Equivalente a {{ ruta()!.tiempoMin }} minutos de servicio</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          @for (i of bloquesArray(); track i) {
+            <div class="size-9 bg-white/25 border border-white/40 rounded-[8px] flex items-center justify-center">
+              <span class="text-white text-[14px] font-bold">{{ i + 1 }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    }
+
   </div>
 
 </div>

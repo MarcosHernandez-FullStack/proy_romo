@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { LucideAngularModule, Phone, Navigation, Clock, DollarSign } from 'lucide-angular';
+import { LucideAngularModule, Phone } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
 import { ClienteB2B, SlotAdmin } from '../../../models/admin.model';
 import { TipoCargaComponent, TipoCarga } from './tipo-carga/tipo-carga';
@@ -27,9 +27,6 @@ export class NuevaReservaComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
   protected readonly PhoneIcon = Phone;
-  protected readonly NavigationIcon = Navigation;
-  protected readonly ClockIcon = Clock;
-  protected readonly DollarSignIcon = DollarSign;
 
   protected readonly clientes = signal<ClienteB2B[]>([]);
 
@@ -65,17 +62,16 @@ export class NuevaReservaComponent implements OnInit {
     return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   });
 
-  protected readonly slots = signal<SlotAdmin[]>(this.generateSlots());
+  protected readonly slots = signal<SlotAdmin[]>([]);
   protected readonly horarioValidado = signal(false);
 
   protected readonly tipoVehiculo = signal('');
   protected readonly detallesVehiculo = signal('');
   protected readonly observaciones = signal('');
 
-  protected readonly distanciaKm = computed(() =>
-    this.origen() && this.destino() ? 0.56 : 0
-  );
-  protected readonly tiempoMin = computed(() => this.distanciaKm() > 0 ? 2 : 0);
+  private readonly rutaData = signal<{ distanciaKm: number; tiempoMin: number } | null>(null);
+  protected readonly distanciaKm = computed(() => this.rutaData()?.distanciaKm ?? 0);
+  protected readonly tiempoMin   = computed(() => this.rutaData()?.tiempoMin   ?? 0);
   protected readonly margenManiobra = 30;
   protected readonly bloques = computed(() =>
     Math.max(1, Math.ceil((this.tiempoMin() + this.margenManiobra) / 60))
@@ -108,26 +104,29 @@ export class NuevaReservaComponent implements OnInit {
     tarifaKm: this.clienteSeleccionado()?.tarifaKm ?? 0,
   }));
 
-  private generateSlots(): SlotAdmin[] {
-    const estados: SlotAdmin['estado'][] = [
-      'cerrado', 'cerrado', 'cerrado', 'cerrado', 'cerrado', 'cerrado', 'cerrado', 'cerrado',
-      'seleccionado', 'ocupado', 'ocupado', 'libre',
-      'libre', 'libre', 'ocupado', 'libre', 'libre', 'libre', 'libre', 'libre', 'libre', 'libre', 'libre', 'libre',
-    ];
-    return Array.from({ length: 24 }, (_, i) => ({
-      hora: String(i).padStart(2, '0') + ':00',
-      estado: estados[i],
-    }));
+  private cargarHorarios(fecha: Date): void {
+    const rol = this.adminSvc.session()?.rol ?? 'ADMINISTRADOR';
+    this.adminSvc.getHorariosDisponibles(fecha, rol).subscribe({
+      next: (horas) => this.slots.set(
+        (horas ?? []).map(h => ({ hora: h.horaDisponible.substring(0, 5), estado: 'libre' as const }))
+      ),
+      error: () => this.slots.set([]),
+    });
   }
 
   ngOnInit(): void {
     this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    this.cargarHorarios(this.today);
+  }
+
+  protected onRutaChange(data: { distanciaKm: number; tiempoMin: number } | null): void {
+    this.rutaData.set(data);
   }
 
   protected onSelectFecha(idx: number): void {
     this.fechaIdx.set(idx);
     this.horarioValidado.set(false);
-    this.slots.set(this.generateSlots());
+    this.cargarHorarios(this.fechas()[idx].date);
   }
 
   protected onSelectSlot(idx: number): void {
@@ -160,7 +159,7 @@ export class NuevaReservaComponent implements OnInit {
     this.detallesVehiculo.set('');
     this.observaciones.set('');
     this.horarioValidado.set(false);
-    this.slots.set(this.generateSlots());
+    this.cargarHorarios(this.today);
   }
 
   protected readonly step0Complete = computed(() =>

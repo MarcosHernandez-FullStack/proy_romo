@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { LucideAngularModule, CheckCircle, Clock, Lock } from 'lucide-angular';
+import { LucideAngularModule, CheckCircle, Clock, Lock, Calendar } from 'lucide-angular';
 import { SlotAdmin } from '../../../../models/admin.model';
 
 export interface FechaItem {
@@ -30,6 +30,7 @@ export class SeleccionAgendaComponent {
   protected readonly CheckCircleIcon = CheckCircle;
   protected readonly ClockIcon = Clock;
   protected readonly LockIcon = Lock;
+  protected readonly CalendarIcon = Calendar;
 
   protected slotClass(s: SlotAdmin): string {
     switch (s.estado) {
@@ -78,5 +79,20 @@ export class SeleccionAgendaComponent {
   protected getDateSuffix(): string {
     const f = this.fechas()[this.fechaIdx()];
     return `(${f.dia}/${f.mes})`;
+  }
+
+  protected toDateString(d: Date): string {
+    return d.toISOString().split('T')[0];
+  }
+
+  protected onDateChange(value: string): void {
+    if (!value) return;
+    const picked = new Date(value + 'T00:00:00');
+    const idx = this.fechas().findIndex(f =>
+      f.date.getFullYear() === picked.getFullYear() &&
+      f.date.getMonth()    === picked.getMonth()    &&
+      f.date.getDate()     === picked.getDate()
+    );
+    if (idx !== -1) this.selectFecha.emit(idx);
   }
 }

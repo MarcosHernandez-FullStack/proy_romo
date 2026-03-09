@@ -62,6 +62,14 @@ export class AdminService {
     }
   }
 
+  getHorariosDisponibles(fecha: Date, rol: string): Observable<{ horaDisponible: string }[]> {
+    const fechaStr = fecha.toISOString().split('T')[0];
+    return this.http.get<{ horaDisponible: string }[]>(
+      `${API}/reservas/horarios-disponibles`,
+      { params: { fecha: fechaStr, rol } }
+    );
+  }
+
   // TODO: reemplazar con this.http.get('/api/admin/operaciones')
   getOperaciones(): Observable<ServicioAdmin[]> {
     return of(SERVICIOS_ADMIN).pipe(delay(300));
