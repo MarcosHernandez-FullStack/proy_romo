@@ -132,9 +132,11 @@
           <div>
             <p class="text-[#c6d2ff] text-[12px] font-semibold">Capacidad Operativa Requerida</p>
             <p class="text-white text-[22px] font-bold leading-none">
-              {{ bloquesOperativos() }} Bloque{{ bloquesOperativos()! > 1 ? 's' : '' }} Operativo{{ bloquesOperativos()! > 1 ? 's' : '' }}
+              {{ bloquesOperativos()!.calculo }} Bloque{{ bloquesOperativos()!.calculo > 1 ? 's' : '' }} Operativo{{ bloquesOperativos()!.calculo > 1 ? 's' : '' }}
             </p>
-            <p class="text-[#c6d2ff] text-[12px] mt-0.5">Equivalente a {{ ruta()!.tiempoMin }} minutos de servicio</p>
+            <p class="text-[#c6d2ff] text-[12px] mt-0.5">
+             Tiempo Google Maps ({{ ruta()!.tiempoMin }} min) + Margen de maniobra ({{ bloquesOperativos()!.maniobra }} min) = {{ ruta()!.tiempoMin + bloquesOperativos()!.maniobra }} min
+            </p>
           </div>
         </div>
         <div class="flex gap-2">

@@ -18,6 +18,10 @@ interface TarifaGlobal {
   tarifaKm:   number;
 }
 
+interface ParametroOperativo {
+  tiempoMargenManiobra: number;
+}
+
 @Component({
   selector: 'app-seleccion-cliente',
   standalone: true,
@@ -57,6 +61,10 @@ export class SeleccionClienteComponent implements AfterViewInit {
           .subscribe({ next: t => this.tarifaGlobal.set(t) });
       }
     });
+
+    // Cargar parámetro operativo al inicializar
+    this.http.get<ParametroOperativo>('http://localhost:5016/api/configuracion/parametro-operativo')
+      .subscribe({ next: p => this.parametroOperativo.set(p) });
   }
 
   readonly clientes  = input.required<ClienteB2B[]>();
@@ -78,10 +86,11 @@ export class SeleccionClienteComponent implements AfterViewInit {
     this.clientes().find(c => c.id === this.clienteId()) ?? null
   );
 
-  protected readonly cargando     = signal(false);
-  protected readonly error        = signal<string | null>(null);
-  protected readonly ruta         = signal<RutaOptima | null>(null);
-  protected readonly tarifaGlobal = signal<TarifaGlobal | null>(null);
+  protected readonly cargando            = signal(false);
+  protected readonly error               = signal<string | null>(null);
+  protected readonly ruta                = signal<RutaOptima | null>(null);
+  protected readonly tarifaGlobal        = signal<TarifaGlobal | null>(null);
+  protected readonly parametroOperativo  = signal<ParametroOperativo | null>(null);
 
   /** Tarifa efectiva: usa la del cliente si tarifaKm+tarifaBase > 0, sino la global */
   protected readonly tarifaEfectiva = computed(() => {
@@ -108,11 +117,13 @@ export class SeleccionClienteComponent implements AfterViewInit {
 
   protected readonly bloquesOperativos = computed(() => {
     const r = this.ruta();
-    return r ? Math.ceil(r.tiempoMin / 60) : null;
+    if (!r) return null;
+    const margen = this.parametroOperativo()?.tiempoMargenManiobra ?? 0;
+    return {calculo: Math.ceil((r.tiempoMin + margen) / 60), maniobra: margen};
   });
 
   protected readonly bloquesArray = computed(() =>
-    Array.from({ length: this.bloquesOperativos() ?? 0 }, (_, i) => i)
+    Array.from({ length: this.bloquesOperativos()?.calculo ?? 0 }, (_, i) => i)
   );
 
   private directionsService!: any;
