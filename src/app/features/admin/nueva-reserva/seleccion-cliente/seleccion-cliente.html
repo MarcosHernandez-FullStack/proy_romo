@@ -22,7 +22,7 @@
       <option value="">Seleccionar cliente...</option>
       @for (c of clientes(); track c.id) {
         @if (c.activo) {
-          <option [value]="c.id">{{ c.id }} - {{ c.empresa }} (${{ c.tarifaKm }} USD/km)</option>
+          <option [value]="c.id">{{ c.id }} - {{ c.empresa }} (${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
         }
       }
     </select>
@@ -33,7 +33,14 @@
           <span class="text-[#364153] text-[13px]">Empresa: <strong class="text-[#101828]">{{ clienteSeleccionado()!.empresa }}</strong></span>
         </div>
         <div class="w-px h-4 bg-[#bedbff]"></div>
-        <span class="text-[#364153] text-[13px]">Tarifa: <strong class="text-[#155dfc]">${{ clienteSeleccionado()!.tarifaKm }} USD/km</strong></span>
+        @if (tarifaEfectiva()) {
+          <span class="text-[#364153] text-[13px]">
+            Tarifa <span class="font-semibold text-[#6a7282]">({{ tarifaEfectiva()!.tipo }})</span>
+            = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
+          </span>
+        } @else {
+          <span class="text-[#6a7282] text-[13px] italic">Cargando tarifa...</span>
+        }
       </div>
     }
   </div>

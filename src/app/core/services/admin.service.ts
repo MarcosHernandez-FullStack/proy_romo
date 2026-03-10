@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of, tap } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay, map } from 'rxjs/operators';
 import {
   BitacoraEntry,
   ClienteB2B,
@@ -75,9 +75,21 @@ export class AdminService {
     return of(SERVICIOS_ADMIN).pipe(delay(300));
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/clientes')
   getClientes(): Observable<ClienteB2B[]> {
-    return of(CLIENTES_B2B).pipe(delay(200));
+    return this.http.get<any[]>(`${API}/clientes`, { params: { estado: 'ACTIVO' } }).pipe(
+      map(data => data.map(c => ({
+        id:         String(c.id),
+        empresa:    c.empresa,
+        contacto:   c.nomContacto,
+        correo:     c.correoContacto,
+        telefono:   c.nroContacto,
+        loginId:    c.alias,
+        password:   '',
+        tarifaBase: c.tarifaBase,
+        tarifaKm:   c.tarifaKm,
+        activo:     true,
+      })))
+    );
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/operadores')

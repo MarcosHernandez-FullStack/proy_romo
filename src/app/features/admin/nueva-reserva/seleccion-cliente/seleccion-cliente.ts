@@ -1,4 +1,5 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, computed, effect, input, output, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, computed, effect, inject, input, output, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Building2, MapPin, Navigation, Clock } from 'lucide-angular';
 import { ClienteB2B } from '../../../../models/admin.model';
@@ -12,6 +13,11 @@ interface RutaOptima {
   tiempoTexto:    string;
 }
 
+interface TarifaGlobal {
+  tarifaBase: number;
+  tarifaKm:   number;
+}
+
 @Component({
   selector: 'app-seleccion-cliente',
   standalone: true,
@@ -23,7 +29,10 @@ export class SeleccionClienteComponent implements AfterViewInit {
   @ViewChild('origenInput')   origenInput!:   ElementRef<HTMLInputElement>;
   @ViewChild('destinoInput')  destinoInput!:  ElementRef<HTMLInputElement>;
 
+  private readonly http = inject(HttpClient);
+
   constructor() {
+    // Auto-calcular ruta
     let timer: ReturnType<typeof setTimeout> | null = null;
     effect(() => {
       const o = this.origen().trim();
@@ -35,6 +44,17 @@ export class SeleccionClienteComponent implements AfterViewInit {
         this.ruta.set(null);
         this.error.set(null);
         this.rutaChange.emit(null);
+      }
+    });
+
+    // Cargar tarifario global cuando el cliente seleccionado no tenga tarifa propia
+    effect(() => {
+      const cliente = this.clienteSeleccionado();
+      if (!cliente) return;
+      const sumaCliente = (cliente.tarifaKm ?? 0) + (cliente.tarifaBase ?? 0);
+      if (sumaCliente === 0 && this.tarifaGlobal() === null) {
+        this.http.get<TarifaGlobal>('http://localhost:5016/api/configuracion/tarifario-global')
+          .subscribe({ next: t => this.tarifaGlobal.set(t) });
       }
     });
   }
@@ -58,15 +78,32 @@ export class SeleccionClienteComponent implements AfterViewInit {
     this.clientes().find(c => c.id === this.clienteId()) ?? null
   );
 
-  protected readonly cargando = signal(false);
-  protected readonly error    = signal<string | null>(null);
-  protected readonly ruta     = signal<RutaOptima | null>(null);
+  protected readonly cargando     = signal(false);
+  protected readonly error        = signal<string | null>(null);
+  protected readonly ruta         = signal<RutaOptima | null>(null);
+  protected readonly tarifaGlobal = signal<TarifaGlobal | null>(null);
+
+  /** Tarifa efectiva: usa la del cliente si tarifaKm+tarifaBase > 0, sino la global */
+  protected readonly tarifaEfectiva = computed(() => {
+    const cliente = this.clienteSeleccionado();
+    if (!cliente) return null;
+
+    const sumaCliente = (cliente.tarifaKm ?? 0) + (cliente.tarifaBase ?? 0);
+    if (sumaCliente > 0) {
+      return { valor: sumaCliente, tipo: 'personalizada' as const };
+    }
+
+    const global = this.tarifaGlobal();
+    if (!global) return null;
+    const sumaGlobal = (global.tarifaKm ?? 0) + (global.tarifaBase ?? 0);
+    return { valor: sumaGlobal, tipo: 'global' as const };
+  });
 
   protected readonly costoEstimado = computed(() => {
     const r = this.ruta();
-    if (!r) return null;
-    const tarifa = this.clienteSeleccionado()?.tarifaKm ?? 0;
-    return +(r.distanciaKm * tarifa).toFixed(0);
+    const t = this.tarifaEfectiva();
+    if (!r || !t) return null;
+    return +(r.distanciaKm * t.valor).toFixed(0);
   });
 
   protected readonly bloquesOperativos = computed(() => {
@@ -95,9 +132,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
     });
     acOrigen.addListener('place_changed', () => {
       const place = acOrigen.getPlace();
-      if (place?.formatted_address) {
-        this.origenChange.emit(place.formatted_address);
-      }
+      if (place?.formatted_address) this.origenChange.emit(place.formatted_address);
     });
 
     // Places Autocomplete — destino
@@ -106,9 +141,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
     });
     acDestino.addListener('place_changed', () => {
       const place = acDestino.getPlace();
-      if (place?.formatted_address) {
-        this.destinoChange.emit(place.formatted_address);
-      }
+      if (place?.formatted_address) this.destinoChange.emit(place.formatted_address);
     });
   }
 
@@ -136,12 +169,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
           const distanciaKm = Math.round(leg.distance.value / 1000);
           const tiempoMin   = Math.round(leg.duration.value / 60);
 
-          this.ruta.set({
-            distanciaKm,
-            tiempoMin,
-            distanciaTexto: leg.distance.text,
-            tiempoTexto:    leg.duration.text,
-          });
+          this.ruta.set({ distanciaKm, tiempoMin, distanciaTexto: leg.distance.text, tiempoTexto: leg.duration.text });
           this.rutaChange.emit({ distanciaKm, tiempoMin });
 
           this.renderer = new google.maps.DirectionsRenderer({
