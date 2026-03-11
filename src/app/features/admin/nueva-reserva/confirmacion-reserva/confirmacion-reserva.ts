@@ -1,20 +1,26 @@
 import { Component, input, output } from '@angular/core';
 import { LucideAngularModule, Phone, Navigation, CalendarDays, DollarSign, CheckCircle } from 'lucide-angular';
 
+export interface VehiculoResumen {
+  tipo:        string;
+  placa:       string;
+  descripcion: string;
+}
+
 export interface DatosReserva {
-  cliente: string;
-  origen: string;
-  destino: string;
-  fechaLabel: string;
-  horaSlot: string;
-  tipoVehiculo: string;
-  tipoCarga: string;
-  distanciaKm: number;
-  tiempoMin: number;
+  cliente:       string;
+  origen:        string;
+  destino:       string;
+  fechaLabel:    string;
+  horaSlot:      string;
+  tipoCarga:     string;
+  vehiculos:     VehiculoResumen[];
+  distanciaKm:   number;
+  tiempoMin:     number;
   margenManiobra: number;
-  bloques: number;
-  costoTotal: number;
-  tarifaKm: number;
+  bloques:       number;
+  costoTotal:    number;
+  tarifaKm:      number;
 }
 
 @Component({

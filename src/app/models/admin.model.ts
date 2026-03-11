@@ -84,7 +84,7 @@ export interface HorarioRegular {
 
 export interface SlotAdmin {
   hora: string;
-  estado: 'libre' | 'ocupado' | 'cerrado' | 'seleccionado' | 'bloqueado' | 'conflicto';
+  estado: 'libre' | 'ocupado' | 'cerrado' | 'seleccionado' | 'rango' | 'bloqueado' | 'conflicto';
 }
 
 export type RolUsuario = 'Administrador' | 'Staff';

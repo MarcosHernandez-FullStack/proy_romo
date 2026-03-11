@@ -11,39 +11,105 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-2 gap-4">
-    <div>
-      <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tipo de Vehículo *</label>
-      <select [ngModel]="tipoVehiculo()" (ngModelChange)="tipoVehiculoChange.emit($event)" name="tipoVehiculo"
-        class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
-        <option value="">Seleccionar tipo...</option>
-        <option value="Sedán">Sedán</option>
-        <option value="SUV">SUV</option>
-        <option value="Camioneta">Camioneta</option>
-        <option value="Pickup">Pickup</option>
-        <option value="Otro">Otro</option>
-      </select>
+  <!-- Banner carga múltiple -->
+  @if (tipoCarga() === 'multiple') {
+    <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[12px] px-4 py-3 flex items-center gap-3">
+      <div class="size-9 bg-[#155dfc] rounded-[9px] flex items-center justify-center shrink-0">
+        <lucide-angular [img]="TruckIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide">Carga Múltiple</p>
+        <p class="text-[#1447e6] text-[16px] font-bold leading-tight">{{ cantidadVehiculos() }} Vehículos</p>
+      </div>
     </div>
-    <div>
-      <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Detalles del Vehículo</label>
-      <input type="text" [ngModel]="detallesVehiculo()" (ngModelChange)="detallesVehiculoChange.emit($event)" name="detalles"
-        placeholder="Ej. Toyota Corolla 2020, Gris"
-        class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+  }
+
+  <!-- Tarjetas de vehículos -->
+  @for (v of vehiculos(); track $index; let i = $index) {
+    <div class="border border-[#e5e7eb] rounded-[12px] overflow-hidden">
+
+      <!-- Header de la tarjeta -->
+      <button type="button" (click)="toggleExpand(i)"
+        class="w-full flex items-center justify-between px-4 py-3 bg-[#f9fafb] hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+        <div class="flex items-center gap-3">
+          <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
+            <span class="text-white text-[11px] font-bold">{{ i + 1 }}</span>
+          </div>
+          <div class="text-left">
+            <p class="text-[#101828] text-[14px] font-semibold">Vehículo {{ i + 1 }}</p>
+            <p class="text-[#6a7282] text-[12px]">{{ v.tipo || 'Sin tipo seleccionado' }}</p>
+          </div>
+        </div>
+        @if (expandedIdx() === i) {
+          <lucide-angular [img]="ChevronUpIcon" class="size-5" color="#6a7282" [strokeWidth]="1.5" />
+        } @else {
+          <lucide-angular [img]="ChevronDownIcon" class="size-5" color="#6a7282" [strokeWidth]="1.5" />
+        }
+      </button>
+
+      <!-- Contenido expandible -->
+      @if (expandedIdx() === i) {
+        <div class="p-4 flex flex-col gap-4 border-t border-[#e5e7eb]">
+
+          <div class="grid grid-cols-3 gap-4">
+            <!-- Tipo de vehículo -->
+            <div>
+              <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tipo de Vehículo *</label>
+              <select [ngModel]="v.tipo" (ngModelChange)="updateVehiculo(i, 'tipo', $event)"
+                [name]="'tipo_' + i"
+                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
+                <option value="">Seleccionar tipo...</option>
+                <option value="Sedán">Sedán</option>
+                <option value="SUV">SUV</option>
+                <option value="Camioneta">Camioneta</option>
+                <option value="Pickup">Pickup</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+
+            <!-- Placa / Patente -->
+            <div>
+              <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Placa / Patente</label>
+              <input type="text" [ngModel]="v.placa" (ngModelChange)="updateVehiculo(i, 'placa', $event)"
+                [name]="'placa_' + i"
+                placeholder="EJ: AB 123 CD"
+                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+            </div>
+
+            <!-- Marca / Modelo / Color -->
+            <div>
+              <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Marca / Modelo / Color</label>
+              <input type="text" [ngModel]="v.descripcion" (ngModelChange)="updateVehiculo(i, 'descripcion', $event)"
+                [name]="'desc_' + i"
+                placeholder="Ej: Toyota Corolla 2020, Gris"
+                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div>
+            <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">
+              Observaciones del Vehículo {{ i + 1 }}
+            </label>
+            <textarea [ngModel]="v.observaciones" (ngModelChange)="updateVehiculo(i, 'observaciones', $event)"
+              [name]="'obs_' + i"
+              placeholder="Detalles específicos, problemas mecánicos, instrucciones especiales..."
+              rows="3"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] resize-none"></textarea>
+          </div>
+
+        </div>
+      }
+
     </div>
-  </div>
+  }
 
-  <div>
-    <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Observaciones Adicionales</label>
-    <textarea [ngModel]="observaciones()" (ngModelChange)="observacionesChange.emit($event)" name="observaciones"
-      placeholder="Detalles adicionales del servicio, instrucciones especiales, contacto directo..."
-      rows="3"
-      class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] resize-none"></textarea>
-  </div>
-
-  <button type="button" (click)="confirmar.emit()"
-    [disabled]="!step1Complete() || !step2Complete() || !tipoVehiculo()"
+  <!-- Botón confirmar -->
+  <button type="button" (click)="onConfirmar()"
+    [disabled]="!puedeConfirmar()"
     class="w-full bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-[10px] h-12 transition-colors cursor-pointer flex items-center justify-center gap-2">
     <lucide-angular [img]="PhoneIcon" class="size-5" color="white" [strokeWidth]="1.5" />
     Confirmar Reserva Telefónica
   </button>
+
 </div>

@@ -28,7 +28,9 @@
       (clienteIdChange)="clienteId.set($event)"
       (origenChange)="origen.set($event)"
       (destinoChange)="destino.set($event)"
-      (rutaChange)="onRutaChange($event)" />
+      (rutaChange)="onRutaChange($event)"
+      (tarifaChange)="onTarifaChange($event)"
+      (parametroChange)="onParametroChange($event)" />
   }
 
   <!-- Section 2: Selección de Agenda (shown after step 1 complete) -->
@@ -42,22 +44,18 @@
       [bloques]="bloques()"
       (selectFecha)="onSelectFecha($event)"
       (selectSlot)="onSelectSlot($event)"
-      (validar)="horarioValidado.set(true)"
+      (validar)="onValidarHorario()"
       (editar)="horarioValidado.set(false)" />
   }
 
   <!-- Section 3: Detalles del Vehículo (shown after step 2 complete) -->
   @if (step2Complete()) {
     <app-detalles-vehiculo
-      [tipoVehiculo]="tipoVehiculo()"
-      [detallesVehiculo]="detallesVehiculo()"
-      [observaciones]="observaciones()"
+      [tipoCarga]="tipoCarga()"
+      [cantidadVehiculos]="cantidadVehiculos()"
       [step1Complete]="step1Complete()"
       [step2Complete]="step2Complete()"
-      (tipoVehiculoChange)="tipoVehiculo.set($event)"
-      (detallesVehiculoChange)="detallesVehiculo.set($event)"
-      (observacionesChange)="observaciones.set($event)"
-      (confirmar)="showConfirm.set(true)" />
+      (confirmar)="onVehiculosConfirmados($event)" />
   }
 
 </div>
@@ -73,4 +71,12 @@
   <app-reserva-exitosa
     [servicioId]="servicioCreado()"
     (nuevaReserva)="onNuevaReserva()" />
+}
+
+@if (modal()) {
+  <app-mensaje-modal
+    [tipo]="modal()!.tipo"
+    [titulo]="modal()!.titulo"
+    [mensaje]="modal()!.mensaje"
+    (cerrar)="modal.set(null)" />
 }

@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, computed, effect, inject, input, output, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Building2, MapPin, Navigation, Clock } from 'lucide-angular';
+import { LucideAngularModule, Building2, MapPin, Navigation, Clock, DollarSign } from 'lucide-angular';
 import { ClienteB2B } from '../../../../models/admin.model';
 
 declare var google: any;
@@ -20,6 +20,9 @@ interface TarifaGlobal {
 
 interface ParametroOperativo {
   tiempoMargenManiobra: number;
+  tiempoRetornoBase:    number;
+  timerAdministrativo: number;
+  timerCliente:        number;
 }
 
 @Component({
@@ -51,20 +54,25 @@ export class SeleccionClienteComponent implements AfterViewInit {
       }
     });
 
-    // Cargar tarifario global cuando el cliente seleccionado no tenga tarifa propia
+    // Cargar tarifario global siempre que haya un cliente seleccionado
     effect(() => {
       const cliente = this.clienteSeleccionado();
       if (!cliente) return;
-      const sumaCliente = (cliente.tarifaKm ?? 0) + (cliente.tarifaBase ?? 0);
-      if (sumaCliente === 0 && this.tarifaGlobal() === null) {
+      if (this.tarifaGlobal() === null) {
         this.http.get<TarifaGlobal>('http://localhost:5016/api/configuracion/tarifario-global')
           .subscribe({ next: t => this.tarifaGlobal.set(t) });
       }
     });
 
+    // Emitir tarifaChange cuando cambie la tarifa efectiva
+    effect(() => {
+      const t = this.tarifaEfectiva();
+      this.tarifaChange.emit(t ? { tarifaKm: t.tarifaKm, tarifaBase: t.tarifaBase } : null);
+    });
+
     // Cargar parámetro operativo al inicializar
     this.http.get<ParametroOperativo>('http://localhost:5016/api/configuracion/parametro-operativo')
-      .subscribe({ next: p => this.parametroOperativo.set(p) });
+      .subscribe({ next: p => { this.parametroOperativo.set(p); this.parametroChange.emit(p); } });
   }
 
   readonly clientes  = input.required<ClienteB2B[]>();
@@ -72,15 +80,18 @@ export class SeleccionClienteComponent implements AfterViewInit {
   readonly origen    = input.required<string>();
   readonly destino   = input.required<string>();
 
-  readonly clienteIdChange = output<string>();
-  readonly origenChange    = output<string>();
-  readonly destinoChange   = output<string>();
-  readonly rutaChange      = output<{ distanciaKm: number; tiempoMin: number } | null>();
+  readonly clienteIdChange  = output<string>();
+  readonly origenChange     = output<string>();
+  readonly destinoChange    = output<string>();
+  readonly rutaChange       = output<{ distanciaKm: number; tiempoMin: number } | null>();
+  readonly tarifaChange     = output<{ tarifaKm: number; tarifaBase: number } | null>();
+  readonly parametroChange  = output<ParametroOperativo | null>();
 
-  protected readonly Building2Icon  = Building2;
-  protected readonly MapPinIcon     = MapPin;
-  protected readonly NavigationIcon = Navigation;
-  protected readonly ClockIcon      = Clock;
+  protected readonly Building2Icon   = Building2;
+  protected readonly MapPinIcon      = MapPin;
+  protected readonly NavigationIcon  = Navigation;
+  protected readonly ClockIcon       = Clock;
+  protected readonly DollarSignIcon  = DollarSign;
 
   protected readonly clienteSeleccionado = computed(() =>
     this.clientes().find(c => c.id === this.clienteId()) ?? null
@@ -92,21 +103,50 @@ export class SeleccionClienteComponent implements AfterViewInit {
   protected readonly tarifaGlobal        = signal<TarifaGlobal | null>(null);
   protected readonly parametroOperativo  = signal<ParametroOperativo | null>(null);
 
-  /** Tarifa efectiva: usa la del cliente si tarifaKm+tarifaBase > 0, sino la global */
+  // Override de tarifa por cliente: almacena el id del cliente y el tipo elegido
+  protected readonly tarifaOverride = signal<{ id: string; tipo: 'personalizada' | 'global' } | null>(null);
+
+  protected readonly clienteTienePersonalizada = computed(() => {
+    const c = this.clienteSeleccionado();
+    return !!c && (c.tarifaKm ?? 0) + (c.tarifaBase ?? 0) > 0;
+  });
+
+  /** Tarifa efectiva: respeta la selección manual del usuario, si no auto-elige */
   protected readonly tarifaEfectiva = computed(() => {
     const cliente = this.clienteSeleccionado();
     if (!cliente) return null;
 
     const sumaCliente = (cliente.tarifaKm ?? 0) + (cliente.tarifaBase ?? 0);
-    if (sumaCliente > 0) {
-      return { valor: sumaCliente, tipo: 'personalizada' as const };
+    const tienePersonalizada = sumaCliente > 0;
+
+    const override = this.tarifaOverride();
+    const seleccion = override?.id === cliente.id
+      ? override.tipo
+      : (tienePersonalizada ? 'personalizada' : 'global');
+
+    if (seleccion === 'personalizada' && tienePersonalizada) {
+      return {
+        valor:     sumaCliente,
+        tipo:      'personalizada' as const,
+        tarifaKm:  cliente.tarifaKm  ?? 0,
+        tarifaBase: cliente.tarifaBase ?? 0,
+      };
     }
 
     const global = this.tarifaGlobal();
     if (!global) return null;
     const sumaGlobal = (global.tarifaKm ?? 0) + (global.tarifaBase ?? 0);
-    return { valor: sumaGlobal, tipo: 'global' as const };
+    return {
+      valor:     sumaGlobal,
+      tipo:      'global' as const,
+      tarifaKm:  global.tarifaKm  ?? 0,
+      tarifaBase: global.tarifaBase ?? 0,
+    };
   });
+
+  protected seleccionarTarifa(tipo: 'personalizada' | 'global'): void {
+    this.tarifaOverride.set({ id: this.clienteId(), tipo });
+  }
 
   protected readonly costoEstimado = computed(() => {
     const r = this.ruta();

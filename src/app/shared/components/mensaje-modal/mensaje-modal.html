@@ -1,0 +1,50 @@
+<!-- Backdrop -->
+<div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+  (click)="cerrar.emit()">
+
+  <!-- Panel — detiene la propagación para no cerrar al hacer click dentro -->
+  <div class="bg-white rounded-[16px] shadow-2xl w-full max-w-md overflow-hidden"
+    (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div [class]="headerClass + ' flex items-center justify-between px-5 py-4'">
+      <div class="flex items-center gap-3">
+        <div [class]="iconBgClass + ' size-9 rounded-[10px] flex items-center justify-center shrink-0'">
+          @switch (tipo()) {
+            @case ('exito') {
+              <lucide-angular [img]="CheckCircleIcon" class="size-5" [color]="iconColor" [strokeWidth]="1.5" />
+            }
+            @case ('error') {
+              <lucide-angular [img]="XCircleIcon" class="size-5" [color]="iconColor" [strokeWidth]="1.5" />
+            }
+            @case ('advertencia') {
+              <lucide-angular [img]="AlertTriangleIcon" class="size-5" [color]="iconColor" [strokeWidth]="1.5" />
+            }
+            @default {
+              <lucide-angular [img]="InfoIcon" class="size-5" [color]="iconColor" [strokeWidth]="1.5" />
+            }
+          }
+        </div>
+        <span class="text-[#101828] text-[15px] font-bold">{{ titulo() }}</span>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-7 rounded-[6px] flex items-center justify-center text-[#6a7282] hover:bg-[#f3f4f6] transition-colors">
+        <lucide-angular [img]="XIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-5 py-5">
+      <p class="text-[#364153] text-[14px] leading-relaxed">{{ mensaje() }}</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-5 pb-5">
+      <button type="button" (click)="cerrar.emit()"
+        [class]="btnClass + ' w-full h-10 rounded-[10px] text-[14px] font-semibold transition-colors cursor-pointer'">
+        Aceptar
+      </button>
+    </div>
+
+  </div>
+</div>

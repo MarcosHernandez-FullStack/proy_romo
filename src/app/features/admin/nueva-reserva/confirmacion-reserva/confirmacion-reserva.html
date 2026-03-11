@@ -87,10 +87,6 @@
             <p class="text-[#101828] text-[13px] font-semibold">{{ datos().horaSlot }} — {{ datos().fechaLabel }}</p>
           </div>
           <div>
-            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Tipo de Vehículo</p>
-            <p class="text-[#101828] text-[13px] font-semibold">{{ datos().tipoVehiculo || '—' }}</p>
-          </div>
-          <div>
             <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Tipo de Carga</p>
             <p class="text-[#101828] text-[13px] font-semibold">{{ datos().tipoCarga }}</p>
           </div>
@@ -101,6 +97,27 @@
           <div class="col-span-2">
             <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Destino</p>
             <p class="text-[#101828] text-[13px] font-semibold">{{ datos().destino }}</p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-2">Vehículos</p>
+            <div class="flex flex-col gap-2">
+              @for (v of datos().vehiculos; track $index; let i = $index) {
+                <div class="bg-[#f9fafb] border border-[#e5e7eb] rounded-[8px] px-3 py-2 flex items-center gap-3">
+                  <div class="size-6 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
+                    <span class="text-white text-[10px] font-bold">{{ i + 1 }}</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-[#101828] text-[13px] font-semibold">{{ v.tipo }}</p>
+                    @if (v.descripcion) {
+                      <p class="text-[#6a7282] text-[11px] truncate">{{ v.descripcion }}</p>
+                    }
+                  </div>
+                  @if (v.placa) {
+                    <span class="text-[#364153] text-[12px] font-mono bg-[#e5e7eb] px-2 py-0.5 rounded shrink-0">{{ v.placa }}</span>
+                  }
+                </div>
+              }
+            </div>
           </div>
         </div>
       </div>

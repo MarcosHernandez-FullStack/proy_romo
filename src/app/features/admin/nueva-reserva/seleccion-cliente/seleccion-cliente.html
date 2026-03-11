@@ -22,7 +22,7 @@
       <option value="">Seleccionar cliente...</option>
       @for (c of clientes(); track c.id) {
         @if (c.activo) {
-          <option [value]="c.id">{{ c.id }} - {{ c.empresa }} (${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
+          <option [value]="c.id">{{ c.id }} - {{ c.empresa }} (Tarifa personalizada: ${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
         }
       }
     </select>
@@ -33,7 +33,31 @@
           <span class="text-[#364153] text-[13px]">Empresa: <strong class="text-[#101828]">{{ clienteSeleccionado()!.empresa }}</strong></span>
         </div>
         <div class="w-px h-4 bg-[#bedbff]"></div>
-        @if (tarifaEfectiva()) {
+        @if (clienteTienePersonalizada() && tarifaGlobal()) {
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="DollarSignIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
+            <span class="text-[#364153] text-[13px]">Tarifa:</span>
+            <button
+              (click)="seleccionarTarifa('personalizada')"
+              [class]="tarifaEfectiva()?.tipo === 'personalizada'
+                ? 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-[#155dfc] text-white border border-[#155dfc] transition-colors'
+                : 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-white text-[#364153] border border-[#d1d5dc] hover:border-[#155dfc] transition-colors'">
+              Personalizada
+            </button>
+            <button
+              (click)="seleccionarTarifa('global')"
+              [class]="tarifaEfectiva()?.tipo === 'global'
+                ? 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-[#155dfc] text-white border border-[#155dfc] transition-colors'
+                : 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-white text-[#364153] border border-[#d1d5dc] hover:border-[#155dfc] transition-colors'">
+              Global
+            </button>
+            @if (tarifaEfectiva()) {
+              <span class="text-[#364153] text-[13px]">
+                = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
+              </span>
+            }
+          </div>
+        } @else if (tarifaEfectiva()) {
           <span class="text-[#364153] text-[13px]">
             Tarifa <span class="font-semibold text-[#6a7282]">({{ tarifaEfectiva()!.tipo }})</span>
             = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>

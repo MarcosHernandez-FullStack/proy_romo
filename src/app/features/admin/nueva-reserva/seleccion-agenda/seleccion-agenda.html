@@ -46,7 +46,7 @@
   <!-- Slot grid -->
   <div class="grid grid-cols-6 gap-3">
     @for (s of slots(); track $index; let i = $index) {
-      @if (s.estado === 'libre' || s.estado === 'seleccionado') {
+      @if (s.estado === 'libre' || s.estado === 'seleccionado' || s.estado === 'rango') {
       <button type="button" (click)="selectSlot.emit(i)"
         class="flex flex-col items-center justify-center py-4 px-1 rounded-[10px] border-2 font-semibold transition-colors min-h-[80px]"
         [class]="slotClass(s)">
