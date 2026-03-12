@@ -109,6 +109,7 @@ export class NuevaReservaComponent implements OnInit {
     return Math.max(25, +(this.distanciaKm() * this.tarifaEfectivaKm()).toFixed(2));
   });
 
+  protected readonly conflictoBloque = signal<string | null>(null);
   protected readonly showConfirm = signal(false);
   protected readonly showSuccess = signal(false);
   protected readonly servicioCreado = signal('');
@@ -167,7 +168,7 @@ export class NuevaReservaComponent implements OnInit {
       fechaServicio:        fecha.toISOString().split('T')[0],
       horaInicio:           `${slotSel.hora}:00`,
       horaFin,
-      cantidadCarga:        this.cantidadVehiculos(),
+      cantidadCarga:        this.capacidadEfectiva(),
       idCliente:            parseInt(this.clienteId()),
       idOperador:           null as number | null,
       direccionOrigen:      this.origen(),
@@ -260,6 +261,7 @@ export class NuevaReservaComponent implements OnInit {
 
     // Click en el inicio o en un bloque de continuación → deseleccionar todo
     if (s.estado === 'seleccionado' || s.estado === 'rango') {
+      this.conflictoBloque.set(null);
       this.slots.update(prev =>
         prev.map(slot =>
           slot.estado === 'seleccionado' || slot.estado === 'rango'
@@ -269,6 +271,7 @@ export class NuevaReservaComponent implements OnInit {
       );
       return;
     }
+    this.conflictoBloque.set(null);
 
     // Calcular las horas requeridas para los N-1 bloques siguientes
     const bloques      = this.bloques();
@@ -284,7 +287,11 @@ export class NuevaReservaComponent implements OnInit {
       currentSlots.findIndex(sl => sl.hora === hora && sl.estado === 'libre')
     );
 
-    if (indicesRestantes.some(i => i === -1)) return; // No hay N bloques consecutivos libres
+    if (indicesRestantes.some(i => i === -1)) {
+      this.conflictoBloque.set(`No hay ${bloques} bloques consecutivos disponibles desde ${s.hora}`);
+      return;
+    }
+    this.conflictoBloque.set(null);
 
     // Marcar selección (reseteando la selección anterior si existe)
     this.slots.update(prev =>
@@ -295,6 +302,15 @@ export class NuevaReservaComponent implements OnInit {
         return slot;
       })
     );
+  }
+
+  protected onEditar(): void {
+    const timerId = this.idTimerReserva();
+    if (timerId) {
+      this.adminSvc.deleteTimer(timerId).subscribe();
+    }
+    this.horarioValidado.set(false);
+    this.idTimerReserva.set(null);
   }
 
   protected onVehiculosConfirmados(vehiculos: VehiculoDetalle[]): void {
@@ -311,7 +327,6 @@ export class NuevaReservaComponent implements OnInit {
 
     const dto = {
       idTimerReserva: timerId,
-      creadoPor: session.id,
       vehiculos: this.vehiculosData().map(v => ({
         tipo:        v.tipo,
         placa:       v.placa,

@@ -70,6 +70,10 @@ export class AdminService {
     );
   }
 
+  deleteTimer(id: number): Observable<void> {
+    return this.http.delete<void>(`${API}/reservas/timer/${id}`);
+  }
+
   // TODO: reemplazar con this.http.get('/api/admin/operaciones')
   getOperaciones(): Observable<ServicioAdmin[]> {
     return of(SERVICIOS_ADMIN).pipe(delay(300));

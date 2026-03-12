@@ -58,6 +58,20 @@
     }
   </div>
 
+  <!-- Advertencia conflicto de bloques -->
+  @if (conflictoBloque()) {
+    <div class="border border-[#f97316] bg-[#fff7ed] rounded-[12px] p-4 flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <lucide-angular [img]="TriangleAlertIcon" class="size-4" color="#ea580c" [strokeWidth]="1.5" />
+        <span class="text-[#ea580c] text-[13px] font-bold">Conflicto de Bloques</span>
+      </div>
+      <p class="text-[#9a3412] text-[13px] font-semibold">{{ conflictoBloque() }}</p>
+      <p class="text-[#9a3412] text-[12px]">
+        Este servicio requiere {{ bloques() }} bloques horarios, pero hay conflictos con reservas existentes. Por favor, seleccione otro horario de inicio.
+      </p>
+    </div>
+  }
+
   <!-- Horario Confirmado + Validar -->
   @if (hasSelectedSlot()) {
     <div class="border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col gap-4">

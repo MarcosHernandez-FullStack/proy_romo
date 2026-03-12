@@ -42,10 +42,11 @@
       [slots]="slots()"
       [horarioValidado]="horarioValidado()"
       [bloques]="bloques()"
+      [conflictoBloque]="conflictoBloque()"
       (selectFecha)="onSelectFecha($event)"
       (selectSlot)="onSelectSlot($event)"
       (validar)="onValidarHorario()"
-      (editar)="horarioValidado.set(false)" />
+      (editar)="onEditar()" />
   }
 
   <!-- Section 3: Detalles del Vehículo (shown after step 2 complete) -->

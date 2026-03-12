@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { LucideAngularModule, CheckCircle, Clock, Lock, Calendar } from 'lucide-angular';
+import { LucideAngularModule, CircleCheck, Clock, Lock, Calendar, TriangleAlert } from 'lucide-angular';
 import { SlotAdmin } from '../../../../models/admin.model';
 
 export interface FechaItem {
@@ -24,13 +24,15 @@ export class SeleccionAgendaComponent {
   readonly bloques = input.required<number>();
   readonly selectFecha = output<number>();
   readonly selectSlot = output<number>();
+  readonly conflictoBloque = input<string | null>(null);
   readonly validar = output<void>();
   readonly editar = output<void>();
 
-  protected readonly CheckCircleIcon = CheckCircle;
-  protected readonly ClockIcon = Clock;
-  protected readonly LockIcon = Lock;
-  protected readonly CalendarIcon = Calendar;
+  protected readonly CheckCircleIcon  = CircleCheck;
+  protected readonly ClockIcon        = Clock;
+  protected readonly LockIcon         = Lock;
+  protected readonly CalendarIcon     = Calendar;
+  protected readonly TriangleAlertIcon = TriangleAlert;
 
   protected slotClass(s: SlotAdmin): string {
     switch (s.estado) {
