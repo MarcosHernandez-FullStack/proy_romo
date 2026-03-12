@@ -83,7 +83,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
   readonly clienteIdChange  = output<string>();
   readonly origenChange     = output<string>();
   readonly destinoChange    = output<string>();
-  readonly rutaChange       = output<{ distanciaKm: number; tiempoMin: number } | null>();
+  readonly rutaChange       = output<{ distanciaKm: number; tiempoMin: number; coordLatOrigen: string; coordLonOrigen: string; coordLatDestino: string; coordLonDestino: string } | null>();
   readonly tarifaChange     = output<{ tarifaKm: number; tarifaBase: number } | null>();
   readonly parametroChange  = output<ParametroOperativo | null>();
 
@@ -152,7 +152,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
     const r = this.ruta();
     const t = this.tarifaEfectiva();
     if (!r || !t) return null;
-    return +(r.distanciaKm * t.valor).toFixed(0);
+    return +(r.distanciaKm * t.valor).toFixed(2);
   });
 
   protected readonly bloquesOperativos = computed(() => {
@@ -217,11 +217,16 @@ export class SeleccionClienteComponent implements AfterViewInit {
         this.cargando.set(false);
         if (status === 'OK') {
           const leg         = result.routes[0].legs[0];
-          const distanciaKm = Math.round(leg.distance.value / 1000);
+          const distanciaKm = +(leg.distance.value / 1000).toFixed(1);
           const tiempoMin   = Math.round(leg.duration.value / 60);
 
+          const coordLatOrigen  = String(leg.start_location.lat());
+          const coordLonOrigen  = String(leg.start_location.lng());
+          const coordLatDestino = String(leg.end_location.lat());
+          const coordLonDestino = String(leg.end_location.lng());
+
           this.ruta.set({ distanciaKm, tiempoMin, distanciaTexto: leg.distance.text, tiempoTexto: leg.duration.text });
-          this.rutaChange.emit({ distanciaKm, tiempoMin });
+          this.rutaChange.emit({ distanciaKm, tiempoMin, coordLatOrigen, coordLonOrigen, coordLatDestino, coordLonDestino });
 
           this.renderer = new google.maps.DirectionsRenderer({
             map: this.map,

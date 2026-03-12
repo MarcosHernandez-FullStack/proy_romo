@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule, Phone } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
@@ -38,6 +38,9 @@ export class NuevaReservaComponent implements OnInit {
 
   protected readonly tipoCarga = signal<TipoCarga>('estandar');
   protected readonly cantidadVehiculos = signal(2);
+  protected readonly capacidadEfectiva = computed(() =>
+    this.tipoCarga() === 'estandar' ? 1 : this.cantidadVehiculos()
+  );
   protected readonly clienteId = signal('');
   protected readonly origen = signal('');
   protected readonly destino = signal('');
@@ -84,9 +87,13 @@ export class NuevaReservaComponent implements OnInit {
 
   private readonly vehiculosData = signal<VehiculoDetalle[]>([]);
 
-  private readonly rutaData = signal<{ distanciaKm: number; tiempoMin: number } | null>(null);
-  protected readonly distanciaKm = computed(() => this.rutaData()?.distanciaKm ?? 0);
-  protected readonly tiempoMin   = computed(() => this.rutaData()?.tiempoMin   ?? 0);
+  private readonly rutaData = signal<{ distanciaKm: number; tiempoMin: number; coordLatOrigen: string; coordLonOrigen: string; coordLatDestino: string; coordLonDestino: string } | null>(null);
+  protected readonly distanciaKm    = computed(() => this.rutaData()?.distanciaKm    ?? 0);
+  protected readonly tiempoMin      = computed(() => this.rutaData()?.tiempoMin      ?? 0);
+  protected readonly coordLatOrigen  = computed(() => this.rutaData()?.coordLatOrigen  ?? '0');
+  protected readonly coordLonOrigen  = computed(() => this.rutaData()?.coordLonOrigen  ?? '0');
+  protected readonly coordLatDestino = computed(() => this.rutaData()?.coordLatDestino ?? '0');
+  protected readonly coordLonDestino = computed(() => this.rutaData()?.coordLonDestino ?? '0');
   protected readonly margenManiobra = 30; // fallback hasta que cargue parametroData
   protected readonly bloques = computed(() => {
     const margen = this.parametroData()?.tiempoMargenManiobra ?? this.margenManiobra;
@@ -99,7 +106,7 @@ export class NuevaReservaComponent implements OnInit {
 
   protected readonly costoTotal = computed(() => {
     if (!this.tarifaData() || this.distanciaKm() === 0) return 0;
-    return Math.max(25, +(this.distanciaKm() * this.tarifaEfectivaKm()).toFixed(0));
+    return Math.max(25, +(this.distanciaKm() * this.tarifaEfectivaKm()).toFixed(2));
   });
 
   protected readonly showConfirm = signal(false);
@@ -164,11 +171,11 @@ export class NuevaReservaComponent implements OnInit {
       idCliente:            parseInt(this.clienteId()),
       idOperador:           null as number | null,
       direccionOrigen:      this.origen(),
-      coordLatOrigen:       '0',
-      coordLonOrigen:       '0',
+      coordLatOrigen:       this.coordLatOrigen(),
+      coordLonOrigen:       this.coordLonOrigen(),
       direccionDestino:     this.destino(),
-      coordLatDestino:      '0',
-      coordLonDestino:      '0',
+      coordLatDestino:      this.coordLatDestino(),
+      coordLonDestino:      this.coordLonDestino(),
       distanciaKm:          this.distanciaKm(),
       tiempoEstimado:       this.tiempoMin(),
       tiempoManiobra:       parametro.tiempoMargenManiobra,
@@ -208,9 +215,9 @@ export class NuevaReservaComponent implements OnInit {
     });
   }
 
-  private cargarHorarios(fecha: Date): void {
+  private cargarHorarios(fecha: Date, capacidad: number): void {
     const rol = this.adminSvc.session()?.rol ?? 'ADMINISTRADOR';
-    this.adminSvc.getHorariosDisponibles(fecha, rol).subscribe({
+    this.adminSvc.getHorariosDisponibles(fecha, rol, capacidad).subscribe({
       next: (horas) => this.slots.set(
         (horas ?? []).map(h => ({ hora: h.horaDisponible.substring(0, 5), estado: 'libre' as const }))
       ),
@@ -218,12 +225,20 @@ export class NuevaReservaComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
-    this.cargarHorarios(this.today);
+  constructor() {
+    // Recargar slots cuando cambie la fecha o la cantidad de vehículos
+    effect(() => {
+      const fecha     = this.fechas()[this.fechaIdx()].date;
+      const capacidad = this.capacidadEfectiva();
+      this.cargarHorarios(fecha, capacidad);
+    });
   }
 
-  protected onRutaChange(data: { distanciaKm: number; tiempoMin: number } | null): void {
+  ngOnInit(): void {
+    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+  }
+
+  protected onRutaChange(data: { distanciaKm: number; tiempoMin: number; coordLatOrigen: string; coordLonOrigen: string; coordLatDestino: string; coordLonDestino: string } | null): void {
     this.rutaData.set(data);
   }
 
@@ -232,7 +247,7 @@ export class NuevaReservaComponent implements OnInit {
     this.horarioValidado.set(false);
     this.idTimerReserva.set(null);
     this.modal.set(null);
-    this.cargarHorarios(this.fechas()[idx].date);
+    // cargarHorarios se dispara automáticamente via effect al cambiar fechaIdx
   }
 
   protected onSelectSlot(idx: number): void {
@@ -296,7 +311,7 @@ export class NuevaReservaComponent implements OnInit {
 
     const dto = {
       idTimerReserva: timerId,
-      actualizadoPor: session.id,
+      creadoPor: session.id,
       vehiculos: this.vehiculosData().map(v => ({
         tipo:        v.tipo,
         placa:       v.placa,
@@ -337,7 +352,7 @@ export class NuevaReservaComponent implements OnInit {
     this.destino.set('');
     this.vehiculosData.set([]);
     this.horarioValidado.set(false);
-    this.cargarHorarios(this.today);
+    this.cargarHorarios(this.today, this.capacidadEfectiva());
   }
 
   protected readonly step0Complete = computed(() =>
