@@ -73,9 +73,9 @@
       <label class="block text-[#364153] text-[13px] font-semibold mb-1.5">
         Cantidad de Vehículos
       </label>
-      <input type="number" min="2" max="10"
-        [ngModel]="cantidadVehiculos()"
-        (ngModelChange)="cantidadVehiculosChange.emit(+$event)"
+      <input #qtyInput type="number" min="2" max="10"
+        [value]="cantidadVehiculos()"
+        (change)="cantidadVehiculosChange.emit(+qtyInput.value < 2 ? 2 : +qtyInput.value > 10 ? 10 : +qtyInput.value); qtyInput.value = (+qtyInput.value < 2 ? '2' : +qtyInput.value > 10 ? '10' : qtyInput.value)"
         class="w-40 border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
       <p class="text-[#6a7282] text-[12px] mt-1.5">Mínimo 2, máximo 10 vehículos por servicio</p>
     </div>

@@ -63,7 +63,10 @@ export class AdminService {
   }
 
   getHorariosDisponibles(fecha: Date, rol: string, capacidad: number): Observable<{ horaDisponible: string }[]> {
-    const fechaStr = fecha.toISOString().split('T')[0];
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, '0');
+    const d = String(fecha.getDate()).padStart(2, '0');
+    const fechaStr = `${y}-${m}-${d}`;
     return this.http.get<{ horaDisponible: string }[]>(
       `${API}/reservas/horarios-disponibles`,
       { params: { fecha: fechaStr, rol, capacidad: capacidad.toString() } }

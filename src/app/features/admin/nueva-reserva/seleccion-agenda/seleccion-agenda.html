@@ -11,16 +11,19 @@
   <!-- Date selector -->
   <div class="flex items-center gap-3 flex-wrap">
     <span class="text-[#364153] text-[13px] font-semibold">Seleccione día para reserva:</span>
-    <label class="flex items-center gap-2 px-3 py-2 border border-[#e5e7eb] rounded-[8px] bg-white hover:bg-[#f9fafb] text-[#364153] text-[13px] font-medium transition-colors cursor-pointer">
-      <lucide-angular [img]="CalendarIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
-      Seleccionar fecha
+    <div class="relative">
+      <button type="button" (click)="dateInput.showPicker()"
+        class="flex items-center gap-2 px-3 py-2 border border-[#e5e7eb] rounded-[8px] bg-white hover:bg-[#f9fafb] text-[#364153] text-[13px] font-medium transition-colors cursor-pointer">
+        <lucide-angular [img]="CalendarIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
+        Seleccionar fecha
+      </button>
       <input #dateInput type="date"
-        class="w-0 h-0 opacity-0 absolute"
+        class="sr-only"
         [value]="toDateString(fechas()[fechaIdx()].date)"
         [min]="toDateString(fechas()[0].date)"
         [max]="toDateString(fechas()[fechas().length - 1].date)"
         (change)="onDateChange(dateInput.value)" />
-    </label>
+    </div>
   </div>
 
   <!-- Selected date info bar -->

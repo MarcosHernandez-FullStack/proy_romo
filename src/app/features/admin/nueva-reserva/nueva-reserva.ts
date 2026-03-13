@@ -52,7 +52,7 @@ export class NuevaReservaComponent implements OnInit {
   protected readonly today = new Date();
   protected readonly fechas = computed<FechaItem[]>(() => {
     const arr: FechaItem[] = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 365; i++) {
       const d = new Date(this.today);
       d.setDate(d.getDate() + i);
       arr.push({
@@ -165,7 +165,7 @@ export class NuevaReservaComponent implements OnInit {
       : parametro.timerCliente;
 
     const dto = {
-      fechaServicio:        fecha.toISOString().split('T')[0],
+      fechaServicio:        `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`,
       horaInicio:           `${slotSel.hora}:00`,
       horaFin,
       cantidadCarga:        this.capacidadEfectiva(),
@@ -255,12 +255,11 @@ export class NuevaReservaComponent implements OnInit {
     const s = this.slots()[idx];
     if (s.estado === 'cerrado' || s.estado === 'ocupado' || s.estado === 'bloqueado') return;
 
-    this.horarioValidado.set(false);
-    this.idTimerReserva.set(null);
-    this.modal.set(null);
-
     // Click en el inicio o en un bloque de continuación → deseleccionar todo
     if (s.estado === 'seleccionado' || s.estado === 'rango') {
+      this.horarioValidado.set(false);
+      this.idTimerReserva.set(null);
+      this.modal.set(null);
       this.conflictoBloque.set(null);
       this.slots.update(prev =>
         prev.map(slot =>
@@ -271,6 +270,14 @@ export class NuevaReservaComponent implements OnInit {
       );
       return;
     }
+
+    // Si ya hay una selección activa, bloquear hasta que se desmarca primero
+    const yaHaySeleccion = this.slots().some(sl => sl.estado === 'seleccionado');
+    if (yaHaySeleccion) return;
+
+    this.horarioValidado.set(false);
+    this.idTimerReserva.set(null);
+    this.modal.set(null);
     this.conflictoBloque.set(null);
 
     // Calcular las horas requeridas para los N-1 bloques siguientes
@@ -293,10 +300,8 @@ export class NuevaReservaComponent implements OnInit {
     }
     this.conflictoBloque.set(null);
 
-    // Marcar selección (reseteando la selección anterior si existe)
     this.slots.update(prev =>
       prev.map((slot, i) => {
-        if (slot.estado === 'seleccionado' || slot.estado === 'rango') return { ...slot, estado: 'libre' as const };
         if (i === idx)                    return { ...slot, estado: 'seleccionado' as const };
         if (indicesRestantes.includes(i)) return { ...slot, estado: 'rango' as const };
         return slot;
