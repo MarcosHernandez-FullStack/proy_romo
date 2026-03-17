@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { LucideAngularModule, Phone, Navigation, CalendarDays, DollarSign, CheckCircle } from 'lucide-angular';
+import { LucideAngularModule, Phone, Navigation, CalendarDays, DollarSign, CheckCircle, AlertTriangle } from 'lucide-angular';
 
 export interface VehiculoResumen {
   tipo:        string;
@@ -21,6 +21,7 @@ export interface DatosReserva {
   bloques:       number;
   costoTotal:    number;
   tarifaKm:      number;
+  tipoHorario:   string;
 }
 
 @Component({
@@ -34,9 +35,10 @@ export class ConfirmacionReservaComponent {
   readonly confirmar = output<void>();
   readonly cerrar = output<void>();
 
-  protected readonly PhoneIcon = Phone;
-  protected readonly NavigationIcon = Navigation;
-  protected readonly CalendarDaysIcon = CalendarDays;
-  protected readonly DollarSignIcon = DollarSign;
-  protected readonly CheckCircleIcon = CheckCircle;
+  protected readonly PhoneIcon         = Phone;
+  protected readonly NavigationIcon    = Navigation;
+  protected readonly CalendarDaysIcon  = CalendarDays;
+  protected readonly DollarSignIcon    = DollarSign;
+  protected readonly CheckCircleIcon   = CheckCircle;
+  protected readonly AlertTriangleIcon = AlertTriangle;
 }

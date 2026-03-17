@@ -1,0 +1,31 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[420px] overflow-hidden">
+
+    <div class="px-6 py-10 flex flex-col items-center text-center gap-5">
+
+      <!-- Checkmark icon in green circle -->
+      <div class="size-20 bg-[#f0fdf4] border-2 border-[#7bf1a8] rounded-full flex items-center justify-center">
+        <lucide-angular [img]="CircleCheckIcon" class="size-10" color="#00a63e" [strokeWidth]="1.5" />
+      </div>
+
+      <div>
+        <h2 class="text-[#101828] text-[28px] font-bold">¡Reserva Creada!</h2>
+        <p class="text-[#6a7282] text-[14px] mt-1">El servicio ha sido registrado exitosamente</p>
+      </div>
+
+      <!-- Service code box -->
+      <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[14px] px-8 py-4 w-full">
+        <p class="text-[#6a7282] text-[12px] uppercase tracking-wider font-semibold mb-1">Código de Servicio</p>
+        <p class="text-[#155dfc] text-[36px] font-bold font-mono">{{ servicioId() }}</p>
+      </div>
+
+      <!-- Auto redirect -->
+      <div class="flex items-center gap-2 text-[#6a7282] text-[13px]">
+        <div class="size-4 border-2 border-[#6a7282] border-t-transparent rounded-full animate-spin"></div>
+        <span>Redirigiendo automáticamente...</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>

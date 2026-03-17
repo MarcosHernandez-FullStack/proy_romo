@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { LucideAngularModule, Phone } from 'lucide-angular';
+import { LucideAngularModule, CircleCheck } from 'lucide-angular';
 
 @Component({
   selector: 'app-reserva-exitosa',
@@ -11,5 +11,5 @@ export class ReservaExitosaComponent {
   readonly servicioId = input.required<string>();
   readonly nuevaReserva = output<void>();
 
-  protected readonly PhoneIcon = Phone;
+  protected readonly CircleCheckIcon = CircleCheck;
 }

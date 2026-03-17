@@ -28,7 +28,7 @@
         <span class="text-[#101828] text-[15px] font-bold">{{ titulo() }}</span>
       </div>
       <button type="button" (click)="cerrar.emit()"
-        class="size-7 rounded-[6px] flex items-center justify-center text-[#6a7282] hover:bg-[#f3f4f6] transition-colors">
+        class="size-7 rounded-[6px] flex items-center justify-center text-[#6a7282] hover:bg-[#f3f4f6] transition-colors cursor-pointer">
         <lucide-angular [img]="XIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
       </button>
     </div>
@@ -40,10 +40,27 @@
 
     <!-- Footer -->
     <div class="px-5 pb-5">
-      <button type="button" (click)="cerrar.emit()"
-        [class]="btnClass + ' w-full h-10 rounded-[10px] text-[14px] font-semibold transition-colors cursor-pointer'">
-        Aceptar
-      </button>
+
+      @if (confirmable()) {
+        <!-- Confirmación: 2 botones -->
+        <div class="flex gap-3">
+          <button type="button" (click)="cerrar.emit()"
+            class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+            {{ labelCancelar() }}
+          </button>
+          <button type="button" (click)="confirmar.emit()"
+            [class]="btnConfirmarClass + ' flex-1 h-10 rounded-[10px] text-[14px] font-semibold transition-colors cursor-pointer'">
+            {{ labelConfirmar() }}
+          </button>
+        </div>
+      } @else {
+        <!-- Solo cierre -->
+        <button type="button" (click)="cerrar.emit()"
+          [class]="btnConfirmarClass + ' w-full h-10 rounded-[10px] text-[14px] font-semibold transition-colors cursor-pointer'">
+          Aceptar
+        </button>
+      }
+
     </div>
 
   </div>

@@ -1,0 +1,131 @@
+<div class="p-4 md:p-8 flex flex-col gap-6 bg-[#f9fafb] min-h-full">
+
+  <!-- Header -->
+  <div class="flex items-center gap-4">
+    <div class="size-12 bg-[#f0fdf4] border border-[#7bf1a8] rounded-[12px] flex items-center justify-center">
+      <lucide-angular [img]="PhoneIcon" class="size-6" color="#00a63e" [strokeWidth]="1.5" />
+    </div>
+    <div>
+      <h1 class="text-[#101828] text-[28px] font-bold leading-tight">Nueva Reserva</h1>
+      <p class="text-[#4a5565] text-[14px] mt-0.5">Sistema de reserva B2B con gestión de agenda en tiempo real</p>
+    </div>
+  </div>
+
+  <!-- Stepper -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm px-6 py-5">
+    <div class="flex items-center">
+      @for (label of stepLabels; track $index; let i = $index) {
+        <div class="flex flex-col items-center gap-1.5 shrink-0">
+          <div class="size-8 rounded-full flex items-center justify-center text-[12px] font-bold transition-colors"
+            [class.bg-[#155dfc]]="currentStep() >= i"
+            [class.text-white]="currentStep() >= i"
+            [class.bg-[#f3f4f6]]="currentStep() < i"
+            [class.text-[#9ca3af]]="currentStep() < i">
+            {{ i + 1 }}
+          </div>
+          <span class="text-[10px] font-semibold whitespace-nowrap transition-colors text-center"
+            [class.text-[#155dfc]]="currentStep() === i"
+            [class.text-[#101828]]="currentStep() > i"
+            [class.text-[#9ca3af]]="currentStep() < i">
+            {{ label }}
+          </span>
+        </div>
+        @if (i < stepLabels.length - 1) {
+          <div class="flex-1 h-0.5 mx-3 transition-colors"
+            [class.bg-[#155dfc]]="currentStep() > i"
+            [class.bg-[#e5e7eb]]="currentStep() <= i"></div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Step 0: Tipo de Carga -->
+  @if (currentStep() === 0) {
+    <app-tipo-carga
+      [tipoCarga]="tipoCarga()"
+      [cantidadVehiculos]="cantidadVehiculos()"
+      (tipoCargaChange)="tipoCarga.set($event)"
+      (cantidadVehiculosChange)="cantidadVehiculos.set($event)"
+      (siguiente)="goNext()" />
+  }
+
+  <!-- Step 1: Cliente y Ruta -->
+  @if (currentStep() === 1) {
+    <app-seleccion-cliente
+      [clientes]="clientes()"
+      [clienteId]="clienteId()"
+      [origen]="origen()"
+      [destino]="destino()"
+      (clienteIdChange)="clienteId.set($event)"
+      (origenChange)="origen.set($event)"
+      (destinoChange)="destino.set($event)"
+      (rutaChange)="onRutaChange($event)"
+      (tarifaChange)="onTarifaChange($event)"
+      (parametroChange)="onParametroChange($event)"
+      (anterior)="goPrev()"
+      (siguiente)="goNext()" />
+  }
+
+  <!-- Step 2: Fecha y Horario -->
+  @if (currentStep() === 2) {
+    <app-seleccion-agenda
+      [fechas]="fechas()"
+      [fechaIdx]="fechaIdx()"
+      [fechaLabel]="fechaLabel()"
+      [slots]="slots()"
+      [horarioValidado]="horarioValidado()"
+      [bloques]="bloques()"
+      [conflictoBloque]="conflictoBloque()"
+      (selectFecha)="onSelectFecha($event)"
+      (selectSlot)="onSelectSlot($event)"
+      (validar)="onValidarHorario()"
+      (editar)="onEditar()"
+      (anterior)="goPrev()"
+      (siguiente)="goNext()" />
+  }
+
+  <!-- Step 3: Detalles del Vehículo -->
+  @if (currentStep() === 3) {
+    <app-detalles-vehiculo
+      [tipoCarga]="tipoCarga()"
+      [cantidadVehiculos]="cantidadVehiculos()"
+      [step1Complete]="step1Complete()"
+      [step2Complete]="step2Complete()"
+      (anterior)="goPrev()"
+      (confirmar)="onVehiculosConfirmados($event)" />
+  }
+
+</div>
+
+@if (showConfirm()) {
+  <app-confirmacion-reserva
+    [datos]="datosReserva()"
+    (confirmar)="onConfirmarReserva()"
+    (cerrar)="showConfirm.set(false)" />
+}
+
+@if (showSuccess()) {
+  <app-reserva-exitosa
+    [servicioId]="servicioCreado()"
+    (nuevaReserva)="onNuevaReserva()" />
+}
+
+@if (confirmExcepcion()) {
+  <app-mensaje-modal
+    tipo="advertencia"
+    titulo="Horario de Excepción Seleccionado"
+    [mensaje]="mensajeExcepcion()"
+    [confirmable]="true"
+    labelCancelar="Cancelar"
+    labelConfirmar="Sí, Continuar"
+    (cerrar)="confirmExcepcion.set(false)"
+    (confirmar)="onConfirmarExcepcion()" />
+}
+
+@if (modal()) {
+  <app-mensaje-modal
+    [tipo]="modal()!.tipo"
+    [titulo]="modal()!.titulo"
+    [mensaje]="modal()!.mensaje"
+    (cerrar)="modal.set(null)" />
+}

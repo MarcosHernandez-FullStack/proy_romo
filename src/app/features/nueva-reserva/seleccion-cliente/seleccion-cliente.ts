@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild, AfterViewInit, computed, effect, inje
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Building2, MapPin, Navigation, Clock, DollarSign } from 'lucide-angular';
-import { ClienteB2B } from '../../../../models/admin.model';
+import { ClienteB2B } from '../../../models/admin.model';
 
 declare var google: any;
 
@@ -86,6 +86,8 @@ export class SeleccionClienteComponent implements AfterViewInit {
   readonly rutaChange       = output<{ distanciaKm: number; tiempoMin: number; coordLatOrigen: string; coordLonOrigen: string; coordLatDestino: string; coordLonDestino: string } | null>();
   readonly tarifaChange     = output<{ tarifaKm: number; tarifaBase: number } | null>();
   readonly parametroChange  = output<ParametroOperativo | null>();
+  readonly anterior         = output<void>();
+  readonly siguiente        = output<void>();
 
   protected readonly Building2Icon   = Building2;
   protected readonly MapPinIcon      = MapPin;

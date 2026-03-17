@@ -54,7 +54,7 @@ export const routes: Routes = [
       {
         path: 'nueva-reserva',
         loadComponent: () =>
-          import('./features/admin/nueva-reserva/nueva-reserva').then((m) => m.NuevaReservaComponent),
+          import('./features/nueva-reserva/nueva-reserva').then((m) => m.NuevaReservaComponent),
       },
       {
         path: 'operaciones',

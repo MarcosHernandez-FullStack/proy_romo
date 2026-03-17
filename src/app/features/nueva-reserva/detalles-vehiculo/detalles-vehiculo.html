@@ -1,14 +1,17 @@
 <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
 
   <!-- Section header -->
-  <div class="flex items-center gap-3">
-    <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
-      <span class="text-white text-[12px] font-bold">3</span>
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
+        <span class="text-white text-[12px] font-bold">4</span>
+      </div>
+      <div>
+        <h2 class="text-[#101828] text-[18px] font-bold">Detalles del Vehículo</h2>
+        <p class="text-[#6a7282] text-[13px]">Complete la información del vehículo a transportar</p>
+      </div>
     </div>
-    <div>
-      <h2 class="text-[#101828] text-[18px] font-bold">Detalles del Vehículo y Confirmación</h2>
-      <p class="text-[#6a7282] text-[13px]">Complete la información del vehículo a transportar</p>
-    </div>
+    <span class="text-[#6a7282] text-[12px] font-medium shrink-0">Paso 4 de 4</span>
   </div>
 
   <!-- Banner carga múltiple -->
@@ -104,12 +107,18 @@
     </div>
   }
 
-  <!-- Botón confirmar -->
-  <button type="button" (click)="onConfirmar()"
-    [disabled]="!puedeConfirmar()"
-    class="w-full bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-[10px] h-12 transition-colors cursor-pointer flex items-center justify-center gap-2">
-    <lucide-angular [img]="PhoneIcon" class="size-5" color="white" [strokeWidth]="1.5" />
-    Confirmar Reserva Telefónica
-  </button>
+  <!-- Navigation + Confirm -->
+  <div class="flex gap-3 pt-4 border-t border-[#e5e7eb]">
+    <button type="button" (click)="anterior.emit()"
+      class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-11 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      Anterior
+    </button>
+    <button type="button" (click)="onConfirmar()"
+      [disabled]="!puedeConfirmar()"
+      class="flex-1 bg-[#00a63e] hover:bg-[#008236] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-bold rounded-[10px] h-11 transition-colors cursor-pointer flex items-center justify-center gap-2">
+      <lucide-angular [img]="CheckIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      Confirmar Reserva
+    </button>
+  </div>
 
 </div>

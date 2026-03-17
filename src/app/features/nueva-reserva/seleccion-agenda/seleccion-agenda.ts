@@ -1,6 +1,7 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
 import { LucideAngularModule, CircleCheck, Clock, Lock, Calendar, TriangleAlert } from 'lucide-angular';
-import { SlotAdmin } from '../../../../models/admin.model';
+import { SlotAdmin } from '../../../models/admin.model';
+import { MensajeModalComponent } from '../../../shared/components/mensaje-modal/mensaje-modal';
 
 export interface FechaItem {
   label: string;
@@ -12,7 +13,7 @@ export interface FechaItem {
 @Component({
   selector: 'app-seleccion-agenda',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, MensajeModalComponent],
   templateUrl: './seleccion-agenda.html',
 })
 export class SeleccionAgendaComponent {
@@ -27,6 +28,10 @@ export class SeleccionAgendaComponent {
   readonly conflictoBloque = input<string | null>(null);
   readonly validar = output<void>();
   readonly editar = output<void>();
+  readonly anterior = output<void>();
+  readonly siguiente = output<void>();
+
+  protected readonly showConfirmEditar = signal(false);
 
   protected readonly CheckCircleIcon  = CircleCheck;
   protected readonly ClockIcon        = Clock;
@@ -36,23 +41,25 @@ export class SeleccionAgendaComponent {
 
   protected slotClass(s: SlotAdmin): string {
     switch (s.estado) {
-      case 'cerrado':     return 'bg-[#d1d5dc] border-[#99a1af] text-[#6a7282] cursor-not-allowed';
-      case 'ocupado':     return 'bg-[#314158] border-[#1d293d] text-white cursor-not-allowed';
+      case 'cerrado':      return 'bg-[#d1d5dc] border-[#99a1af] text-[#6a7282] cursor-not-allowed opacity-60';
+      case 'ocupado':      return 'bg-[#314158] border-[#1d293d] text-white cursor-not-allowed';
       case 'seleccionado': return 'bg-[#2b7fff] border-[#155dfc] text-white cursor-pointer shadow-md';
-      case 'rango':       return 'bg-[#93c5fd] border-[#3b82f6] text-[#1e3a8a] cursor-pointer';
-      case 'bloqueado':   return 'bg-[#d1d5dc] border-[#99a1af] text-[#6a7282] cursor-not-allowed';
-      default:            return 'bg-white border-[#00c950] text-[#364153] hover:border-[#155dfc] hover:bg-[#eff6ff] cursor-pointer';
+      case 'rango':        return 'bg-[#93c5fd] border-[#3b82f6] text-[#1e3a8a] cursor-pointer';
+      case 'bloqueado':    return 'bg-[#d1d5dc] border-[#99a1af] text-[#6a7282] cursor-not-allowed opacity-60';
+      case 'excepcion':    return 'bg-[#fffbeb] border-dashed border-[#fbbf24] text-[#92400e] cursor-pointer hover:bg-[#fef3c7] hover:border-[#f59e0b]';
+      default:             return 'bg-white border-[#00c950] text-[#364153] hover:border-[#155dfc] hover:bg-[#eff6ff] cursor-pointer';
     }
   }
 
   protected slotLabel(s: SlotAdmin): string {
     switch (s.estado) {
-      case 'cerrado':     return 'Cerrado';
-      case 'ocupado':     return 'Ocupado';
+      case 'cerrado':      return 'Cerrado';
+      case 'ocupado':      return 'Ocupado';
       case 'seleccionado': return '✓ Inicio';
-      case 'rango':       return 'Cont.';
-      case 'bloqueado':   return 'Bloq.';
-      default:            return 'Libre';
+      case 'rango':        return 'Cont.';
+      case 'bloqueado':    return 'Bloq.';
+      case 'excepcion':    return 'Excep.';
+      default:             return 'Libre';
     }
   }
 
@@ -61,6 +68,7 @@ export class SeleccionAgendaComponent {
       case 'seleccionado': return 'white';
       case 'rango':        return '#1e40af';
       case 'ocupado':      return 'white';
+      case 'excepcion':    return '#92400e';
       case 'libre':        return '#00a63e';
       default:             return '#9ca3af';
     }

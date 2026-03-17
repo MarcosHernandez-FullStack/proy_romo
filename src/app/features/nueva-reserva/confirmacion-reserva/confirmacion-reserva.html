@@ -8,13 +8,29 @@
           <lucide-angular [img]="PhoneIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         </div>
         <div>
-          <h2 class="text-white text-[20px] font-bold">Confirmación de Reserva Telefónica</h2>
+          <h2 class="text-white text-[20px] font-bold">Confirmación de Reserva</h2>
           <p class="text-[#dcfce7] text-[13px]">Revise el desglose técnico antes de confirmar</p>
         </div>
       </div>
     </div>
 
     <div class="p-6 flex flex-col gap-5">
+
+      <!-- Banner excepción -->
+      @if (datos().tipoHorario === 'excepcion') {
+        <div class="border border-[#fcd34d] bg-[#fffbeb] rounded-[12px] px-4 py-3 flex items-start gap-3">
+          <div class="size-7 bg-[#fef3c7] border border-[#fcd34d] rounded-[8px] flex items-center justify-center shrink-0 mt-0.5">
+            <lucide-angular [img]="AlertTriangleIcon" class="size-4" color="#b45309" [strokeWidth]="1.5" />
+          </div>
+          <div>
+            <p class="text-[#92400e] text-[13px] font-bold mb-0.5">Horario de Excepción Seleccionado</p>
+            <p class="text-[#92400e] text-[13px]">
+              El horario <strong>{{ datos().horaSlot }}</strong> está marcado como excepción.
+              Este horario normalmente no se trabaja y está disponible únicamente para casos de emergencia.
+            </p>
+          </div>
+        </div>
+      }
 
       <!-- Desglose Técnico -->
       <div class="border border-[#e5e7eb] rounded-[14px] overflow-hidden">
@@ -146,7 +162,7 @@
       <button type="button" (click)="confirmar.emit()"
         class="flex-1 bg-[#00a63e] hover:bg-[#008236] text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer flex items-center justify-center gap-2">
         <lucide-angular [img]="CheckCircleIcon" class="size-4" color="white" [strokeWidth]="1.5" />
-        Confirmar y Crear Servicio
+        Guardar Reserva
       </button>
     </div>
 

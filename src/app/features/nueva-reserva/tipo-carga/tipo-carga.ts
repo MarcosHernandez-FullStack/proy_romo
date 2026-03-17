@@ -15,6 +15,7 @@ export class TipoCargaComponent {
   readonly cantidadVehiculos = input.required<number>();
   readonly tipoCargaChange = output<TipoCarga>();
   readonly cantidadVehiculosChange = output<number>();
+  readonly siguiente = output<void>();
 
   protected readonly TruckIcon = Truck;
   protected readonly LayersIcon = Layers;

@@ -1,6 +1,6 @@
 import { Component, computed, effect, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Phone, Truck, ChevronDown, ChevronUp } from 'lucide-angular';
+import { LucideAngularModule, Check, Truck, ChevronDown, ChevronUp } from 'lucide-angular';
 import { TipoCarga } from '../tipo-carga/tipo-carga';
 
 export interface VehiculoDetalle {
@@ -25,8 +25,9 @@ export class DetallesVehiculoComponent {
   readonly step1Complete     = input.required<boolean>();
   readonly step2Complete     = input.required<boolean>();
   readonly confirmar         = output<VehiculoDetalle[]>();
+  readonly anterior          = output<void>();
 
-  protected readonly PhoneIcon       = Phone;
+  protected readonly CheckIcon       = Check;
   protected readonly TruckIcon       = Truck;
   protected readonly ChevronDownIcon = ChevronDown;
   protected readonly ChevronUpIcon   = ChevronUp;

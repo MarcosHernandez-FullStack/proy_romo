@@ -1,14 +1,17 @@
 <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
 
   <!-- Section header -->
-  <div class="flex items-center gap-3">
-    <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
-      <span class="text-white text-[12px] font-bold">1</span>
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
+        <span class="text-white text-[12px] font-bold">2</span>
+      </div>
+      <div>
+        <h2 class="text-[#101828] text-[18px] font-bold">Cliente y Ruta</h2>
+        <p class="text-[#6a7282] text-[13px]">Seleccione el cliente y defina la ruta del servicio</p>
+      </div>
     </div>
-    <div>
-      <h2 class="text-[#101828] text-[18px] font-bold">Selección de Cliente y Configuración del Servicio</h2>
-      <p class="text-[#6a7282] text-[13px]">Seleccione el cliente y defina la ruta del servicio</p>
-    </div>
+    <span class="text-[#6a7282] text-[12px] font-medium shrink-0">Paso 2 de 4</span>
   </div>
 
   <!-- Cliente selector -->
@@ -91,7 +94,7 @@
     </div>
   </div>
 
-  <!-- Mapa y ruta óptima -->
+  <!-- Mapa + Cards row -->
   <div class="flex flex-col gap-3">
 
     @if (cargando()) {
@@ -102,51 +105,69 @@
       <p class="text-[#e7000b] text-[12px] text-center">{{ error() }}</p>
     }
 
-    <div>
-      <p class="flex items-center gap-1.5 text-[#364153] text-[13px] font-semibold mb-1.5">
-        <lucide-angular [img]="NavigationIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
-        Mapa de Referencia - Visualización de Ruta
-      </p>
-      <div #mapContainer class="rounded-[12px] border border-[#e5e7eb] overflow-hidden" style="height: 260px;"></div>
-    </div>
+    <div class="grid grid-cols-12 gap-4 items-start">
 
-    @if (ruta()) {
+      <!-- Mapa (8/12) -->
+      <div class="col-span-8">
+        <p class="flex items-center gap-1.5 text-[#364153] text-[13px] font-semibold mb-1.5">
+          <lucide-angular [img]="NavigationIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+          Visualización de Ruta
+        </p>
+        <div #mapContainer class="rounded-[12px] border border-[#e5e7eb] overflow-hidden" style="height: 320px;"></div>
+      </div>
 
-      <!-- 3 cards: Distancia, Tiempo, Costo -->
-      <div class="grid grid-cols-3 gap-3">
+      <!-- Cards (4/12) -->
+      <div class="col-span-4 flex flex-col gap-3 pt-[26px]">
 
-        <div class="rounded-[12px] border border-[#8ec5ff] px-4 py-3 flex flex-col gap-1"
-          style="background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 100%)">
-          <div class="flex items-center gap-1.5 mb-0.5">
-            <lucide-angular [img]="NavigationIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
-            <span class="text-[#1447e6] text-[12px] font-semibold">Distancia Total</span>
+        @if (ruta()) {
+
+          <!-- Distancia -->
+          <div class="rounded-[12px] border border-[#8ec5ff] px-4 py-4 flex flex-col gap-1"
+            style="background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 100%)">
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <lucide-angular [img]="NavigationIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+              <span class="text-[#1447e6] text-[12px] font-semibold">Distancia Total</span>
+            </div>
+            <p class="text-[#1c398e] text-[24px] font-bold leading-none">{{ ruta()!.distanciaTexto }}</p>
           </div>
-          <p class="text-[#1c398e] text-[26px] font-bold leading-none">{{ ruta()!.distanciaTexto }}</p>
-        </div>
 
-        <div class="rounded-[12px] border border-[#7bf1a8] px-4 py-3 flex flex-col gap-1"
-          style="background: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 100%)">
-          <div class="flex items-center gap-1.5 mb-0.5">
-            <lucide-angular [img]="ClockIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
-            <span class="text-[#008236] text-[12px] font-semibold">Tiempo Estimado</span>
+          <!-- Tiempo -->
+          <div class="rounded-[12px] border border-[#7bf1a8] px-4 py-4 flex flex-col gap-1"
+            style="background: linear-gradient(160deg, #f0fdf4 0%, #dcfce7 100%)">
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <lucide-angular [img]="ClockIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
+              <span class="text-[#008236] text-[12px] font-semibold">Tiempo Estimado</span>
+            </div>
+            <p class="text-[#0d542b] text-[24px] font-bold leading-none">{{ ruta()!.tiempoTexto }}</p>
           </div>
-          <p class="text-[#0d542b] text-[26px] font-bold leading-none">{{ ruta()!.tiempoTexto }}</p>
-          <p class="text-[#008236] text-[11px]">Tiempo de trayecto estimado</p>
-        </div>
 
-        <div class="rounded-[12px] border border-[#dab2ff] px-4 py-3 flex flex-col gap-1"
-          style="background: linear-gradient(160deg, #faf5ff 0%, #f3e8ff 100%)">
-          <div class="flex items-center gap-1.5 mb-0.5">
-            <lucide-angular [img]="NavigationIcon" class="size-4" color="#8200db" [strokeWidth]="1.5" />
-            <span class="text-[#8200db] text-[12px] font-semibold">Costo Estimado</span>
+          <!-- Costo -->
+          <div class="rounded-[12px] border border-[#dab2ff] px-4 py-4 flex flex-col gap-1"
+            style="background: linear-gradient(160deg, #faf5ff 0%, #f3e8ff 100%)">
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <lucide-angular [img]="DollarSignIcon" class="size-4" color="#8200db" [strokeWidth]="1.5" />
+              <span class="text-[#8200db] text-[12px] font-semibold">Costo Estimado</span>
+            </div>
+            <p class="text-[#59168b] text-[24px] font-bold leading-none">${{ costoEstimado() }}</p>
+            <p class="text-[#8200db] text-[11px]">USD</p>
           </div>
-          <p class="text-[#59168b] text-[26px] font-bold leading-none">${{ costoEstimado() }}</p>
-          <p class="text-[#8200db] text-[11px]">USD</p>
-        </div>
+
+        } @else {
+
+          <div class="flex items-center justify-center rounded-[12px] border border-dashed border-[#d1d5dc] bg-[#f9fafb]" style="height: 320px;">
+            <p class="text-[#9ca3af] text-[13px] text-center px-4 leading-relaxed">
+              Ingrese origen y destino<br>para ver las métricas de ruta
+            </p>
+          </div>
+
+        }
 
       </div>
 
-      <!-- Bloque Operativo Banner -->
+    </div>
+
+    <!-- Bloque Operativo Banner -->
+    @if (ruta()) {
       <div class="rounded-[12px] border border-[#4f39f6] px-5 py-4 flex items-center justify-between gap-4"
         style="background: linear-gradient(135deg, #4f39f6 0%, #9810fa 100%)">
         <div class="flex items-center gap-3">
@@ -159,7 +180,7 @@
               {{ bloquesOperativos()!.calculo }} Bloque{{ bloquesOperativos()!.calculo > 1 ? 's' : '' }} Operativo{{ bloquesOperativos()!.calculo > 1 ? 's' : '' }}
             </p>
             <p class="text-[#c6d2ff] text-[12px] mt-0.5">
-             Tiempo Google Maps ({{ ruta()!.tiempoMin }} min) + Margen de maniobra ({{ bloquesOperativos()!.maniobra }} min) = {{ ruta()!.tiempoMin + bloquesOperativos()!.maniobra }} min
+              Tiempo Google Maps ({{ ruta()!.tiempoMin }} min) + Margen de maniobra ({{ bloquesOperativos()!.maniobra }} min) = {{ ruta()!.tiempoMin + bloquesOperativos()!.maniobra }} min
             </p>
           </div>
         </div>
@@ -171,9 +192,21 @@
           }
         </div>
       </div>
-
     }
 
+  </div>
+
+  <!-- Navigation -->
+  <div class="flex gap-3 pt-4 border-t border-[#e5e7eb]">
+    <button type="button" (click)="anterior.emit()"
+      class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-11 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      Anterior
+    </button>
+    <button type="button" (click)="siguiente.emit()"
+      [disabled]="!clienteId() || !origen() || !destino()"
+      class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer">
+      Siguiente
+    </button>
   </div>
 
 </div>

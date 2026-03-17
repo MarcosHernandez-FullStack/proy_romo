@@ -1,0 +1,182 @@
+<div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
+
+  <!-- Section header -->
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
+        <span class="text-white text-[12px] font-bold">3</span>
+      </div>
+      <div>
+        <h2 class="text-[#101828] text-[18px] font-bold">Fecha y Horario</h2>
+        <p class="text-[#6a7282] text-[13px]">Seleccione el día y el bloque horario disponible</p>
+      </div>
+    </div>
+    <span class="text-[#6a7282] text-[12px] font-medium shrink-0">Paso 3 de 4</span>
+  </div>
+
+  <!-- Capacity banner -->
+  <div class="rounded-[12px] px-5 py-4 flex items-center justify-between"
+    style="background: linear-gradient(135deg, #4f39f6 0%, #9810fa 100%)">
+    <div>
+      <p class="text-[#c6d2ff] text-[12px] font-semibold">Capacidad Requerida</p>
+      <p class="text-white text-[28px] font-bold leading-none">
+        {{ bloques() }} Bloque{{ bloques() !== 1 ? 's' : '' }}
+      </p>
+      <p class="text-[#c6d2ff] text-[11px] mt-1">Por reserva de servicio</p>
+    </div>
+    <div class="size-12 bg-white/20 rounded-[12px] flex items-center justify-center shrink-0">
+      <lucide-angular [img]="ClockIcon" class="size-6" color="white" [strokeWidth]="1.5" />
+    </div>
+  </div>
+
+  <!-- Date selector -->
+  <div class="flex items-center gap-3 flex-wrap">
+    <span class="text-[#364153] text-[13px] font-semibold">Seleccione día:</span>
+    <div class="relative">
+      <button type="button" (click)="dateInput.showPicker()"
+        class="flex items-center gap-2 px-3 py-2 border border-[#e5e7eb] rounded-[8px] bg-white hover:bg-[#f9fafb] text-[#364153] text-[13px] font-medium transition-colors cursor-pointer">
+        <lucide-angular [img]="CalendarIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
+        Seleccionar fecha
+      </button>
+      <input #dateInput type="date"
+        class="sr-only"
+        [value]="toDateString(fechas()[fechaIdx()].date)"
+        [min]="toDateString(fechas()[0].date)"
+        [max]="toDateString(fechas()[fechas().length - 1].date)"
+        (change)="onDateChange(dateInput.value)" />
+    </div>
+  </div>
+
+  <!-- Selected date info bar -->
+  <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-2.5">
+    <span class="text-[#1447e6] text-[13px]">
+      <strong>Día seleccionado:</strong> {{ fechaLabel() }}
+    </span>
+  </div>
+
+  <!-- Legend -->
+  <div class="flex items-center gap-5 flex-wrap">
+    <div class="flex items-center gap-2">
+      <div class="size-5 rounded border-2 border-[#00c950] bg-white"></div>
+      <span class="text-[#364153] text-[12px]">Disponible</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="size-5 rounded border-2 border-dashed border-[#fbbf24] bg-[#fffbeb]"></div>
+      <span class="text-[#364153] text-[12px]">Excepción / Emergencias</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="size-5 rounded border-2 border-[#155dfc] bg-[#2b7fff]"></div>
+      <span class="text-[#364153] text-[12px]">Seleccionado</span>
+    </div>
+  </div>
+
+  <!-- Slot grid header -->
+  <div>
+    <div class="flex items-center gap-2 mb-0.5">
+      <lucide-angular [img]="ClockIcon" class="size-4" color="#00a63e" [strokeWidth]="1.5" />
+      <p class="text-[#101828] text-[15px] font-bold">
+        Horarios para {{ fechas()[fechaIdx()].dia }} de {{ fechas()[fechaIdx()].mes }}
+      </p>
+    </div>
+    <p class="text-[#6a7282] text-[12px]">
+      Seleccione el horario de inicio. Se reservarán {{ bloques() }} bloque(s) consecutivo(s).
+    </p>
+  </div>
+
+  <!-- Slot grid (12 cols) -->
+  <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+    @for (s of slots(); track $index; let i = $index) {
+      <button type="button" (click)="selectSlot.emit(i)"
+        [disabled]="s.estado === 'cerrado' || s.estado === 'ocupado' || s.estado === 'bloqueado'"
+        class="flex flex-col items-center justify-center py-3 px-1 rounded-[10px] border-2 font-semibold transition-colors min-h-[72px]"
+        [class]="slotClass(s)">
+        <lucide-angular [img]="ClockIcon" class="size-4 mb-1" [color]="slotIconColor(s)" [strokeWidth]="1.5" />
+        <span class="text-[13px] font-bold leading-none">{{ s.hora }}</span>
+        <span class="text-[10px] font-normal mt-1 leading-none">{{ slotLabel(s) }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Advertencia conflicto de bloques -->
+  @if (conflictoBloque()) {
+    <div class="border border-[#f97316] bg-[#fff7ed] rounded-[12px] p-4 flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <lucide-angular [img]="TriangleAlertIcon" class="size-4" color="#ea580c" [strokeWidth]="1.5" />
+        <span class="text-[#ea580c] text-[13px] font-bold">Conflicto de Bloques</span>
+      </div>
+      <p class="text-[#9a3412] text-[13px] font-semibold">{{ conflictoBloque() }}</p>
+      <p class="text-[#9a3412] text-[12px]">
+        Este servicio requiere {{ bloques() }} bloques horarios consecutivos. Seleccione otro horario de inicio.
+      </p>
+    </div>
+  }
+
+  <!-- Horario Seleccionado + Verificar -->
+  @if (hasSelectedSlot()) {
+    <div class="border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col gap-4">
+
+      <span class="text-[#101828] text-[15px] font-bold border-b-2 border-[#155dfc] pb-0.5 self-start">
+        Horario Seleccionado
+      </span>
+
+      <div class="flex flex-col gap-1.5">
+        <p class="text-[#364153] text-[13px]">
+          <strong>Inicio:</strong> {{ getSelectedSlotHora() }} ({{ fechas()[fechaIdx()].dia }}/{{ fechas()[fechaIdx()].mes }})
+        </p>
+        <p class="text-[#364153] text-[13px]">
+          <strong>Fin:</strong> {{ getFinHora() }} ({{ fechas()[fechaIdx()].dia }}/{{ fechas()[fechaIdx()].mes }})
+        </p>
+        <p class="text-[#364153] text-[13px]">
+          <strong>Duración:</strong> {{ bloques() }} bloque(s)
+        </p>
+      </div>
+
+      @if (!horarioValidado()) {
+        <button type="button" (click)="validar.emit()"
+          class="w-full bg-[#00a63e] hover:bg-[#008236] text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer flex items-center justify-center gap-2">
+          <lucide-angular [img]="LockIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+          Verificar Disponibilidad
+        </button>
+      } @else {
+        <div class="bg-[#f0fdf4] border border-[#7bf1a8] rounded-[10px] px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <lucide-angular [img]="CheckCircleIcon" class="size-5" color="#008236" [strokeWidth]="1.5" />
+            <span class="text-[#008236] text-[14px] font-bold">Disponibilidad confirmada</span>
+          </div>
+          <button type="button" (click)="showConfirmEditar.set(true)"
+            class="text-[#155dfc] text-[13px] font-semibold underline cursor-pointer">
+            Editar
+          </button>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- Modal confirmación editar -->
+  @if (showConfirmEditar()) {
+    <app-mensaje-modal
+      tipo="advertencia"
+      titulo="Editar Disponibilidad"
+      mensaje="Si editas la disponibilidad, se perderá el horario seleccionado anteriormente."
+      [confirmable]="true"
+      labelCancelar="Cancelar"
+      labelConfirmar="Continuar"
+      (cerrar)="showConfirmEditar.set(false)"
+      (confirmar)="showConfirmEditar.set(false); editar.emit()" />
+  }
+
+  <!-- Navigation -->
+  <div class="flex gap-3 pt-4 border-t border-[#e5e7eb]">
+    <button type="button" (click)="anterior.emit()"
+      class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-11 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      Anterior
+    </button>
+    <button type="button" (click)="siguiente.emit()"
+      [disabled]="!horarioValidado()"
+      class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer">
+      Siguiente
+    </button>
+  </div>
+
+</div>
