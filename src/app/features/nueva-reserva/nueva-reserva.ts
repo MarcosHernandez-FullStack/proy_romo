@@ -109,18 +109,20 @@ export class NuevaReservaComponent implements OnInit {
     return Math.max(25, +(this.distanciaKm() * this.tarifaEfectivaKm()).toFixed(2));
   });
 
-  protected readonly mensajeExcepcion = computed(() =>
-    `Ha seleccionado el horario ${this.horaExcepcionPend()} que está marcado como excepción. ` +
-    `Este horario normalmente no se trabaja y está disponible únicamente para casos de emergencia. ` +
-    `¿Está seguro que desea continuar con esta reserva?`
-  );
+  protected readonly mensajeExcepcion = computed(() => {
+    const horas = this.horaExcepcionPend();
+    const lista = horas.map(h => `• ${h}`).join('\n');
+    return `Los siguientes horarios del bloque seleccionado están marcados como excepción:\n${lista}\n\n` +
+      `Estos horarios normalmente no se trabajan y están disponibles únicamente para casos de emergencia. ` +
+      `¿Está seguro que desea continuar con esta reserva?`;
+  });
 
   protected readonly conflictoBloque    = signal<string | null>(null);
   protected readonly showConfirm        = signal(false);
   protected readonly showSuccess        = signal(false);
   protected readonly servicioCreado     = signal('');
   protected readonly confirmExcepcion   = signal(false);
-  protected readonly horaExcepcionPend  = signal('');
+  protected readonly horaExcepcionPend  = signal<string[]>([]);
 
   // Wizard state
   protected readonly currentStep = signal(0);
@@ -149,7 +151,10 @@ export class NuevaReservaComponent implements OnInit {
     bloques: this.bloques(),
     costoTotal:   this.costoTotal(),
     tarifaKm:     this.tarifaEfectivaKm(),
-    tipoHorario:  this.tipoHorarioSel(),
+    tipoHorario:    this.tipoHorarioSel(),
+    horasExcepcion: this.slots()
+      .filter(s => (s.estado === 'seleccionado' || s.estado === 'rango') && s.estadoOriginal === 'excepcion')
+      .map(s => s.hora),
   }));
 
   protected onTarifaChange(data: { tarifaKm: number; tarifaBase: number } | null): void {
@@ -163,8 +168,10 @@ export class NuevaReservaComponent implements OnInit {
   protected onValidarHorario(): void {
     // Para slots de excepción, pedir confirmación antes de validar
     if (this.tipoHorarioSel() === 'excepcion') {
-      const slotSel = this.slots().find(s => s.estado === 'seleccionado');
-      this.horaExcepcionPend.set(slotSel?.hora ?? '');
+      const excepcionHoras = this.slots()
+        .filter(s => (s.estado === 'seleccionado' || s.estado === 'rango') && s.estadoOriginal === 'excepcion')
+        .map(s => s.hora);
+      this.horaExcepcionPend.set(excepcionHoras);
       this.confirmExcepcion.set(true);
       return;
     }

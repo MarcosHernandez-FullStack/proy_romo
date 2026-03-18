@@ -33,8 +33,9 @@
   <div class="flex items-center gap-3 flex-wrap">
     <span class="text-[#364153] text-[13px] font-semibold">Seleccione día:</span>
     <div class="relative">
-      <button type="button" (click)="dateInput.showPicker()"
-        class="flex items-center gap-2 px-3 py-2 border border-[#e5e7eb] rounded-[8px] bg-white hover:bg-[#f9fafb] text-[#364153] text-[13px] font-medium transition-colors cursor-pointer">
+      <button type="button" (click)="!horarioValidado() && dateInput.showPicker()"
+        [disabled]="horarioValidado()"
+        class="flex items-center gap-2 px-3 py-2 border border-[#e5e7eb] rounded-[8px] bg-white hover:bg-[#f9fafb] disabled:opacity-40 disabled:cursor-not-allowed text-[#364153] text-[13px] font-medium transition-colors cursor-pointer">
         <lucide-angular [img]="CalendarIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
         Seleccionar fecha
       </button>
@@ -87,7 +88,7 @@
   <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
     @for (s of slots(); track $index; let i = $index) {
       <button type="button" (click)="selectSlot.emit(i)"
-        [disabled]="s.estado === 'cerrado' || s.estado === 'ocupado' || s.estado === 'bloqueado'"
+        [disabled]="horarioValidado() || s.estado === 'cerrado' || s.estado === 'ocupado' || s.estado === 'bloqueado'"
         class="flex flex-col items-center justify-center py-3 px-1 rounded-[10px] border-2 font-semibold transition-colors min-h-[72px]"
         [class]="slotClass(s)">
         <lucide-angular [img]="ClockIcon" class="size-4 mb-1" [color]="slotIconColor(s)" [strokeWidth]="1.5" />
@@ -169,7 +170,8 @@
   <!-- Navigation -->
   <div class="flex gap-3 pt-4 border-t border-[#e5e7eb]">
     <button type="button" (click)="anterior.emit()"
-      class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-11 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      [disabled]="horarioValidado()"
+      class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-11 hover:bg-[#f9fafb] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer">
       Anterior
     </button>
     <button type="button" (click)="siguiente.emit()"

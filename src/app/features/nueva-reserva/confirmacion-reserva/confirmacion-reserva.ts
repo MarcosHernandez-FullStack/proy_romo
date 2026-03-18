@@ -21,7 +21,8 @@ export interface DatosReserva {
   bloques:       number;
   costoTotal:    number;
   tarifaKm:      number;
-  tipoHorario:   string;
+  tipoHorario:    string;
+  horasExcepcion: string[];
 }
 
 @Component({

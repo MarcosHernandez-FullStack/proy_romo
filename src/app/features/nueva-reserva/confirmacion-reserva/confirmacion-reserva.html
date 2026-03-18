@@ -25,8 +25,9 @@
           <div>
             <p class="text-[#92400e] text-[13px] font-bold mb-0.5">Horario de Excepción Seleccionado</p>
             <p class="text-[#92400e] text-[13px]">
-              El horario <strong>{{ datos().horaSlot }}</strong> está marcado como excepción.
-              Este horario normalmente no se trabaja y está disponible únicamente para casos de emergencia.
+              Los siguientes horarios del bloque seleccionado están marcados como excepción:
+              <strong>{{ datos().horasExcepcion.join(', ') }}</strong>.
+              Estos horarios normalmente no se trabajan y están disponibles únicamente para casos de emergencia.
             </p>
           </div>
         </div>
