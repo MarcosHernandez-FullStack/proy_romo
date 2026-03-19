@@ -439,6 +439,15 @@ export class NuevaReservaComponent implements OnInit {
 
   // Wizard navigation
   protected goNext(): void {
+    // Al pasar de Cliente y Ruta → Fecha y Horario, reiniciar agenda
+    if (this.currentStep() === 1) {
+      this.fechaIdx.set(0);
+      this.horarioValidado.set(false);
+      this.tipoHorarioSel.set('disponible');
+      this.modal.set(null);
+      this.conflictoBloque.set(null);
+      this.cargarHorarios(this.fechas()[0].date, this.capacidadEfectiva());
+    }
     this.currentStep.update(s => Math.min(s + 1, 3));
   }
 
