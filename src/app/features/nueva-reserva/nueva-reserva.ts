@@ -2,6 +2,7 @@ import { Component, OnInit, computed, effect, inject, signal } from '@angular/co
 import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule, Phone } from 'lucide-angular';
 import { AdminService } from '../../core/services/admin.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ClienteB2B, SlotAdmin } from '../../models/admin.model';
 import { TipoCargaComponent, TipoCarga } from './tipo-carga/tipo-carga';
 import { SeleccionClienteComponent } from './seleccion-cliente/seleccion-cliente';
@@ -30,11 +31,17 @@ const API = 'http://localhost:5016/api';
 })
 export class NuevaReservaComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
+  private readonly authSvc  = inject(AuthService);
   private readonly http     = inject(HttpClient);
+
+  /** Sesión activa: cliente vía AuthService, admin vía AdminService */
+  private readonly activeSession = () => this.authSvc.session() ?? this.adminSvc.session();
 
   protected readonly PhoneIcon = Phone;
 
   protected readonly clientes = signal<ClienteB2B[]>([]);
+
+  protected readonly modoCliente = computed(() => this.activeSession()?.rol === 'CLIENTE');
 
   protected readonly tipoCarga = signal<TipoCarga>('estandar');
   protected readonly cantidadVehiculos = signal(2);
@@ -132,7 +139,8 @@ export class NuevaReservaComponent implements OnInit {
   protected readonly tipoHorarioSel = signal<string>('disponible');
 
   protected readonly datosReserva = computed<DatosReserva>(() => ({
-    cliente: this.clienteSeleccionado()?.empresa ?? '',
+    cliente: this.clienteSeleccionado()?.empresa
+      ?? (this.modoCliente() ? (this.activeSession()?.empresa ?? '') : ''),
     origen: this.origen(),
     destino: this.destino(),
     fechaLabel: this.fechaLabel(),
@@ -184,7 +192,7 @@ export class NuevaReservaComponent implements OnInit {
   }
 
   private ejecutarValidacion(): void {
-    const session   = this.adminSvc.session();
+    const session   = this.activeSession();
     const tarifa    = this.tarifaData();
     const parametro = this.parametroData();
     const slotSel   = this.slots().find(s => s.estado === 'seleccionado');
@@ -209,7 +217,7 @@ export class NuevaReservaComponent implements OnInit {
       horaFin,
       cantidadCarga:        this.capacidadEfectiva(),
       rol:                  session.rol,
-      idCliente:            parseInt(this.clienteId()),
+      idCliente:            session.idCliente ?? parseInt(this.clienteId()),
       idOperador:           null as number | null,
       direccionOrigen:      this.origen(),
       coordLatOrigen:       this.coordLatOrigen(),
@@ -226,7 +234,7 @@ export class NuevaReservaComponent implements OnInit {
       costoBase:            tarifa.tarifaBase,
       timerExpiracion,
       creadoPor:            session.id,
-      tipoHorario:          this.tipoHorarioSel(),
+      tipoHorario:          this.tipoHorarioSel().toUpperCase(),
       estadoOperacion:      'RESERVADO',
       estadoAdministrativo: 'PENDIENTE',
       estado:               'ACTIVO',
@@ -259,7 +267,7 @@ export class NuevaReservaComponent implements OnInit {
   }
 
   private cargarHorarios(fecha: Date, capacidad: number): void {
-    const rol = this.adminSvc.session()?.rol ?? 'ADMINISTRADOR';
+    const rol = this.activeSession()?.rol ?? 'ADMINISTRADOR';
     this.adminSvc.getHorarios(fecha, rol, capacidad).subscribe({
       next: (horas) => this.slots.set(
         (horas ?? []).map(h => {
@@ -289,7 +297,12 @@ export class NuevaReservaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    const session = this.activeSession();
+    if (session?.rol === 'CLIENTE' && session.idCliente) {
+      this.clienteId.set(String(session.idCliente));
+    } else {
+      this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    }
   }
 
   protected onRutaChange(data: { distanciaKm: number; tiempoMin: number; coordLatOrigen: string; coordLonOrigen: string; coordLatDestino: string; coordLonDestino: string } | null): void {
@@ -383,7 +396,7 @@ export class NuevaReservaComponent implements OnInit {
   }
 
   protected onConfirmarReserva(): void {
-    const session  = this.adminSvc.session();
+    const session  = this.activeSession();
     const timerId  = this.idTimerReserva();
     if (!session || !timerId) return;
 
@@ -409,15 +422,15 @@ export class NuevaReservaComponent implements OnInit {
           this.servicioCreado.set(`SRV-${result.id ?? ''}`);
           this.showSuccess.set(true);
         } else {
-          this.modal.set({ tipo: 'error', titulo: 'Error al confirmar', mensaje: result.mensaje });
+          this.modal.set({ tipo: 'error', titulo: 'Error al Guardar Reserva', mensaje: result.mensaje });
         }
       },
       error: err => {
         const msg = err.error;
         this.modal.set({
           tipo: 'error',
-          titulo: 'Error al confirmar',
-          mensaje: typeof msg === 'string' ? msg : 'Ocurrió un error inesperado al crear la reserva.',
+          titulo: 'Error al Guardar Reserva',
+          mensaje: typeof msg === 'string' ? msg : 'Ocurrió un error inesperado al guardar la reserva.',
         });
       },
     });

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Building2, MapPin, Navigation, Clock, DollarSign } from 'lucide-angular';
 import { ClienteB2B } from '../../../models/admin.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 declare var google: any;
 
@@ -36,7 +37,8 @@ export class SeleccionClienteComponent implements AfterViewInit {
   @ViewChild('origenInput')   origenInput!:   ElementRef<HTMLInputElement>;
   @ViewChild('destinoInput')  destinoInput!:  ElementRef<HTMLInputElement>;
 
-  private readonly http = inject(HttpClient);
+  private readonly http     = inject(HttpClient);
+  private readonly authSvc  = inject(AuthService);
 
   constructor() {
     // Auto-calcular ruta
@@ -54,10 +56,11 @@ export class SeleccionClienteComponent implements AfterViewInit {
       }
     });
 
-    // Cargar tarifario global siempre que haya un cliente seleccionado
+    // Cargar tarifario global siempre que haya un cliente seleccionado o sea modo cliente
     effect(() => {
-      const cliente = this.clienteSeleccionado();
-      if (!cliente) return;
+      const cliente    = this.clienteSeleccionado();
+      const modoCliente = this.modoCliente();
+      if (!cliente && !modoCliente) return;
       if (this.tarifaGlobal() === null) {
         this.http.get<TarifaGlobal>('http://localhost:5016/api/configuracion/tarifario-global')
           .subscribe({ next: t => this.tarifaGlobal.set(t) });
@@ -75,10 +78,11 @@ export class SeleccionClienteComponent implements AfterViewInit {
       .subscribe({ next: p => { this.parametroOperativo.set(p); this.parametroChange.emit(p); } });
   }
 
-  readonly clientes  = input.required<ClienteB2B[]>();
-  readonly clienteId = input.required<string>();
-  readonly origen    = input.required<string>();
-  readonly destino   = input.required<string>();
+  readonly modoCliente = input(false);
+  readonly clientes    = input.required<ClienteB2B[]>();
+  readonly clienteId   = input.required<string>();
+  readonly origen      = input.required<string>();
+  readonly destino     = input.required<string>();
 
   readonly clienteIdChange  = output<string>();
   readonly origenChange     = output<string>();
@@ -115,6 +119,24 @@ export class SeleccionClienteComponent implements AfterViewInit {
 
   /** Tarifa efectiva: respeta la selección manual del usuario, si no auto-elige */
   protected readonly tarifaEfectiva = computed(() => {
+    if (this.modoCliente()) {
+      const session   = this.authSvc.session();
+      const tarifaKm  = session?.tarifaKm  ?? 0;
+      const tarifaBase = session?.tarifaBase ?? 0;
+      const suma = tarifaKm + tarifaBase;
+      if (suma > 0) {
+        return { valor: suma, tipo: 'personalizada' as const, tarifaKm, tarifaBase };
+      }
+      const global = this.tarifaGlobal();
+      if (!global) return null;
+      return {
+        valor:     (global.tarifaKm ?? 0) + (global.tarifaBase ?? 0),
+        tipo:      'global' as const,
+        tarifaKm:  global.tarifaKm  ?? 0,
+        tarifaBase: global.tarifaBase ?? 0,
+      };
+    }
+
     const cliente = this.clienteSeleccionado();
     if (!cliente) return null;
 

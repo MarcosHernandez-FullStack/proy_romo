@@ -6,6 +6,7 @@ import {
   ClipboardList,
   LayoutList,
   LogOut,
+  Phone,
 } from 'lucide-angular';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -22,7 +23,8 @@ export class SidebarComponent {
   protected readonly LogOutIcon = LogOut;
 
   protected readonly navItems = [
-    { label: 'Reservas', path: '/reservas', icon: ClipboardList },
+    { label: 'Nueva Reserva', path: '/nueva-reserva', icon: Phone },
+    //{ label: 'Reservas',      path: '/reservas',      icon: ClipboardList },
     { label: 'Mis Servicios', path: '/mis-servicios', icon: LayoutList },
   ];
 }

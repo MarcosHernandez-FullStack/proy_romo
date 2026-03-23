@@ -26,6 +26,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/cliente/mis-servicios/mis-servicios').then((m) => m.MisServiciosComponent),
       },
+      {
+        path: 'nueva-reserva',
+        loadComponent: () =>
+          import('./features/nueva-reserva/nueva-reserva').then((m) => m.NuevaReservaComponent),
+      },
       { path: '', redirectTo: 'reservas', pathMatch: 'full' },
     ],
   },

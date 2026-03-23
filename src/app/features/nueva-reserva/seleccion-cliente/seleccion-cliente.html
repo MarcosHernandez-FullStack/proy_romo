@@ -14,63 +14,65 @@
     <span class="text-[#6a7282] text-[12px] font-medium shrink-0">Paso 2 de 4</span>
   </div>
 
-  <!-- Cliente selector -->
-  <div>
-    <label class="flex items-center gap-1.5 text-[#364153] text-[13px] font-semibold mb-1.5">
-      <lucide-angular [img]="Building2Icon" class="size-4" color="#364153" [strokeWidth]="1.5" />
-      Seleccionar Cliente B2B *
-    </label>
-    <select [ngModel]="clienteId()" (ngModelChange)="clienteIdChange.emit($event)" name="clienteId"
-      class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
-      <option value="">Seleccionar cliente...</option>
-      @for (c of clientes(); track c.id) {
-        @if (c.activo) {
-          <option [value]="c.id">{{ c.id }} - {{ c.empresa }} (Tarifa personalizada: ${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
+  <!-- Cliente selector (solo ADMINISTRADOR) -->
+  @if (!modoCliente()) {
+    <div>
+      <label class="flex items-center gap-1.5 text-[#364153] text-[13px] font-semibold mb-1.5">
+        <lucide-angular [img]="Building2Icon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+        Seleccionar Cliente B2B *
+      </label>
+      <select [ngModel]="clienteId()" (ngModelChange)="clienteIdChange.emit($event)" name="clienteId"
+        class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
+        <option value="">Seleccionar cliente...</option>
+        @for (c of clientes(); track c.id) {
+          @if (c.activo) {
+            <option [value]="c.id">{{ c.id }} - {{ c.empresa }} (Tarifa personalizada: ${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
+          }
         }
-      }
-    </select>
-    @if (clienteSeleccionado()) {
-      <div class="mt-2 bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-2.5 flex items-center gap-4">
-        <div class="flex items-center gap-1.5">
-          <lucide-angular [img]="Building2Icon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
-          <span class="text-[#364153] text-[13px]">Empresa: <strong class="text-[#101828]">{{ clienteSeleccionado()!.empresa }}</strong></span>
-        </div>
-        <div class="w-px h-4 bg-[#bedbff]"></div>
-        @if (clienteTienePersonalizada() && tarifaGlobal()) {
-          <div class="flex items-center gap-2">
-            <lucide-angular [img]="DollarSignIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
-            <span class="text-[#364153] text-[13px]">Tarifa:</span>
-            <button
-              (click)="seleccionarTarifa('personalizada')"
-              [class]="tarifaEfectiva()?.tipo === 'personalizada'
-                ? 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-[#155dfc] text-white border border-[#155dfc] transition-colors'
-                : 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-white text-[#364153] border border-[#d1d5dc] hover:border-[#155dfc] transition-colors'">
-              Personalizada
-            </button>
-            <button
-              (click)="seleccionarTarifa('global')"
-              [class]="tarifaEfectiva()?.tipo === 'global'
-                ? 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-[#155dfc] text-white border border-[#155dfc] transition-colors'
-                : 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-white text-[#364153] border border-[#d1d5dc] hover:border-[#155dfc] transition-colors'">
-              Global
-            </button>
-            @if (tarifaEfectiva()) {
-              <span class="text-[#364153] text-[13px]">
-                = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
-              </span>
-            }
+      </select>
+      @if (clienteSeleccionado()) {
+        <div class="mt-2 bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-2.5 flex items-center gap-4">
+          <div class="flex items-center gap-1.5">
+            <lucide-angular [img]="Building2Icon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
+            <span class="text-[#364153] text-[13px]">Empresa: <strong class="text-[#101828]">{{ clienteSeleccionado()!.empresa }}</strong></span>
           </div>
-        } @else if (tarifaEfectiva()) {
-          <span class="text-[#364153] text-[13px]">
-            Tarifa <span class="font-semibold text-[#6a7282]">({{ tarifaEfectiva()!.tipo }})</span>
-            = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
-          </span>
-        } @else {
-          <span class="text-[#6a7282] text-[13px] italic">Cargando tarifa...</span>
-        }
-      </div>
-    }
-  </div>
+          <div class="w-px h-4 bg-[#bedbff]"></div>
+          @if (clienteTienePersonalizada() && tarifaGlobal()) {
+            <div class="flex items-center gap-2">
+              <lucide-angular [img]="DollarSignIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
+              <span class="text-[#364153] text-[13px]">Tarifa:</span>
+              <button
+                (click)="seleccionarTarifa('personalizada')"
+                [class]="tarifaEfectiva()?.tipo === 'personalizada'
+                  ? 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-[#155dfc] text-white border border-[#155dfc] transition-colors'
+                  : 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-white text-[#364153] border border-[#d1d5dc] hover:border-[#155dfc] transition-colors'">
+                Personalizada
+              </button>
+              <button
+                (click)="seleccionarTarifa('global')"
+                [class]="tarifaEfectiva()?.tipo === 'global'
+                  ? 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-[#155dfc] text-white border border-[#155dfc] transition-colors'
+                  : 'px-2.5 py-1 rounded-[7px] text-[12px] font-semibold bg-white text-[#364153] border border-[#d1d5dc] hover:border-[#155dfc] transition-colors'">
+                Global
+              </button>
+              @if (tarifaEfectiva()) {
+                <span class="text-[#364153] text-[13px]">
+                  = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
+                </span>
+              }
+            </div>
+          } @else if (tarifaEfectiva()) {
+            <span class="text-[#364153] text-[13px]">
+              Tarifa <span class="font-semibold text-[#6a7282]">({{ tarifaEfectiva()!.tipo }})</span>
+              = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
+            </span>
+          } @else {
+            <span class="text-[#6a7282] text-[13px] italic">Cargando tarifa...</span>
+          }
+        </div>
+      }
+    </div>
+  }
 
   <!-- Origen / Destino -->
   <div class="grid grid-cols-2 gap-4">
@@ -203,7 +205,7 @@
       Anterior
     </button>
     <button type="button" (click)="siguiente.emit()"
-      [disabled]="!clienteId() || !origen() || !destino()"
+      [disabled]="(!modoCliente() && !clienteId()) || !ruta()"
       class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer">
       Siguiente
     </button>

@@ -12,4 +12,8 @@ export interface LoginResponse {
   correo: string;
   telefono: string | null;
   rol: string;
+  idCliente?:  number;
+  tarifaKm?:   number;
+  tarifaBase?: number;
+  empresa?:    string;
 }
