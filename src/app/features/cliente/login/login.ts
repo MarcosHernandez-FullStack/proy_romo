@@ -38,7 +38,7 @@ export class LoginComponent {
           this.error.set('Acceso solo para clientes.');
           return;
         }
-        this.router.navigate(['/reservas']);
+        this.router.navigate(['/nueva-reserva']);
       },
       error: () => {
         this.loading.set(false);
