@@ -241,7 +241,7 @@ export class NuevaReservaComponent implements OnInit {
       fechaCreacion:        new Date().toISOString(),
     };
 
-    this.http.post<{ exitoso: number; mensaje: string; id: number | null }>(
+    this.http.post<{ exitoso: number; mensaje: string; horasConflicto: string | null; id: number | null }>(
       `${API}/reservas/validar-horario`,
       dto
     ).subscribe({
@@ -251,17 +251,20 @@ export class NuevaReservaComponent implements OnInit {
           this.idTimerReserva.set(result.id);
           this.horarioValidado.set(true);
         } else {
-          this.modal.set({ tipo: 'error', titulo: 'Horario no disponible', mensaje: result.mensaje });
+          const mensaje = result.horasConflicto
+            ? `${result.mensaje}\n\nHoras sin disponibilidad: ${result.horasConflicto}`
+            : result.mensaje;
+          this.modal.set({ tipo: 'error', titulo: 'Horario no disponible', mensaje });
         }
       },
       error: err => {
         this.validando.set(false);
-        const msg = err.error;
-        this.modal.set({
-          tipo: 'error',
-          titulo: 'Error al verificar disponibilidad',
-          mensaje: typeof msg === 'string' ? msg : 'Ocurrió un error inesperado al verificar disponibilidad, intente nuevamente.',
-        });
+        const body = err.error;
+        const base = body?.mensaje ?? (typeof body === 'string' ? body : 'Ocurrió un error inesperado al verificar disponibilidad, intente nuevamente.');
+        const mensaje = body?.horasConflicto
+          ? `${base}\n\nHoras sin disponibilidad: ${body.horasConflicto}`
+          : base;
+        this.modal.set({ tipo: 'error', titulo: 'Horario no disponible', mensaje });
       },
     });
   }
