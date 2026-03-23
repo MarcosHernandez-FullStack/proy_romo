@@ -416,7 +416,7 @@ export class NuevaReservaComponent implements OnInit {
       })),
     };
 
-    this.http.post<{ exitoso: number; mensaje: string; id: number | null }>(
+    this.http.post<{ exitoso: number; mensaje: string; horasConflicto: string | null; id: number | null }>(
       `${API}/reservas/crear-reserva`,
       dto
     ).subscribe({
@@ -429,11 +429,13 @@ export class NuevaReservaComponent implements OnInit {
         }
       },
       error: err => {
-        const msg = err.error;
+        const body = err.error;
+        const mensaje = body?.mensaje ?? (typeof body === 'string' ? body : 'Ocurrió un error inesperado al guardar la reserva.');
+        const detalle = body?.horasConflicto ? ` Horas comprometidas: ${body.horasConflicto}.` : '';
         this.modal.set({
           tipo: 'error',
           titulo: 'Error al Guardar Reserva',
-          mensaje: typeof msg === 'string' ? msg : 'Ocurrió un error inesperado al guardar la reserva.',
+          mensaje: mensaje + detalle,
         });
       },
     });

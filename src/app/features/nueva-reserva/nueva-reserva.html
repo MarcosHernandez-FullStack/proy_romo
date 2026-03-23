@@ -6,8 +6,8 @@
       <lucide-angular [img]="PhoneIcon" class="size-6" color="#00a63e" [strokeWidth]="1.5" />
     </div>
     <div>
-      <h1 class="text-[#101828] text-[28px] font-bold leading-tight">Nueva Reserva</h1>
-      <p class="text-[#4a5565] text-[14px] mt-0.5">Sistema de reserva B2B con gestión de agenda en tiempo real</p>
+      <h1 class="text-[#101828] text-[20px] sm:text-[28px] font-bold leading-tight">Nueva Reserva</h1>
+      <p class="text-[#4a5565] text-[13px] sm:text-[14px] mt-0.5">Sistema de reserva B2B con gestión de agenda en tiempo real</p>
     </div>
   </div>
 
@@ -23,7 +23,7 @@
             [class.text-[#9ca3af]]="currentStep() < i">
             {{ i + 1 }}
           </div>
-          <span class="text-[10px] font-semibold whitespace-nowrap transition-colors text-center"
+          <span class="text-[9px] sm:text-[10px] font-semibold whitespace-nowrap transition-colors text-center"
             [class.text-[#155dfc]]="currentStep() === i"
             [class.text-[#101828]]="currentStep() > i"
             [class.text-[#9ca3af]]="currentStep() < i">

@@ -94,7 +94,7 @@
           <lucide-angular [img]="CalendarDaysIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
           <span class="text-[#101828] text-[14px] font-bold">Resumen del Servicio</span>
         </div>
-        <div class="p-4 grid grid-cols-2 gap-4">
+        <div class="p-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wide mb-0.5">Cliente</p>
             <p class="text-[#101828] text-[13px] font-semibold">{{ datos().cliente }}</p>
@@ -149,7 +149,7 @@
             <p class="text-[#b0f7cb] text-[11px]">USD — Dólares</p>
           </div>
         </div>
-        <span class="text-white text-[38px] font-bold">$ {{ datos().costoTotal }}</span>
+        <span class="text-white text-[26px] sm:text-[38px] font-bold">$ {{ datos().costoTotal }}</span>
       </div>
 
     </div>

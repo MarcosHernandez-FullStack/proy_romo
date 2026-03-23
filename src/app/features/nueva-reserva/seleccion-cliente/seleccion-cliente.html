@@ -1,7 +1,7 @@
 <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
 
   <!-- Section header -->
-  <div class="flex items-center justify-between gap-3">
+  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
     <div class="flex items-center gap-3">
       <div class="size-7 bg-[#155dfc] rounded-full flex items-center justify-center shrink-0">
         <span class="text-white text-[12px] font-bold">2</span>
@@ -31,7 +31,7 @@
         }
       </select>
       @if (clienteSeleccionado()) {
-        <div class="mt-2 bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-2.5 flex items-center gap-4">
+        <div class="mt-2 bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-2.5 flex flex-wrap items-center gap-3">
           <div class="flex items-center gap-1.5">
             <lucide-angular [img]="Building2Icon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
             <span class="text-[#364153] text-[13px]">Empresa: <strong class="text-[#101828]">{{ clienteSeleccionado()!.empresa }}</strong></span>
@@ -75,7 +75,7 @@
   }
 
   <!-- Origen / Destino -->
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
     <div>
       <label class="flex items-center gap-1.5 text-[#364153] text-[13px] font-semibold mb-1.5">
         <lucide-angular [img]="MapPinIcon" class="size-4" color="#00a63e" [strokeWidth]="1.5" />
@@ -107,19 +107,19 @@
       <p class="text-[#e7000b] text-[12px] text-center">{{ error() }}</p>
     }
 
-    <div class="grid grid-cols-12 gap-4 items-start">
+    <div class="flex flex-col gap-4 lg:grid lg:grid-cols-12 lg:items-start">
 
       <!-- Mapa (8/12) -->
-      <div class="col-span-8">
+      <div class="lg:col-span-8">
         <p class="flex items-center gap-1.5 text-[#364153] text-[13px] font-semibold mb-1.5">
           <lucide-angular [img]="NavigationIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
           Visualización de Ruta
         </p>
-        <div #mapContainer class="rounded-[12px] border border-[#e5e7eb] overflow-hidden" style="height: 320px;"></div>
+        <div #mapContainer class="rounded-[12px] border border-[#e5e7eb] overflow-hidden h-[220px] sm:h-[280px] lg:h-[320px]"></div>
       </div>
 
       <!-- Cards (4/12) -->
-      <div class="col-span-4 flex flex-col gap-3 pt-[26px]">
+      <div class="lg:col-span-4 flex flex-row flex-wrap lg:flex-col gap-3 pt-0 lg:pt-[26px]">
 
         @if (ruta()) {
 
@@ -156,7 +156,7 @@
 
         } @else {
 
-          <div class="flex items-center justify-center rounded-[12px] border border-dashed border-[#d1d5dc] bg-[#f9fafb]" style="height: 320px;">
+          <div class="flex items-center justify-center rounded-[12px] border border-dashed border-[#d1d5dc] bg-[#f9fafb] h-[220px] sm:h-[280px] lg:h-[320px]">
             <p class="text-[#9ca3af] text-[13px] text-center px-4 leading-relaxed">
               Ingrese origen y destino<br>para ver las métricas de ruta
             </p>
