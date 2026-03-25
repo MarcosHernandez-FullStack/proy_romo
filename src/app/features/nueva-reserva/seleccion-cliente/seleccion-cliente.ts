@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Building2, MapPin, Navigation, Clock, DollarSign } from 'lucide-angular';
 import { ClienteB2B } from '../../../models/admin.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 declare var google: any;
 
@@ -62,7 +63,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
       const modoCliente = this.modoCliente();
       if (!cliente && !modoCliente) return;
       if (this.tarifaGlobal() === null) {
-        this.http.get<TarifaGlobal>('http://localhost:5016/api/configuracion/tarifario-global')
+        this.http.get<TarifaGlobal>(`${environment.apiUrl}/configuracion/tarifario-global`)
           .subscribe({ next: t => this.tarifaGlobal.set(t) });
       }
     });
@@ -74,7 +75,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
     });
 
     // Cargar parámetro operativo al inicializar
-    this.http.get<ParametroOperativo>('http://localhost:5016/api/configuracion/parametro-operativo')
+    this.http.get<ParametroOperativo>(`${environment.apiUrl}/configuracion/parametro-operativo`)
       .subscribe({ next: p => { this.parametroOperativo.set(p); this.parametroChange.emit(p); } });
   }
 

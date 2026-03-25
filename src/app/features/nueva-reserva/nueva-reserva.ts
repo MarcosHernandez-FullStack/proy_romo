@@ -11,8 +11,9 @@ import { DetallesVehiculoComponent, VehiculoDetalle } from './detalles-vehiculo/
 import { ConfirmacionReservaComponent, DatosReserva } from './confirmacion-reserva/confirmacion-reserva';
 import { ReservaExitosaComponent } from './reserva-exitosa/reserva-exitosa';
 import { MensajeModalComponent, MensajeModalTipo } from '../../shared/components/mensaje-modal/mensaje-modal';
+import { environment } from '../../../environments/environment';
 
-const API = 'http://localhost:5016/api';
+const API = environment.apiUrl;
 
 @Component({
   selector: 'app-nueva-reserva',

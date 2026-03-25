@@ -3,8 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { LoginRequest, LoginResponse } from '../../models/auth.model';
+import { environment } from '../../../environments/environment';
 
-const API = 'http://localhost:5016/api';
+const API = environment.apiUrl;
 const STORAGE_KEY = 'crane_user';
 
 @Injectable({ providedIn: 'root' })
@@ -42,7 +43,13 @@ export class AuthService {
   private loadSession(): LoginResponse | null {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
+      if (!stored) return null;
+      const session: LoginResponse = JSON.parse(stored);
+      if (session.expiresAt && new Date(session.expiresAt) <= new Date()) {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return session;
     } catch {
       return null;
     }
