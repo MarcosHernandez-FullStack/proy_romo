@@ -115,6 +115,19 @@ export interface ParametrosOperativos {
   tiempoRetornoBaseMin: number;
 }
 
+export interface ReservaOperacion {
+  id:               number;
+  direccionOrigen:  string;
+  direccionDestino: string;
+  cantidadCarga:    number;
+  fechaServicio:    string;
+  horaInicio:       string;
+  horaFin:          string;
+  nroBloques:       number;
+  estadoOperacion:  string;
+  estado:           string;
+}
+
 export interface ServicioReporte extends ServicioAdmin {
   estadoAdministrativo: EstadoAdminServicio;
   fechaCompleta: string;

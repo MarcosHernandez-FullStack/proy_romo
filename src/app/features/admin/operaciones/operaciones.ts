@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import {
   LucideAngularModule,
   AlertTriangle,
@@ -10,19 +11,24 @@ import {
   Calendar,
   MapPin,
   Clock,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
 } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
-import { EstadoServicioAdmin, Operador, ServicioAdmin } from '../../../models/admin.model';
-import { AsignarServicioComponent, AsignacionData } from './asignar-servicio/asignar-servicio';
+import { ReservaOperacion } from '../../../models/admin.model';
+import { AsignarServicioComponent } from './asignar-servicio/asignar-servicio';
 import { CancelarServicioComponent } from './cancelar-servicio/cancelar-servicio';
 import { ReprogramarServicioComponent } from './reprogramar-servicio/reprogramar-servicio';
 
-type FiltroTab = 'Reservado' | 'Asignado' | 'En Curso';
+type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO';
 
 @Component({
   selector: 'app-operaciones',
   standalone: true,
   imports: [
+    FormsModule,
     LucideAngularModule,
     AsignarServicioComponent,
     CancelarServicioComponent,
@@ -33,81 +39,147 @@ type FiltroTab = 'Reservado' | 'Asignado' | 'En Curso';
 export class OperacionesComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
-  protected readonly AlertTriangleIcon = AlertTriangle;
-  protected readonly CheckCircle2Icon = CheckCircle2;
-  protected readonly TruckIcon = Truck;
-  protected readonly UsersIcon = Users;
-  protected readonly PencilIcon = Pencil;
-  protected readonly XCircleIcon = XCircle;
-  protected readonly CalendarIcon = Calendar;
-  protected readonly MapPinIcon = MapPin;
-  protected readonly ClockIcon = Clock;
+  protected readonly AlertTriangleIcon  = AlertTriangle;
+  protected readonly CheckCircle2Icon   = CheckCircle2;
+  protected readonly TruckIcon          = Truck;
+  protected readonly UsersIcon          = Users;
+  protected readonly PencilIcon         = Pencil;
+  protected readonly XCircleIcon        = XCircle;
+  protected readonly CalendarIcon       = Calendar;
+  protected readonly MapPinIcon         = MapPin;
+  protected readonly ClockIcon          = Clock;
+  protected readonly SearchIcon         = Search;
+  protected readonly ChevronLeftIcon    = ChevronLeft;
+  protected readonly ChevronRightIcon   = ChevronRight;
+  protected readonly RotateCcwIcon      = RotateCcw;
 
-  protected readonly servicios = signal<ServicioAdmin[]>([]);
-  protected readonly operadores = signal<Operador[]>([]);
-  protected readonly filtroTab = signal<FiltroTab>('Reservado');
-  protected readonly filtroTabs: FiltroTab[] = ['Reservado', 'Asignado', 'En Curso'];
+  readonly ITEMS_POR_PAGINA = 10;
+
+  protected readonly reservas      = signal<ReservaOperacion[]>([]);
+  protected readonly cargando      = signal(false);
+  protected readonly filtroTab     = signal<FiltroTab>('RESERVADO');
+  protected readonly busquedaId    = signal('');
+  protected readonly paginaActual  = signal(1);
+
+  protected readonly filtroTabs: FiltroTab[] = ['RESERVADO', 'ASIGNADO', 'EN_CURSO'];
+  protected readonly tabLabel: Record<FiltroTab, string> = {
+    RESERVADO: 'Reservado',
+    ASIGNADO:  'Asignado',
+    EN_CURSO:  'En Curso',
+  };
 
   // Modal state
-  protected readonly showAsignar = signal(false);
-  protected readonly servicioAsignar = signal<ServicioAdmin | null>(null);
-  protected readonly showCancelar = signal(false);
-  protected readonly servicioCancelar = signal<ServicioAdmin | null>(null);
-  protected readonly showReprogramar = signal(false);
-  protected readonly servicioReprogramar = signal<ServicioAdmin | null>(null);
+  protected readonly showAsignar        = signal(false);
+  protected readonly reservaAsignar     = signal<ReservaOperacion | null>(null);
+  protected readonly showCancelar       = signal(false);
+  protected readonly reservaCancelar    = signal<ReservaOperacion | null>(null);
+  protected readonly showReprogramar    = signal(false);
+  protected readonly reservaReprogramar = signal<ReservaOperacion | null>(null);
 
-  protected readonly serviciosFiltrados = computed(() =>
-    this.servicios().filter((s) => s.estado === this.filtroTab())
+  // KPIs
+  protected readonly countPendiente = computed(() => this.reservas().filter(r => r.estadoOperacion === 'RESERVADO').length);
+  protected readonly countAsignado  = computed(() => this.reservas().filter(r => r.estadoOperacion === 'ASIGNADO').length);
+  protected readonly countEnCurso   = computed(() => this.reservas().filter(r => r.estadoOperacion === 'EN_CURSO').length);
+
+  // Filtrado + paginación
+  protected readonly reservasFiltradas = computed(() => {
+    const busq = this.busquedaId().trim();
+    return this.reservas().filter(r =>
+      r.estadoOperacion === this.filtroTab() &&
+      (!busq || String(r.id).includes(busq))
+    );
+  });
+
+  protected readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.reservasFiltradas().length / this.ITEMS_POR_PAGINA))
   );
 
-  protected readonly countReservado = computed(() => this.servicios().filter((s) => s.estado === 'Reservado').length);
-  protected readonly countAsignado = computed(() => this.servicios().filter((s) => s.estado === 'Asignado').length);
-  protected readonly countEnCurso = computed(() => this.servicios().filter((s) => s.estado === 'En Curso').length);
-  protected readonly operadoresDisponibles = computed(() => this.operadores().filter((o) => o.activo).length);
+  protected readonly reservasPaginadas = computed(() => {
+    const inicio = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA;
+    return this.reservasFiltradas().slice(inicio, inicio + this.ITEMS_POR_PAGINA);
+  });
+
+  protected readonly paginas = computed(() => {
+    const total  = this.totalPaginas();
+    const actual = this.paginaActual();
+    const inicio = Math.max(1, actual - 2);
+    const fin    = Math.min(total, actual + 2);
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  });
 
   ngOnInit(): void {
-    this.adminSvc.getOperaciones().subscribe((data) => this.servicios.set(data));
-    this.adminSvc.getOperadores().subscribe((data) => this.operadores.set(data));
+    this.cargar();
   }
 
-  protected abrirAsignar(s: ServicioAdmin): void {
-    this.servicioAsignar.set(s);
+  protected cargar(): void {
+    this.cargando.set(true);
+    this.adminSvc.getReservas().subscribe({
+      next: data => { this.reservas.set(data); this.cargando.set(false); },
+      error: ()   => this.cargando.set(false),
+    });
+  }
+
+  protected cambiarTab(tab: FiltroTab): void {
+    this.filtroTab.set(tab);
+    this.paginaActual.set(1);
+  }
+
+  protected setBusqueda(v: string): void {
+    this.busquedaId.set(v);
+    this.paginaActual.set(1);
+  }
+
+  protected cambiarPagina(n: number): void {
+    if (n < 1 || n > this.totalPaginas()) return;
+    this.paginaActual.set(n);
+  }
+
+  protected rangoMostrado(): string {
+    const total = this.reservasFiltradas().length;
+    if (total === 0) return '0';
+    const desde = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA + 1;
+    const hasta = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
+    return `${desde} - ${hasta}`;
+  }
+
+  protected abrirAsignar(r: ReservaOperacion): void {
+    this.reservaAsignar.set(r);
     this.showAsignar.set(true);
   }
 
-  protected onConfirmarAsignacion(data: AsignacionData): void {
-    this.servicios.update((prev) =>
-      prev.map((s) =>
-        s.id === data.servicioId
-          ? { ...s, operador: data.operador, unidad: data.unidad, estado: 'Asignado' as EstadoServicioAdmin }
-          : s
-      )
-    );
-    this.showAsignar.set(false);
-  }
-
-  protected abrirCancelar(s: ServicioAdmin): void {
-    this.servicioCancelar.set(s);
+  protected abrirCancelar(r: ReservaOperacion): void {
+    this.reservaCancelar.set(r);
     this.showCancelar.set(true);
   }
 
-  protected onConfirmarCancelacion(id: string): void {
-    this.servicios.update((prev) => prev.filter((s) => s.id !== id));
-    this.showCancelar.set(false);
-  }
-
-  protected abrirReprogramar(s: ServicioAdmin): void {
-    this.servicioReprogramar.set(s);
+  protected abrirReprogramar(r: ReservaOperacion): void {
+    this.reservaReprogramar.set(r);
     this.showReprogramar.set(true);
   }
 
-  protected estadoBadgeClass(estado: EstadoServicioAdmin): string {
+  protected onConfirmarCancelacion(): void {
+    const id = this.reservaCancelar()?.id;
+    if (id !== undefined)
+      this.reservas.update(prev => prev.filter(r => r.id !== id));
+    this.showCancelar.set(false);
+  }
+
+  protected estadoBadgeClass(estado: string): string {
     switch (estado) {
-      case 'Reservado': return 'bg-[#fffbeb] text-[#bb4d00] border border-[#ffd230]';
-      case 'Asignado': return 'bg-[#eff6ff] text-[#1447e6] border border-[#bedbff]';
-      case 'En Curso': return 'bg-[#fff7ed] text-[#ca3500] border border-[#fdba74]';
-      case 'Finalizado': return 'bg-[#f0fdf4] text-[#008236] border border-[#b9f8cf]';
-      case 'Cancelado': return 'bg-[#fef2f2] text-[#c10007] border border-[#fca5a5]';
+      case 'RESERVADO':  return 'bg-[#fffbeb] text-[#bb4d00] border border-[#ffd230]';
+      case 'ASIGNADO':   return 'bg-[#eff6ff] text-[#1447e6] border border-[#bedbff]';
+      case 'EN_CURSO':   return 'bg-[#fff7ed] text-[#ca3500] border border-[#fdba74]';
+      case 'FINALIZADO': return 'bg-[#f0fdf4] text-[#008236] border border-[#b9f8cf]';
+      case 'CANCELADO':  return 'bg-[#fef2f2] text-[#c10007] border border-[#fca5a5]';
+      default:           return 'bg-[#f9fafb] text-[#6a7282] border border-[#e5e7eb]';
     }
+  }
+
+  protected estadoLabel(estado: string): string {
+    const labels: Record<string, string> = {
+      RESERVADO: 'Reservado', ASIGNADO: 'Asignado', EN_CURSO: 'En Curso',
+      FINALIZADO: 'Finalizado', CANCELADO: 'Cancelado',
+    };
+    return labels[estado] ?? estado;
   }
 }

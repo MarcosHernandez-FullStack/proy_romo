@@ -10,6 +10,7 @@ import {
   HorarioRegular,
   Operador,
   ParametrosOperativos,
+  ReservaOperacion,
   ServicioAdmin,
   ServicioReporte,
   TarifaCliente,
@@ -82,6 +83,12 @@ export class AdminService {
 
   deleteTimer(id: number): Observable<void> {
     return this.http.delete<void>(`${API}/reservas/timer/${id}`);
+  }
+
+  getReservas(): Observable<ReservaOperacion[]> {
+    return this.http.get<ReservaOperacion[]>(`${API}/operaciones`).pipe(
+      map(data => data ?? [])
+    );
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/operaciones')
