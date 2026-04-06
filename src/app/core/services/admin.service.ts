@@ -13,6 +13,7 @@ import {
   ReservaOperacion,
   ServicioAdmin,
   ServicioReporte,
+  Sugerencias,
   TarifaCliente,
   UnidadFlota,
   UsuarioAdmin,
@@ -85,10 +86,22 @@ export class AdminService {
     return this.http.delete<void>(`${API}/reservas/timer/${id}`);
   }
 
-  getReservas(): Observable<ReservaOperacion[]> {
-    return this.http.get<ReservaOperacion[]>(`${API}/operaciones`).pipe(
+  getReservas(fecha?: string): Observable<ReservaOperacion[]> {
+    const params: Record<string, string> = {};
+    if (fecha) params['fechaServicio'] = fecha;
+    return this.http.get<ReservaOperacion[]>(`${API}/operaciones`, { params }).pipe(
       map(data => data ?? [])
     );
+  }
+
+  getSugerencias(idReserva: number): Observable<Sugerencias> {
+    return this.http.get<Sugerencias>(`${API}/operaciones/sugerencias`, {
+      params: { idReserva: String(idReserva) },
+    });
+  }
+
+  asignarServicio(idReserva: number, idGrua: number, idOperador: number): Observable<void> {
+    return this.http.patch<void>(`${API}/operaciones/asignar`, { idReserva, idGrua, idOperador });
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/operaciones')

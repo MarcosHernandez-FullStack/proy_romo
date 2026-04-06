@@ -59,6 +59,7 @@ export class OperacionesComponent implements OnInit {
   protected readonly cargando      = signal(false);
   protected readonly filtroTab     = signal<FiltroTab>('RESERVADO');
   protected readonly busquedaId    = signal('');
+  protected readonly fechaFiltro   = signal('');
   protected readonly paginaActual  = signal(1);
 
   protected readonly filtroTabs: FiltroTab[] = ['RESERVADO', 'ASIGNADO', 'EN_CURSO'];
@@ -113,7 +114,7 @@ export class OperacionesComponent implements OnInit {
 
   protected cargar(): void {
     this.cargando.set(true);
-    this.adminSvc.getReservas().subscribe({
+    this.adminSvc.getReservas(this.fechaFiltro() || undefined).subscribe({
       next: data => { this.reservas.set(data); this.cargando.set(false); },
       error: ()   => this.cargando.set(false),
     });
@@ -127,6 +128,12 @@ export class OperacionesComponent implements OnInit {
   protected setBusqueda(v: string): void {
     this.busquedaId.set(v);
     this.paginaActual.set(1);
+  }
+
+  protected setFechaFiltro(v: string): void {
+    this.fechaFiltro.set(v);
+    this.paginaActual.set(1);
+    this.cargar();
   }
 
   protected cambiarPagina(n: number): void {
@@ -155,6 +162,13 @@ export class OperacionesComponent implements OnInit {
   protected abrirReprogramar(r: ReservaOperacion): void {
     this.reservaReprogramar.set(r);
     this.showReprogramar.set(true);
+  }
+
+  protected onConfirmarAsignacion(idReserva: number): void {
+    this.reservas.update(prev =>
+      prev.map(r => r.id === idReserva ? { ...r, estadoOperacion: 'ASIGNADO' } : r)
+    );
+    this.showAsignar.set(false);
   }
 
   protected onConfirmarCancelacion(): void {

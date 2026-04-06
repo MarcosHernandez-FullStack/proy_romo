@@ -115,6 +115,31 @@ export interface ParametrosOperativos {
   tiempoRetornoBaseMin: number;
 }
 
+export interface GruaSugerida {
+  id:            number;
+  placa:         string;
+  marca:         string;
+  modelo:        string;
+  capacidad:     number;
+  distanciaKm:   number | null;
+  tiempoMin:     number | null;
+  clasificacion: string;
+}
+
+export interface OperadorSugerido {
+  id:            number;
+  nombres:       string;
+  apellidos:     string;
+  distanciaKm:   number | null;
+  tiempoMin:     number | null;
+  clasificacion: string;
+}
+
+export interface Sugerencias {
+  gruas:      GruaSugerida[];
+  operadores: OperadorSugerido[];
+}
+
 export interface ReservaOperacion {
   id:               number;
   direccionOrigen:  string;
@@ -124,6 +149,9 @@ export interface ReservaOperacion {
   horaInicio:       string;
   horaFin:          string;
   nroBloques:       number;
+  distanciaKm:      number;
+  tiempoEstimado:   number;
+  tiempoManiobra:   number;
   estadoOperacion:  string;
   estado:           string;
 }

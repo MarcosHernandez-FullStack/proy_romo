@@ -42,6 +42,11 @@
           placeholder=" Buscar por ID..."
           class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc]" />
       </div>
+      <div class="relative">
+        <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+        <input type="date" [ngModel]="fechaFiltro()" (ngModelChange)="setFechaFiltro($event)" name="fechaFiltro"
+          class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc] cursor-pointer" />
+      </div>
       <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
         @for (tab of filtroTabs; track tab) {
           <button type="button" (click)="cambiarTab(tab)"
@@ -74,10 +79,16 @@
       }
 
       <!-- Sin resultados -->
-      @if (!cargando() && reservasPaginadas().length === 0) {
-        <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
-          <lucide-angular [img]="TruckIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
-          <p class="text-[14px]">No hay reservas con estado "{{ tabLabel[filtroTab()] }}"</p>
+      @if (!cargando() && reservasFiltradas().length === 0) {
+        <div class="py-12 flex flex-col items-center gap-3 text-[#9ca3af]">
+          <lucide-angular [img]="TruckIcon" class="size-10" color="#d1d5dc" [strokeWidth]="1" />
+          <!-- @if (busquedaId().trim() || fechaFiltro()) { -->
+            <p class="text-[14px] font-medium text-[#6a7282]">Sin resultados para los filtros aplicados</p>
+           <!--  <p class="text-[12px]">Intenta con otro ID o fecha</p> -->
+          <!-- } @else {
+            <p class="text-[14px] font-medium text-[#6a7282]">No hay reservas en estado "{{ tabLabel[filtroTab()] }}"</p>
+            <p class="text-[12px]">Las reservas aparecerán aquí cuando estén disponibles</p>
+          } -->
         </div>
       }
 
@@ -171,9 +182,8 @@
 
 @if (showAsignar() && reservaAsignar()) {
   <app-asignar-servicio
-    [servicio]="$any(reservaAsignar())"
-    [operadores]="[]"
-    (confirmar)="showAsignar.set(false)"
+    [reserva]="reservaAsignar()!"
+    (confirmar)="onConfirmarAsignacion($event)"
     (cerrar)="showAsignar.set(false)" />
 }
 
