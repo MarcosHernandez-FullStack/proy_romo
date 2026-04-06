@@ -189,8 +189,8 @@
 
 @if (showCancelar() && reservaCancelar()) {
   <app-cancelar-servicio
-    [servicio]="$any(reservaCancelar())"
-    (confirmar)="onConfirmarCancelacion()"
+    [reserva]="reservaCancelar()!"
+    (confirmar)="onConfirmarCancelacion($event)"
     (cerrar)="showCancelar.set(false)" />
 }
 

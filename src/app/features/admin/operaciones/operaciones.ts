@@ -171,10 +171,8 @@ export class OperacionesComponent implements OnInit {
     this.showAsignar.set(false);
   }
 
-  protected onConfirmarCancelacion(): void {
-    const id = this.reservaCancelar()?.id;
-    if (id !== undefined)
-      this.reservas.update(prev => prev.filter(r => r.id !== id));
+  protected onConfirmarCancelacion(idReserva: number): void {
+    this.reservas.update(prev => prev.filter(r => r.id !== idReserva));
     this.showCancelar.set(false);
   }
 

@@ -104,6 +104,10 @@ export class AdminService {
     return this.http.patch<void>(`${API}/operaciones/asignar`, { idReserva, idGrua, idOperador });
   }
 
+  cancelarReserva(id: number, motivoCancelacion: string): Observable<void> {
+    return this.http.patch<void>(`${API}/operaciones/cancelar`, { id, motivoCancelacion });
+  }
+
   // TODO: reemplazar con this.http.get('/api/admin/operaciones')
   getOperaciones(): Observable<ServicioAdmin[]> {
     return of(SERVICIOS_ADMIN).pipe(delay(300));
