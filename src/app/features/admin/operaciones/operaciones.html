@@ -126,21 +126,25 @@
             {{ estadoLabel(r.estadoOperacion) }}
           </span>
           <div class="flex items-center gap-1">
+            <!-- Asignar: siempre visible; en modo soloDetalle abre solo el detalle -->
             <button type="button" (click)="abrirAsignar(r)"
               class="size-7 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
-              title="Asignar">
+              [title]="soloDetalle(r) ? 'Ver detalle' : 'Asignar'">
               <lucide-angular [img]="PencilIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
             </button>
-            <button type="button" (click)="abrirCancelar(r)"
-              class="size-7 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
-              title="Cancelar">
-              <lucide-angular [img]="XCircleIcon" class="size-3.5" color="#e7000b" [strokeWidth]="1.5" />
-            </button>
-            <button type="button" (click)="abrirReprogramar(r)"
-              class="size-7 flex items-center justify-center rounded-lg hover:bg-[#fffbeb] transition-colors cursor-pointer"
-              title="Reprogramar">
-              <lucide-angular [img]="CalendarIcon" class="size-3.5" color="#e17100" [strokeWidth]="1.5" />
-            </button>
+            <!-- Cancelar: oculto si EN_CURSO o fuera del tiempo de corte -->
+            @if (!soloDetalle(r)) {
+              <button type="button" (click)="abrirCancelar(r)"
+                class="size-7 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+                title="Cancelar">
+                <lucide-angular [img]="XCircleIcon" class="size-3.5" color="#e7000b" [strokeWidth]="1.5" />
+              </button>
+              <button type="button" (click)="abrirReprogramar(r)"
+                class="size-7 flex items-center justify-center rounded-lg hover:bg-[#fffbeb] transition-colors cursor-pointer"
+                title="Reprogramar">
+                <lucide-angular [img]="CalendarIcon" class="size-3.5" color="#e17100" [strokeWidth]="1.5" />
+              </button>
+            }
           </div>
         </div>
       }
@@ -183,6 +187,7 @@
 @if (showAsignar() && reservaAsignar()) {
   <app-asignar-servicio
     [reserva]="reservaAsignar()!"
+    [soloDetalle]="asignarSoloDetalle()"
     (confirmar)="onConfirmarAsignacion($event)"
     (cerrar)="showAsignar.set(false)" />
 }

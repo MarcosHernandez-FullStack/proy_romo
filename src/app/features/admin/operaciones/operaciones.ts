@@ -61,6 +61,7 @@ export class OperacionesComponent implements OnInit {
   protected readonly busquedaId    = signal('');
   protected readonly fechaFiltro   = signal('');
   protected readonly paginaActual  = signal(1);
+  protected readonly tiempoCorte   = signal<number | null>(null);
 
   protected readonly filtroTabs: FiltroTab[] = ['RESERVADO', 'ASIGNADO', 'EN_CURSO'];
   protected readonly tabLabel: Record<FiltroTab, string> = {
@@ -72,6 +73,7 @@ export class OperacionesComponent implements OnInit {
   // Modal state
   protected readonly showAsignar        = signal(false);
   protected readonly reservaAsignar     = signal<ReservaOperacion | null>(null);
+  protected readonly asignarSoloDetalle = signal(false);
   protected readonly showCancelar       = signal(false);
   protected readonly reservaCancelar    = signal<ReservaOperacion | null>(null);
   protected readonly showReprogramar    = signal(false);
@@ -110,6 +112,10 @@ export class OperacionesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
+    this.adminSvc.getParametroOperativo().subscribe({
+      next: p => this.tiempoCorte.set(p.tiempoCorte),
+      error: () => this.tiempoCorte.set(60), // fallback
+    });
   }
 
   protected cargar(): void {
@@ -149,8 +155,35 @@ export class OperacionesComponent implements OnInit {
     return `${desde} - ${hasta}`;
   }
 
+  /**
+   * Determina si solo se puede ver el detalle (sin ejecutar acciones).
+   * - Siempre cuando está EN_CURSO.
+   * - Cuando la fecha del servicio es anterior a hoy.
+   * - Cuando la fecha es hoy pero la horaInicio está a menos de TiempoCorte minutos.
+   */
+  protected soloDetalle(r: ReservaOperacion): boolean {
+    if (r.estadoOperacion === 'EN_CURSO') return true;
+
+    const tc = this.tiempoCorte();
+    if (tc === null) return false; // aún cargando, permitir por defecto
+
+    const fechaStr = r.fechaServicio.includes('T')
+      ? r.fechaServicio.split('T')[0]
+      : r.fechaServicio;
+
+    const [y, m, d]  = fechaStr.split('-').map(Number);
+    const [h, min]   = (r.horaInicio ?? '00:00').split(':').map(Number);
+
+    const servicioDateTime = new Date(y, m - 1, d, h, min, 0, 0);
+    const corteDateTime    = new Date();
+    corteDateTime.setMinutes(corteDateTime.getMinutes() + tc);
+
+    return servicioDateTime < corteDateTime;
+  }
+
   protected abrirAsignar(r: ReservaOperacion): void {
     this.reservaAsignar.set(r);
+    this.asignarSoloDetalle.set(this.soloDetalle(r));
     this.showAsignar.set(true);
   }
 
@@ -177,7 +210,6 @@ export class OperacionesComponent implements OnInit {
   }
 
   protected onConfirmarReprogramacion(idReserva: number): void {
-    // La reserva vuelve a RESERVADO — recargar para reflejar nueva fecha/hora
     this.reservas.update(prev => prev.filter(r => r.id !== idReserva));
     this.showReprogramar.set(false);
     this.cargar();

@@ -176,6 +176,10 @@ export class AdminService {
     return of(PARAMETROS_OPERATIVOS).pipe(delay(200));
   }
 
+  getParametroOperativo(): Observable<{ tiempoCorte: number }> {
+    return this.http.get<{ tiempoCorte: number }>(`${API}/configuracion/parametro-operativo`);
+  }
+
   // TODO: reemplazar con this.http.get('/api/admin/reportes')
   getReportes(): Observable<ServicioReporte[]> {
     return of(SERVICIOS_REPORTE).pipe(delay(300));
@@ -452,6 +456,7 @@ const PARAMETROS_OPERATIVOS: ParametrosOperativos = {
   margenManiobraMin: 30,
   umbralToleranciaMin: 5,
   tiempoRetornoBaseMin: 20,
+  tiempoCorte: 60,
 };
 
 const SERVICIOS_REPORTE: ServicioReporte[] = [

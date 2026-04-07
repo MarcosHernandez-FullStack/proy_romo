@@ -10,6 +10,7 @@ import {
   Users,
   ChevronDown,
   Search,
+  Eye,
 } from 'lucide-angular';
 import { AdminService } from '../../../../core/services/admin.service';
 import { ReservaOperacion, Sugerencias } from '../../../../models/admin.model';
@@ -24,9 +25,10 @@ import { MensajeModalComponent } from '../../../../shared/components/mensaje-mod
 export class AsignarServicioComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
-  readonly reserva   = input.required<ReservaOperacion>();
-  readonly confirmar = output<number>();
-  readonly cerrar    = output<void>();
+  readonly reserva     = input.required<ReservaOperacion>();
+  readonly soloDetalle = input<boolean>(false);
+  readonly confirmar   = output<number>();
+  readonly cerrar      = output<void>();
 
   protected readonly PencilIcon      = Pencil;
   protected readonly ClockIcon       = Clock;
@@ -36,6 +38,7 @@ export class AsignarServicioComponent implements OnInit {
   protected readonly UsersIcon       = Users;
   protected readonly ChevronDownIcon = ChevronDown;
   protected readonly SearchIcon      = Search;
+  protected readonly EyeIcon         = Eye;
 
   protected readonly cargando    = signal(true);
   protected readonly guardando   = signal(false);
@@ -83,6 +86,12 @@ export class AsignarServicioComponent implements OnInit {
   );
   protected readonly showConfirmacion  = signal(false);
 
+  /** Verdadero si la reserva ya tiene asignación guardada en BD */
+  protected get tieneAsignacion(): boolean {
+    const r = this.reserva();
+    return r.estadoOperacion === 'ASIGNADO' && !!(r.gruaAsignada || r.operadorAsignado);
+  }
+
   protected get mensajeConfirmacion(): string {
     const g = this.gruaSeleccionada();
     const o = this.operadorSeleccionado();
@@ -90,6 +99,12 @@ export class AsignarServicioComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // En modo soloDetalle o EN_CURSO no se necesitan sugerencias
+    if (this.soloDetalle()) {
+      this.cargando.set(false);
+      return;
+    }
+
     this.adminSvc.getSugerencias(this.reserva().id).subscribe({
       next: data => { this.sugerencias.set(data); this.cargando.set(false); },
       error: ()   => { this.cargando.set(false); this.error.set('No se pudieron cargar las sugerencias.'); },

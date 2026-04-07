@@ -113,6 +113,7 @@ export interface ParametrosOperativos {
   margenManiobraMin: number;
   umbralToleranciaMin: number;
   tiempoRetornoBaseMin: number;
+  tiempoCorte: number;
 }
 
 export interface GruaSugerida {
@@ -154,6 +155,8 @@ export interface ReservaOperacion {
   tiempoManiobra:   number;
   estadoOperacion:  string;
   estado:           string;
+  gruaAsignada?:    string | null;
+  operadorAsignado?: string | null;
 }
 
 export interface ServicioReporte extends ServicioAdmin {
