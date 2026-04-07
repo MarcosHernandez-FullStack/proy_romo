@@ -176,6 +176,13 @@ export class OperacionesComponent implements OnInit {
     this.showCancelar.set(false);
   }
 
+  protected onConfirmarReprogramacion(idReserva: number): void {
+    // La reserva vuelve a RESERVADO — recargar para reflejar nueva fecha/hora
+    this.reservas.update(prev => prev.filter(r => r.id !== idReserva));
+    this.showReprogramar.set(false);
+    this.cargar();
+  }
+
   protected estadoBadgeClass(estado: string): string {
     switch (estado) {
       case 'RESERVADO':  return 'bg-[#fffbeb] text-[#bb4d00] border border-[#ffd230]';

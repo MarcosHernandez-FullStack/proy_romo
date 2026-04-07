@@ -20,9 +20,9 @@ export class CancelarServicioComponent {
 
   protected readonly XCircleIcon = XCircle;
 
-  protected readonly motivo    = signal('');
-  protected readonly guardando = signal(false);
-  protected readonly error     = signal<string | null>(null);
+  protected readonly motivo           = signal('');
+  protected readonly guardando        = signal(false);
+  protected readonly error            = signal<string | null>(null);
   protected readonly showConfirmacion = signal(false);
 
   protected onConfirmar(): void {

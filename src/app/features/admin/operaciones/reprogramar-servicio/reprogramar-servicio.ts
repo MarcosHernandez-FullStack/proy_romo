@@ -1,4 +1,4 @@
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   LucideAngularModule,
@@ -8,61 +8,210 @@ import {
   AlertTriangle,
   Clock,
   Truck,
+  RefreshCw,
 } from 'lucide-angular';
-import { ServicioAdmin } from '../../../../models/admin.model';
+import { ReservaOperacion } from '../../../../models/admin.model';
+import { AdminService } from '../../../../core/services/admin.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
 interface SlotReprogramar {
-  hora: string;
-  estado: 'libre' | 'ocupado';
+  hora:           string;
+  estado:         'libre' | 'excepcion' | 'seleccionado' | 'rango';
+  estadoOriginal: 'libre' | 'excepcion';
 }
 
 export interface ReprogramacionData {
-  servicioId: string;
-  nuevaFecha: string;
-  nuevaHora: string;
+  idReserva:       number;
+  nuevaFecha:      string;
+  nuevaHoraInicio: string;
 }
 
 @Component({
   selector: 'app-reprogramar-servicio',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, MensajeModalComponent],
   templateUrl: './reprogramar-servicio.html',
 })
-export class ReprogramarServicioComponent {
-  readonly servicio = input.required<ServicioAdmin>();
-  readonly confirmar = output<ReprogramacionData>();
-  readonly cerrar = output<void>();
+export class ReprogramarServicioComponent implements OnInit {
+  private readonly adminSvc = inject(AdminService);
+  private readonly authSvc  = inject(AuthService);
 
-  protected readonly CalendarIcon = Calendar;
-  protected readonly CheckCircle2Icon = CheckCircle2;
-  protected readonly XCircleIcon = XCircle;
+  readonly reserva   = input.required<ReservaOperacion>();
+  readonly confirmar = output<number>();
+  readonly cerrar    = output<void>();
+
+  protected readonly CalendarIcon      = Calendar;
+  protected readonly CheckCircle2Icon  = CheckCircle2;
+  protected readonly XCircleIcon       = XCircle;
   protected readonly AlertTriangleIcon = AlertTriangle;
-  protected readonly ClockIcon = Clock;
-  protected readonly TruckIcon = Truck;
+  protected readonly ClockIcon         = Clock;
+  protected readonly TruckIcon         = Truck;
+  protected readonly RefreshCwIcon     = RefreshCw;
 
-  protected readonly nuevaFecha = signal('');
-  protected readonly slotSeleccionado = signal<number | null>(null);
+  protected readonly nuevaFecha        = signal('');
+  protected readonly cargandoSlots     = signal(false);
+  protected readonly guardando         = signal(false);
+  protected readonly error             = signal<string | null>(null);
+  protected readonly showConfirmacion  = signal(false);
+  protected readonly slots             = signal<SlotReprogramar[]>([]);
+  protected readonly conflictoBloque   = signal<string | null>(null);
 
-  protected readonly slots = computed<SlotReprogramar[]>(() =>
-    Array.from({ length: 24 }, (_, i) => {
-      const hora = String(i).padStart(2, '0') + ':00';
-      const ocupados = [10, 11, 14, 16];
-      return { hora, estado: ocupados.includes(i) ? 'ocupado' : 'libre' };
-    })
+  protected readonly slotSeleccionado = computed(
+    () => this.slots().find(s => s.estado === 'seleccionado') ?? null
   );
 
-  protected slotClass(s: SlotReprogramar, idx: number): string {
-    if (this.slotSeleccionado() === idx) return 'bg-[#155dfc] border-[#155dfc] text-white cursor-pointer';
-    if (s.estado === 'ocupado') return 'bg-[#1e293b] border-[#1e293b] text-white cursor-not-allowed opacity-70';
-    return 'bg-white border-[#d1d5dc] text-[#364153] hover:border-[#155dfc] hover:bg-[#eff6ff] cursor-pointer';
+  protected readonly puedeConfirmar = computed(
+    () => !!this.nuevaFecha() && this.slotSeleccionado() !== null
+  );
+
+  protected readonly mensajeConfirmacion =
+    'Este cambio liberará los bloques de la fecha original y reservará los nuevos bloques seleccionados. ' +
+    'En caso de que ya se haya asignado una grúa y un operador, estos serán liberados. ' +
+    'La operación se encontrará ahora en un estado "Reservado" y pendiente de asignación.';
+
+  ngOnInit(): void {
+    const raw      = this.reserva().fechaServicio;
+    const fechaStr = raw.includes('T') ? raw.split('T')[0] : raw;
+    this.nuevaFecha.set(fechaStr);
+    this.cargarSlots(fechaStr);
   }
 
-  protected onConfirmar(): void {
-    if (this.slotSeleccionado() === null) return;
-    this.confirmar.emit({
-      servicioId: this.servicio().id,
-      nuevaFecha: this.nuevaFecha() || this.servicio().fecha,
-      nuevaHora: this.slots()[this.slotSeleccionado()!].hora,
+  protected onFechaChange(fecha: string): void {
+    this.nuevaFecha.set(fecha);
+    this.conflictoBloque.set(null);
+    if (fecha) this.cargarSlots(fecha);
+  }
+
+  protected cargarSlots(fechaStr: string): void {
+    const [y, m, d] = fechaStr.split('-').map(Number);
+    const fecha      = new Date(y, m - 1, d);
+    const r          = this.reserva();
+    const rol        = this.authSvc.session()?.rol ?? 'ADMINISTRADOR';
+
+    this.cargandoSlots.set(true);
+    this.slots.set([]);
+
+    this.adminSvc.getHorarios(fecha, rol, r.cantidadCarga).subscribe({
+      next: data => {
+        this.slots.set(
+          (data ?? []).map(h => {
+            const hora   = h.hora?.slice(0, 5) ?? h.hora;
+            const est    = (h.estado ?? '').toLowerCase();
+            const origin: SlotReprogramar['estadoOriginal'] =
+              est === 'excepcion' ? 'excepcion' : 'libre';
+            return { hora, estado: origin, estadoOriginal: origin };
+          })
+        );
+        this.cargandoSlots.set(false);
+      },
+      error: () => this.cargandoSlots.set(false),
+    });
+  }
+
+  protected onClickSlot(idx: number): void {
+    const s       = this.slots()[idx];
+    const bloques = this.reserva().nroBloques;
+
+    if (s.estado === 'seleccionado' || s.estado === 'rango') {
+      this.conflictoBloque.set(null);
+      this.slots.update(prev =>
+        prev.map(slot =>
+          slot.estado === 'seleccionado' || slot.estado === 'rango'
+            ? { ...slot, estado: slot.estadoOriginal }
+            : slot
+        )
+      );
+      return;
+    }
+
+    if (this.slots().some(sl => sl.estado === 'seleccionado')) return;
+
+    this.conflictoBloque.set(null);
+
+    const horaInicio     = parseInt(s.hora.split(':')[0]);
+    const horasRestantes = Array.from({ length: bloques - 1 }, (_, i) => {
+      const h = (horaInicio + i + 1) % 24;
+      return `${String(h).padStart(2, '0')}:00`;
+    });
+
+    const currentSlots     = this.slots();
+    const indicesRestantes = horasRestantes.map(hora =>
+      currentSlots.findIndex(
+        sl => sl.hora === hora && (sl.estado === 'libre' || sl.estado === 'excepcion')
+      )
+    );
+
+    if (indicesRestantes.some(i => i === -1)) {
+      this.conflictoBloque.set(
+        `No hay ${bloques} bloques consecutivos disponibles desde ${s.hora}`
+      );
+      return;
+    }
+
+    this.slots.update(prev =>
+      prev.map((slot, i) => {
+        if (i === idx)                    return { ...slot, estado: 'seleccionado' as const };
+        if (indicesRestantes.includes(i)) return { ...slot, estado: 'rango'        as const };
+        return slot;
+      })
+    );
+  }
+
+  protected limpiarSeleccion(): void {
+    this.conflictoBloque.set(null);
+    this.error.set(null);
+    this.slots.update(prev =>
+      prev.map(s => ({ ...s, estado: s.estadoOriginal }))
+    );
+  }
+
+  protected slotClass(s: SlotReprogramar): string {
+    switch (s.estado) {
+      case 'seleccionado': return 'bg-[#2b7fff] border-[#155dfc] text-white cursor-pointer shadow-md';
+      case 'rango':        return 'bg-[#93c5fd] border-[#3b82f6] text-[#1e3a8a] cursor-pointer';
+      case 'excepcion':    return 'bg-[#fffbeb] border-dashed border-[#fbbf24] text-[#92400e] cursor-pointer hover:bg-[#fef3c7]';
+      default:             return 'bg-white border-[#00c950] text-[#364153] hover:border-[#155dfc] hover:bg-[#eff6ff] cursor-pointer';
+    }
+  }
+
+  /** "2026-05-01T00:00:00" → "01/05/2026" */
+  protected get fechaServicioFormateada(): string {
+    const raw  = this.reserva().fechaServicio;
+    const date = new Date(raw.includes('T') ? raw : raw + 'T00:00:00');
+    return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  /** "12:00:00" → "12:00" */
+  protected get horaInicioFormateada(): string {
+    return this.reserva().horaInicio?.slice(0, 5) ?? this.reserva().horaInicio;
+  }
+
+  protected onGuardar(): void {
+    if (!this.puedeConfirmar()) return;
+    this.error.set(null);
+    this.showConfirmacion.set(true);
+  }
+
+  protected onConfirmarModal(): void {
+    const slot = this.slotSeleccionado();
+    if (!slot) return;
+
+    this.guardando.set(true);
+    this.adminSvc.reprogramarReserva(
+      this.reserva().id,
+      this.nuevaFecha(),
+      slot.hora,
+      this.reserva().nroBloques,
+    ).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.confirmar.emit(this.reserva().id);
+      },
+      error: (err) => {
+        this.guardando.set(false);
+        this.error.set(err?.error?.mensaje ?? 'Ocurrió un error inesperado al reprogramar la reserva.');
+      },
     });
   }
 }

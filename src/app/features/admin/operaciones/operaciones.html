@@ -196,7 +196,7 @@
 
 @if (showReprogramar() && reservaReprogramar()) {
   <app-reprogramar-servicio
-    [servicio]="$any(reservaReprogramar())"
-    (confirmar)="showReprogramar.set(false)"
+    [reserva]="reservaReprogramar()!"
+    (confirmar)="onConfirmarReprogramacion($event)"
     (cerrar)="showReprogramar.set(false)" />
 }
