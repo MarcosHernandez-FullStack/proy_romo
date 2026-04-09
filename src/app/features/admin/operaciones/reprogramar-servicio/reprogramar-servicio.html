@@ -63,7 +63,7 @@
             <span class="text-[11px] text-[#6a7282]">Disponible</span>
           </div>
           <div class="flex items-center gap-1.5">
-            <div class="size-4 rounded bg-[#fffbeb] border-2 border-dashed border-[#fbbf24]"></div>
+            <div class="size-4 rounded bg-[#f3f4f6] border-2 border-dashed border-[#9ca3af]"></div>
             <span class="text-[11px] text-[#6a7282]">Excepción / Emergencias</span>
           </div>
           <div class="flex items-center gap-1.5">
@@ -122,12 +122,13 @@
 
       <!-- Advertencia slot excepción (visible al seleccionar un slot de excepción) -->
       @if (slotEsExcepcion()) {
-        <div class="bg-[#fff7ed] border border-[#f97316] rounded-[10px] px-4 py-2.5">
+        <div class="bg-[#f3f4f6] border border-[#9ca3af] rounded-[10px] px-4 py-2.5">
           <div class="flex items-start gap-2">
-            <lucide-angular [img]="OctagonAlertIcon" class="size-4 mt-0.5 shrink-0" color="#ea580c" [strokeWidth]="1.5" />
-            <p class="text-[#9a3412] text-[12px]">
-              <strong>Excepción operativa:</strong> El horario seleccionado se encuentra dentro de un periodo de excepción.
-              Solo los administradores pueden reprogramar en este bloque.
+            <lucide-angular [img]="OctagonAlertIcon" class="size-4 mt-0.5 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+            <p class="text-[#364153] text-[12px]">
+              <strong>Excepción operativa:</strong> Los siguientes horarios se encuentran dentro de un periodo de excepción:
+              <strong>{{ horasExcepcionComprometidas() }}</strong>.
+              Los horarios de excepción solo se deben registrar en casos de emergencia.
             </p>
           </div>
         </div>

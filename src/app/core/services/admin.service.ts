@@ -82,6 +82,17 @@ export class AdminService {
     );
   }
 
+  getHorariosReprogramacion(fecha: Date, rol: string, capacidad: number, idReserva: number): Observable<{ hora: string; estado: string }[]> {
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, '0');
+    const d = String(fecha.getDate()).padStart(2, '0');
+    const fechaStr = `${y}-${m}-${d}`;
+    return this.http.get<{ hora: string; estado: string }[]>(
+      `${API}/reservas/horarios-reprogramacion`,
+      { params: { fecha: fechaStr, rol, capacidad: capacidad.toString(), idReserva: idReserva.toString() } }
+    );
+  }
+
   deleteTimer(id: number): Observable<void> {
     return this.http.delete<void>(`${API}/reservas/timer/${id}`);
   }

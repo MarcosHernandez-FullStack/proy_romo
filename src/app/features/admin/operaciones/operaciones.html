@@ -205,3 +205,12 @@
     (confirmar)="onConfirmarReprogramacion($event)"
     (cerrar)="showReprogramar.set(false)" />
 }
+
+@if (showExito()) {
+  <app-exito-modal
+    [titulo]="exitoTitulo()"
+    [mensaje]="exitoMensaje()"
+    [etiqueta]="exitoEtiqueta()"
+    [detalle]="exitoDetalle()"
+    (cerrar)="onCerrarExito()" />
+}

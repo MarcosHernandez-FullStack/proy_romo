@@ -65,7 +65,16 @@ export class ReprogramarServicioComponent implements OnInit {
   );
 
   protected readonly slotEsExcepcion = computed(
-    () => this.slotSeleccionado()?.estadoOriginal === 'excepcion'
+    () => this.slots().some(
+      s => (s.estado === 'seleccionado' || s.estado === 'rango') && s.estadoOriginal === 'excepcion'
+    )
+  );
+
+  protected readonly horasExcepcionComprometidas = computed(() =>
+    this.slots()
+      .filter(s => (s.estado === 'seleccionado' || s.estado === 'rango') && s.estadoOriginal === 'excepcion')
+      .map(s => s.hora)
+      .join(', ')
   );
 
   protected readonly puedeConfirmar = computed(
@@ -101,7 +110,7 @@ export class ReprogramarServicioComponent implements OnInit {
     this.cargandoSlots.set(true);
     this.slots.set([]);
 
-    this.adminSvc.getHorarios(fecha, rol, r.cantidadCarga).subscribe({
+    this.adminSvc.getHorariosReprogramacion(fecha, rol, r.cantidadCarga, r.id).subscribe({
       next: data => {
         this.slots.set(
           (data ?? []).map(h => {
@@ -180,7 +189,7 @@ export class ReprogramarServicioComponent implements OnInit {
     switch (s.estado) {
       case 'seleccionado': return 'bg-[#2b7fff] border-[#155dfc] text-white cursor-pointer shadow-md';
       case 'rango':        return 'bg-[#93c5fd] border-[#3b82f6] text-[#1e3a8a] cursor-pointer';
-      case 'excepcion':    return 'bg-[#fffbeb] border-dashed border-[#fbbf24] text-[#92400e] cursor-pointer hover:bg-[#fef3c7]';
+      case 'excepcion':    return 'bg-[#f3f4f6] border-dashed border-[#9ca3af] text-[#4b5563] cursor-pointer hover:bg-[#e5e7eb]';
       default:             return 'bg-white border-[#00c950] text-[#364153] hover:border-[#155dfc] hover:bg-[#eff6ff] cursor-pointer';
     }
   }

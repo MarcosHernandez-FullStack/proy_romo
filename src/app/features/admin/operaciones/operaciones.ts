@@ -21,6 +21,7 @@ import { ReservaOperacion } from '../../../models/admin.model';
 import { AsignarServicioComponent } from './asignar-servicio/asignar-servicio';
 import { CancelarServicioComponent } from './cancelar-servicio/cancelar-servicio';
 import { ReprogramarServicioComponent } from './reprogramar-servicio/reprogramar-servicio';
+import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
 type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO';
 
@@ -33,6 +34,7 @@ type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO';
     AsignarServicioComponent,
     CancelarServicioComponent,
     ReprogramarServicioComponent,
+    ExitoModalComponent,
   ],
   templateUrl: './operaciones.html',
 })
@@ -78,6 +80,13 @@ export class OperacionesComponent implements OnInit {
   protected readonly reservaCancelar    = signal<ReservaOperacion | null>(null);
   protected readonly showReprogramar    = signal(false);
   protected readonly reservaReprogramar = signal<ReservaOperacion | null>(null);
+
+  // Éxito modal
+  protected readonly showExito      = signal(false);
+  protected readonly exitoTitulo    = signal('');
+  protected readonly exitoMensaje   = signal('');
+  protected readonly exitoEtiqueta  = signal('');
+  protected readonly exitoDetalle   = signal('');
 
   // KPIs
   protected readonly countPendiente = computed(() => this.reservas().filter(r => r.estadoOperacion === 'RESERVADO').length);
@@ -198,20 +207,34 @@ export class OperacionesComponent implements OnInit {
   }
 
   protected onConfirmarAsignacion(idReserva: number): void {
-    this.reservas.update(prev =>
-      prev.map(r => r.id === idReserva ? { ...r, estadoOperacion: 'ASIGNADO' } : r)
-    );
     this.showAsignar.set(false);
+    this.exitoTitulo.set('¡Servicio Asignado!');
+    this.exitoMensaje.set('La grúa y el operador han sido asignados exitosamente.');
+    this.exitoEtiqueta.set('Servicio');
+    this.exitoDetalle.set(`#${idReserva}`);
+    this.showExito.set(true);
   }
 
   protected onConfirmarCancelacion(idReserva: number): void {
-    this.reservas.update(prev => prev.filter(r => r.id !== idReserva));
     this.showCancelar.set(false);
+    this.exitoTitulo.set('¡Servicio Cancelado!');
+    this.exitoMensaje.set('La reserva ha sido cancelada exitosamente.');
+    this.exitoEtiqueta.set('Servicio');
+    this.exitoDetalle.set(`#${idReserva}`);
+    this.showExito.set(true);
   }
 
   protected onConfirmarReprogramacion(idReserva: number): void {
-    this.reservas.update(prev => prev.filter(r => r.id !== idReserva));
     this.showReprogramar.set(false);
+    this.exitoTitulo.set('¡Servicio Reprogramado!');
+    this.exitoMensaje.set('La reserva ha sido reprogramada exitosamente.');
+    this.exitoEtiqueta.set('Servicio');
+    this.exitoDetalle.set(`#${idReserva}`);
+    this.showExito.set(true);
+  }
+
+  protected onCerrarExito(): void {
+    this.showExito.set(false);
     this.cargar();
   }
 
