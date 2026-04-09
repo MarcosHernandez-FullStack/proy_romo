@@ -120,14 +120,27 @@
         </div>
       }
 
-      <!-- Warning -->
+      <!-- Advertencia slot excepción (visible al seleccionar un slot de excepción) -->
+      @if (slotEsExcepcion()) {
+        <div class="bg-[#fff7ed] border border-[#f97316] rounded-[10px] px-4 py-2.5">
+          <div class="flex items-start gap-2">
+            <lucide-angular [img]="OctagonAlertIcon" class="size-4 mt-0.5 shrink-0" color="#ea580c" [strokeWidth]="1.5" />
+            <p class="text-[#9a3412] text-[12px]">
+              <strong>Excepción operativa:</strong> El horario seleccionado se encuentra dentro de un periodo de excepción.
+              Solo los administradores pueden reprogramar en este bloque.
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- Nota informativa (siempre visible) -->
       <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[10px] px-4 py-2.5">
         <div class="flex items-start gap-2">
           <lucide-angular [img]="AlertTriangleIcon" class="size-4 mt-0.5 shrink-0" color="#bb4d00" [strokeWidth]="1.5" />
           <p class="text-[#bb4d00] text-[12px]">
             <strong>Nota:</strong> Este cambio liberará los bloques de la fecha original y reservará los nuevos
             bloques seleccionados.
-            En caso de que ya se haya asignado una grúa y un operador, estos serán liberados. 
+            En caso de que ya se haya asignado una grúa y un operador, estos serán liberados.
             La operación se encontrará ahora en un estado 'Reservado' y pendiente de asignación.
           </p>
         </div>
@@ -135,9 +148,22 @@
 
     </div>
 
+    <!-- Advertencia excepción operativa (naranja) -->
+    @if (advertencia()) {
+      <div class="mx-6 mb-2 bg-[#fff7ed] border border-[#f97316] rounded-[10px] px-4 py-3 flex items-start gap-2">
+        <lucide-angular [img]="OctagonAlertIcon" class="size-4 mt-0.5 shrink-0" color="#ea580c" [strokeWidth]="1.5" />
+        <div>
+          <p class="text-[#9a3412] text-[13px] font-semibold">Excepción operativa</p>
+          <p class="text-[#9a3412] text-[12px] mt-0.5">{{ advertencia() }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Error duro: corte de tiempo o sin disponibilidad (rojo) -->
     @if (error()) {
-      <div class="mx-6 mb-2 bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-3 text-[#c10007] text-[13px]">
-        {{ error() }}
+      <div class="mx-6 mb-2 bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-3 flex items-start gap-2">
+        <lucide-angular [img]="XCircleIcon" class="size-4 mt-0.5 shrink-0" color="#c10007" [strokeWidth]="1.5" />
+        <p class="text-[#c10007] text-[13px]">{{ error() }}</p>
       </div>
     }
 

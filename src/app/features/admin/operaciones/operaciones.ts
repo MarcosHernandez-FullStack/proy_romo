@@ -2,12 +2,12 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   LucideAngularModule,
-  AlertTriangle,
-  CheckCircle2,
+  TriangleAlert,
+  CircleCheck,
   Truck,
   Users,
   Pencil,
-  XCircle,
+  CircleX,
   Calendar,
   MapPin,
   Clock,
@@ -39,12 +39,12 @@ type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO';
 export class OperacionesComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
-  protected readonly AlertTriangleIcon  = AlertTriangle;
-  protected readonly CheckCircle2Icon   = CheckCircle2;
+  protected readonly AlertTriangleIcon  = TriangleAlert;
+  protected readonly CheckCircle2Icon   = CircleCheck;
   protected readonly TruckIcon          = Truck;
   protected readonly UsersIcon          = Users;
   protected readonly PencilIcon         = Pencil;
-  protected readonly XCircleIcon        = XCircle;
+  protected readonly XCircleIcon        = CircleX;
   protected readonly CalendarIcon       = Calendar;
   protected readonly MapPinIcon         = MapPin;
   protected readonly ClockIcon          = Clock;
@@ -224,6 +224,16 @@ export class OperacionesComponent implements OnInit {
       case 'CANCELADO':  return 'bg-[#fef2f2] text-[#c10007] border border-[#fca5a5]';
       default:           return 'bg-[#f9fafb] text-[#6a7282] border border-[#e5e7eb]';
     }
+  }
+
+  protected formatFecha(f: string): string {
+    const s = f.includes('T') ? f.split('T')[0] : f;
+    const [y, m, d] = s.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  protected formatHora(h: string): string {
+    return h?.substring(0, 5) ?? '';
   }
 
   protected estadoLabel(estado: string): string {

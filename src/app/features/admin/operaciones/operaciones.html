@@ -112,12 +112,12 @@
           </div>
           <div class="flex items-center gap-1">
             <lucide-angular [img]="CalendarIcon" class="size-3.5 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
-            <span class="text-[#364153] text-[12px]">{{ r.fechaServicio }}</span>
+            <span class="text-[#364153] text-[12px]">{{ formatFecha(r.fechaServicio) }}</span>
           </div>
           <div>
             <div class="flex items-center gap-1">
               <lucide-angular [img]="ClockIcon" class="size-3.5" color="#6a7282" [strokeWidth]="1.5" />
-              <span class="text-[#364153] text-[12px]">{{ r.horaInicio }} - {{ r.horaFin }}</span>
+              <span class="text-[#364153] text-[12px]">{{ formatHora(r.horaInicio) }} - {{ formatHora(r.horaFin) }}</span>
             </div>
           </div>
           <p class="text-[#364153] text-[12px]">{{ r.nroBloques }}</p>

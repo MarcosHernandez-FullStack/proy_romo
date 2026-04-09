@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import {
   LucideAngularModule,
   Calendar,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
+  CircleCheck,
+  CircleX,
+  TriangleAlert,
   Clock,
   Truck,
   RefreshCw,
+  OctagonAlert,
 } from 'lucide-angular';
 import { ReservaOperacion } from '../../../../models/admin.model';
 import { AdminService } from '../../../../core/services/admin.service';
@@ -42,9 +43,10 @@ export class ReprogramarServicioComponent implements OnInit {
   readonly cerrar    = output<void>();
 
   protected readonly CalendarIcon      = Calendar;
-  protected readonly CheckCircle2Icon  = CheckCircle2;
-  protected readonly XCircleIcon       = XCircle;
-  protected readonly AlertTriangleIcon = AlertTriangle;
+  protected readonly CheckCircle2Icon  = CircleCheck;
+  protected readonly XCircleIcon       = CircleX;
+  protected readonly AlertTriangleIcon = TriangleAlert;
+  protected readonly OctagonAlertIcon  = OctagonAlert;
   protected readonly ClockIcon         = Clock;
   protected readonly TruckIcon         = Truck;
   protected readonly RefreshCwIcon     = RefreshCw;
@@ -53,12 +55,17 @@ export class ReprogramarServicioComponent implements OnInit {
   protected readonly cargandoSlots     = signal(false);
   protected readonly guardando         = signal(false);
   protected readonly error             = signal<string | null>(null);
+  protected readonly advertencia       = signal<string | null>(null);
   protected readonly showConfirmacion  = signal(false);
   protected readonly slots             = signal<SlotReprogramar[]>([]);
   protected readonly conflictoBloque   = signal<string | null>(null);
 
   protected readonly slotSeleccionado = computed(
     () => this.slots().find(s => s.estado === 'seleccionado') ?? null
+  );
+
+  protected readonly slotEsExcepcion = computed(
+    () => this.slotSeleccionado()?.estadoOriginal === 'excepcion'
   );
 
   protected readonly puedeConfirmar = computed(
@@ -80,6 +87,8 @@ export class ReprogramarServicioComponent implements OnInit {
   protected onFechaChange(fecha: string): void {
     this.nuevaFecha.set(fecha);
     this.conflictoBloque.set(null);
+    this.error.set(null);
+    this.advertencia.set(null);
     if (fecha) this.cargarSlots(fecha);
   }
 
@@ -161,6 +170,7 @@ export class ReprogramarServicioComponent implements OnInit {
   protected limpiarSeleccion(): void {
     this.conflictoBloque.set(null);
     this.error.set(null);
+    this.advertencia.set(null);
     this.slots.update(prev =>
       prev.map(s => ({ ...s, estado: s.estadoOriginal }))
     );
@@ -210,7 +220,17 @@ export class ReprogramarServicioComponent implements OnInit {
       },
       error: (err) => {
         this.guardando.set(false);
-        this.error.set(err?.error?.mensaje ?? 'Ocurrió un error inesperado al reprogramar la reserva.');
+        const body    = err?.error;
+        const mensaje = body?.mensaje ?? 'Ocurrió un error inesperado al reprogramar la reserva.';
+        const horas   = body?.horasConflicto ? ` Horas afectadas: ${body.horasConflicto}.` : '';
+
+        if (mensaje.toLowerCase().includes('excepción') || mensaje.toLowerCase().includes('excepcion')) {
+          this.advertencia.set(mensaje + horas);
+          this.error.set(null);
+        } else {
+          this.error.set(mensaje + horas);
+          this.advertencia.set(null);
+        }
       },
     });
   }
