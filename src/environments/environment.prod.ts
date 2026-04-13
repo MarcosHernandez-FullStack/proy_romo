@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.romo.com/api',
+  apiUrl: 'https://ca-back-romo.whitedesert-ca97fbc6.eastus2.azurecontainerapps.io/api',
 };
