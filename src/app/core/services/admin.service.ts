@@ -6,6 +6,7 @@ import { delay, map } from 'rxjs/operators';
 import {
   BitacoraEntry,
   ClienteB2B,
+  DisponibilidadGrua,
   ExcepcionAgenda,
   HorarioRegular,
   Operador,
@@ -123,6 +124,16 @@ export class AdminService {
     return this.http.patch<{ exitoso: number; mensaje: string; horasConflicto?: string }>(`${API}/operaciones/reprogramar`, {
       idReserva, nuevaFecha, nuevaHoraInicio, nuevoNroBloques,
     });
+  }
+
+  getCapacidadesGruas(): Observable<number[]> {
+    return this.http.get<number[]>(`${API}/operaciones/capacidades-gruas`);
+  }
+
+  getDisponibilidadGruas(fechaServicio: string, capacidad?: number): Observable<DisponibilidadGrua[]> {
+    const params: Record<string, string> = { fechaServicio };
+    if (capacidad !== undefined) params['capacidad'] = String(capacidad);
+    return this.http.get<DisponibilidadGrua[]>(`${API}/operaciones/disponibilidad-gruas`, { params });
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/operaciones')

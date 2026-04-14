@@ -1,0 +1,125 @@
+<div class="p-6 flex flex-col gap-5">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <div class="size-10 bg-[#155dfc] rounded-[10px] flex items-center justify-center shrink-0">
+      <lucide-angular [img]="TruckIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+    </div>
+    <div>
+      <h1 class="text-[#101828] text-[22px] font-bold leading-tight">Disponibilidad de Grúas</h1>
+      <p class="text-[#6a7282] text-[13px]">Ocupación por bloque horario y capacidad</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="flex flex-wrap gap-3 items-end">
+    <div class="flex flex-col gap-1">
+      <label class="text-[#364153] text-[12px] font-medium">Fecha</label>
+      <div class="relative">
+        <lucide-angular [img]="CalendarIcon" class="absolute left-3 top-1/2 -translate-y-1/2 size-4 pointer-events-none" color="#6a7282" [strokeWidth]="1.5" />
+        <input type="date" [ngModel]="fechaFiltro()" (ngModelChange)="onFechaChange($event)" name="fecha"
+          class="pl-9 pr-3 py-2 border border-[#d1d5dc] rounded-[10px] text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc] cursor-pointer" />
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-[#364153] text-[12px] font-medium">Capacidad</label>
+      <select [ngModel]="capFiltro()" (ngModelChange)="onCapacidadChange($event)" name="capacidad"
+        class="px-3 py-2 border border-[#d1d5dc] rounded-[10px] text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc] cursor-pointer min-w-[130px]">
+        <option [ngValue]="undefined">Todas</option>
+        @for (cap of capacidades(); track cap) {
+          <option [value]="cap">Cap. {{ cap }}T</option>
+        }
+      </select>
+    </div>
+
+    <button type="button" (click)="cargar()" [disabled]="cargando()"
+      class="flex items-center gap-1.5 px-4 py-2 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-60 text-white text-[13px] font-medium rounded-[10px] transition-colors cursor-pointer">
+      @if (cargando()) {
+        <lucide-angular [img]="RefreshCwIcon" class="size-4 animate-spin" color="white" [strokeWidth]="1.5" />
+      } @else {
+        <lucide-angular [img]="SearchIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      }
+      Consultar
+    </button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="bg-white rounded-[14px] border border-[#e5e7eb] overflow-x-auto">
+
+    @if (cargando()) {
+      <div class="flex items-center justify-center gap-2 py-16 text-[#9ca3af]">
+        <lucide-angular [img]="RefreshCwIcon" class="size-5 animate-spin" color="#9ca3af" [strokeWidth]="1.5" />
+        <span class="text-[14px]">Cargando...</span>
+      </div>
+    } @else if (datos().length === 0) {
+      <div class="flex flex-col items-center gap-2 py-16 text-[#9ca3af]">
+        <lucide-angular [img]="TruckIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+        <p class="text-[14px]">Sin datos para la fecha seleccionada</p>
+      </div>
+    } @else {
+      <table class="w-full text-[13px]">
+        <thead>
+          <!-- Fila 1: Hora + grupos por capacidad -->
+          <tr class="bg-[#f9fafb] border-b border-[#e5e7eb]">
+            <th class="px-4 py-3 text-left text-[#364153] font-semibold w-20">Hora</th>
+            @for (cap of columnasTabla(); track cap) {
+              <th [attr.colspan]="3" class="px-2 py-3 text-center text-[#155dfc] font-semibold border-l border-[#e5e7eb]">
+                Cap. {{ cap }}T
+              </th>
+            }
+          </tr>
+          <!-- Fila 2: Subencabezados -->
+          <tr class="bg-[#f9fafb] border-b border-[#e5e7eb] text-[11px] text-[#6a7282]">
+            <th class="px-4 py-2"></th>
+            @for (cap of columnasTabla(); track cap) {
+              <th class="px-3 py-2 text-center font-medium border-l border-[#e5e7eb]">Reservas</th>
+              <th class="px-3 py-2 text-center font-medium">Grúas</th>
+              <th class="px-3 py-2 text-center font-medium">Disponibles</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (hora of horas(); track hora) {
+            <tr class="border-b border-[#f3f4f6] hover:bg-[#fafafa] transition-colors">
+              <td class="px-4 py-2.5 font-semibold text-[#101828]">{{ hora }}</td>
+              @for (cap of columnasTabla(); track cap) {
+                @let celda = getCelda(hora, cap);
+                <td class="px-3 py-2 text-center border-l border-[#f3f4f6]">
+                  <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-[12px] font-semibold bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe]">
+                    {{ celda?.cantidadReservas ?? '—' }}
+                  </span>
+                </td>
+                <td class="px-3 py-2 text-center">
+                  <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-[12px] font-semibold bg-[#f3f4f6] text-[#374151] border border-[#e5e7eb]">
+                    {{ celda?.cantidadGruas ?? '—' }}
+                  </span>
+                </td>
+                <td class="px-3 py-2 text-center">
+                  <span class="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-[12px] font-semibold"
+                    [class]="disponibilidadBadge(celda)">
+                    {{ celda?.cantidadGruasDisponible ?? '—' }}
+                  </span>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  </div>
+
+  <!-- Leyenda -->
+  @if (!cargando() && datos().length > 0) {
+    <div class="flex flex-wrap items-center gap-3 text-[12px]">
+      <span class="text-[#6a7282]">Disponibles:</span>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#eff6ff] text-[#1d4ed8] border border-[#bfdbfe]">Reservas</span>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f3f4f6] text-[#374151] border border-[#e5e7eb]">Grúas totales</span>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#f0fdf4] text-[#15803d] border border-[#bbf7d0]">≥ 2 disponibles</span>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#fff7ed] text-[#c2410c] border border-[#fed7aa]">1 disponible</span>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#fef2f2] text-[#c10007] border border-[#fca5a5]">Sin disponibilidad</span>
+    </div>
+  }
+
+</div>

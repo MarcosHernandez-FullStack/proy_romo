@@ -18,10 +18,6 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
-        path: 'reservas',
-        loadComponent: () => import('./features/cliente/reserva/reserva').then((m) => m.ReservaComponent),
-      },
-      {
         path: 'mis-servicios',
         loadComponent: () =>
           import('./features/cliente/mis-servicios/mis-servicios').then((m) => m.MisServiciosComponent),
@@ -31,7 +27,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/nueva-reserva/nueva-reserva').then((m) => m.NuevaReservaComponent),
       },
-      { path: '', redirectTo: 'reservas', pathMatch: 'full' },
+      { path: '', redirectTo: 'nueva-reserva', pathMatch: 'full' },
     ],
   },
   // Admin routes
@@ -90,6 +86,11 @@ export const routes: Routes = [
         path: 'configuracion',
         loadComponent: () =>
           import('./features/admin/configuracion/configuracion').then((m) => m.ConfiguracionComponent),
+      },
+      {
+        path: 'disponibilidad-gruas',
+        loadComponent: () =>
+          import('./features/admin/disponibilidad-gruas/disponibilidad-gruas').then((m) => m.DisponibilidadGruasComponent),
       },
       {
         path: 'reportes',

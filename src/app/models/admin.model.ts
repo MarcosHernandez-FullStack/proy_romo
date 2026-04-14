@@ -164,3 +164,12 @@ export interface ServicioReporte extends ServicioAdmin {
   fechaCompleta: string;
   grua: string;
 }
+
+
+export interface DisponibilidadGrua {
+  horaStr:                 string;
+  capacidad:               number;
+  cantidadReservas:        number;
+  cantidadGruas:           number;
+  cantidadGruasDisponible: number;
+}
