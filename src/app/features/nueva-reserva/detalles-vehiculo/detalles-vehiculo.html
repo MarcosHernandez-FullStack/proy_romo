@@ -76,8 +76,14 @@
               <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Placa / Patente</label>
               <input type="text" [ngModel]="v.placa" (ngModelChange)="updateVehiculo(i, 'placa', $event)"
                 [name]="'placa_' + i"
+                maxlength="10"
                 placeholder="EJ: AB 123 CD"
                 class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+              <p class="text-[11px] text-right mt-1"
+                [class.text-red-500]="(v.placa.length) >= 10"
+                [class.text-[#9ca3af]]="(v.placa.length) < 10">
+                {{ v.placa.length }}/10
+              </p>
             </div>
 
             <!-- Marca / Modelo / Color -->
@@ -85,8 +91,14 @@
               <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Marca / Modelo / Color</label>
               <input type="text" [ngModel]="v.descripcion" (ngModelChange)="updateVehiculo(i, 'descripcion', $event)"
                 [name]="'desc_' + i"
+                maxlength="50"
                 placeholder="Ej: Toyota Corolla 2020, Gris"
                 class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+              <p class="text-[11px] text-right mt-1"
+                [class.text-red-500]="(v.descripcion.length) >= 50"
+                [class.text-[#9ca3af]]="(v.descripcion.length) < 50">
+                {{ v.descripcion.length }}/50
+              </p>
             </div>
           </div>
 
@@ -97,9 +109,15 @@
             </label>
             <textarea [ngModel]="v.observaciones" (ngModelChange)="updateVehiculo(i, 'observaciones', $event)"
               [name]="'obs_' + i"
+              maxlength="100"
               placeholder="Detalles específicos, problemas mecánicos, instrucciones especiales..."
               rows="3"
               class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] resize-none"></textarea>
+            <p class="text-[11px] text-right mt-1"
+              [class.text-red-500]="(v.observaciones.length) >= 100"
+              [class.text-[#9ca3af]]="(v.observaciones.length) < 100">
+              {{ v.observaciones.length }}/100
+            </p>
           </div>
 
         </div>
