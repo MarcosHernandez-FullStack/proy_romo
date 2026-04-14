@@ -142,8 +142,8 @@ export class AsignarServicioComponent implements OnInit {
     this.error.set(null);
 
     this.adminSvc.asignarServicio(this.reserva().id, idGrua, idOperador).subscribe({
-      next: ()    => { this.guardando.set(false); this.confirmar.emit(this.reserva().id); },
-      error: (err) => {
+      next: () => { this.guardando.set(false); this.confirmar.emit(this.reserva().id); },
+      error: (err)   => {
         this.guardando.set(false);
         this.error.set(err?.error?.mensaje ?? 'No se pudo completar la asignación.');
       },

@@ -111,16 +111,16 @@ export class AdminService {
     });
   }
 
-  asignarServicio(idReserva: number, idGrua: number, idOperador: number): Observable<void> {
-    return this.http.patch<void>(`${API}/operaciones/asignar`, { idReserva, idGrua, idOperador });
+  asignarServicio(idReserva: number, idGrua: number, idOperador: number): Observable<{ exitoso: number; mensaje: string }> {
+    return this.http.patch<{ exitoso: number; mensaje: string }>(`${API}/operaciones/asignar`, { idReserva, idGrua, idOperador });
   }
 
-  cancelarReserva(id: number, motivoCancelacion: string): Observable<void> {
-    return this.http.patch<void>(`${API}/operaciones/cancelar`, { id, motivoCancelacion });
+  cancelarReserva(id: number, motivoCancelacion: string): Observable<{ exitoso: number; mensaje: string }> {
+    return this.http.patch<{ exitoso: number; mensaje: string }>(`${API}/operaciones/cancelar`, { id, motivoCancelacion });
   }
 
-  reprogramarReserva(idReserva: number, nuevaFecha: string, nuevaHoraInicio: string, nuevoNroBloques: number): Observable<void> {
-    return this.http.patch<void>(`${API}/operaciones/reprogramar`, {
+  reprogramarReserva(idReserva: number, nuevaFecha: string, nuevaHoraInicio: string, nuevoNroBloques: number): Observable<{ exitoso: number; mensaje: string; horasConflicto?: string }> {
+    return this.http.patch<{ exitoso: number; mensaje: string; horasConflicto?: string }>(`${API}/operaciones/reprogramar`, {
       idReserva, nuevaFecha, nuevaHoraInicio, nuevoNroBloques,
     });
   }

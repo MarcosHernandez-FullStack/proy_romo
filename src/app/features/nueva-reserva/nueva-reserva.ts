@@ -129,6 +129,7 @@ export class NuevaReservaComponent implements OnInit {
   protected readonly showConfirm        = signal(false);
   protected readonly showSuccess        = signal(false);
   protected readonly servicioCreado     = signal('');
+  protected readonly mensajeExito       = signal('');
   protected readonly confirmExcepcion   = signal(false);
   protected readonly horaExcepcionPend  = signal<string[]>([]);
 
@@ -434,6 +435,7 @@ export class NuevaReservaComponent implements OnInit {
       next: result => {
         if (result.exitoso === 1) {
           this.servicioCreado.set(`SRV-${result.id ?? ''}`);
+          this.mensajeExito.set(result.mensaje);
           this.showSuccess.set(true);
         } else {
           this.modal.set({ tipo: 'error', titulo: 'Error al Guardar Reserva', mensaje: result.mensaje });

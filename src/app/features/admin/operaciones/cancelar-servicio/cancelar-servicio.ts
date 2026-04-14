@@ -30,8 +30,8 @@ export class CancelarServicioComponent {
     this.error.set(null);
 
     this.adminSvc.cancelarReserva(this.reserva().id, this.motivo()).subscribe({
-      next: ()     => { this.guardando.set(false); this.confirmar.emit(this.reserva().id); },
-      error: (err) => {
+      next: () => { this.guardando.set(false); this.confirmar.emit(this.reserva().id); },
+      error: (err)   => {
         this.guardando.set(false);
         this.error.set(err?.error?.mensaje ?? 'No se pudo cancelar el servicio.');
       },

@@ -29,8 +29,14 @@
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Motivo de Cancelación *</label>
         <input type="text" [ngModel]="motivo()" (ngModelChange)="motivo.set($event)" name="motivo"
+          maxlength="50"
           placeholder="Indique el motivo..."
           class="w-full border border-[#fca5a5] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#e7000b]" />
+        <p class="text-[11px] text-right mt-1"
+          [class.text-red-500]="motivo().length >= 50"
+          [class.text-[#9ca3af]]="motivo().length < 50">
+          {{ motivo().length }}/50
+        </p>
       </div>
 
     </div>
@@ -60,4 +66,5 @@
     (cerrar)="showConfirmacion.set(false)"
     (confirmar)="showConfirmacion.set(false); onConfirmar()" />
 }
+
 

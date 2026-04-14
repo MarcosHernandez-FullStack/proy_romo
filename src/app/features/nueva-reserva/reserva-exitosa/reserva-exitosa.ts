@@ -8,7 +8,8 @@ import { LucideAngularModule, CircleCheck } from 'lucide-angular';
   templateUrl: './reserva-exitosa.html',
 })
 export class ReservaExitosaComponent {
-  readonly servicioId = input.required<string>();
+  readonly servicioId  = input.required<string>();
+  readonly mensaje     = input<string>('El servicio ha sido registrado exitosamente');
   readonly nuevaReserva = output<void>();
 
   protected readonly CircleCheckIcon = CircleCheck;

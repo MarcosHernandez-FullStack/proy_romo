@@ -223,10 +223,7 @@ export class ReprogramarServicioComponent implements OnInit {
       slot.hora,
       this.reserva().nroBloques,
     ).subscribe({
-      next: () => {
-        this.guardando.set(false);
-        this.confirmar.emit(this.reserva().id);
-      },
+      next: () => { this.guardando.set(false); this.confirmar.emit(this.reserva().id); },
       error: (err) => {
         this.guardando.set(false);
         const body    = err?.error;

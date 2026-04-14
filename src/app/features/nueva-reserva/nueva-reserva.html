@@ -108,6 +108,7 @@
 @if (showSuccess()) {
   <app-reserva-exitosa
     [servicioId]="servicioCreado()"
+    [mensaje]="mensajeExito()"
     (nuevaReserva)="onNuevaReserva()" />
 }
 
