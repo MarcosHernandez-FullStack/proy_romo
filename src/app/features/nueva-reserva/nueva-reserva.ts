@@ -388,10 +388,20 @@ export class NuevaReservaComponent implements OnInit {
   protected onEditar(): void {
     const timerId = this.idTimerReserva();
     if (timerId) {
-      this.adminSvc.deleteTimer(timerId).subscribe();
+      this.adminSvc.deleteTimer(timerId).subscribe({
+        next: () => {
+          this.horarioValidado.set(false);
+          this.idTimerReserva.set(null);
+        },
+        error: (err) => {
+          const mensaje = err?.error?.mensaje ?? err?.error?.message ?? 'No se pudo liberar el horario reservado. Intente nuevamente.';
+          this.modal.set({ tipo: 'error', titulo: 'Error al editar', mensaje });
+        }
+      });
+    } else {
+      this.horarioValidado.set(false);
+      this.idTimerReserva.set(null);
     }
-    this.horarioValidado.set(false);
-    this.idTimerReserva.set(null);
   }
 
   protected onVehiculosConfirmados(vehiculos: VehiculoDetalle[]): void {
