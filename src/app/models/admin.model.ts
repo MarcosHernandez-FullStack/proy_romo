@@ -141,6 +141,13 @@ export interface Sugerencias {
   operadores: OperadorSugerido[];
 }
 
+export interface VehiculoReserva {
+  placa:       string | null;
+  modelo:      string | null;
+  tipo:        string | null;
+  observacion: string | null;
+}
+
 export interface ReservaOperacion {
   id:               number;
   direccionOrigen:  string;
@@ -157,6 +164,8 @@ export interface ReservaOperacion {
   estado:           string;
   gruaAsignada?:    string | null;
   operadorAsignado?: string | null;
+  nombreCliente?:   string | null;
+  vehiculos?:       VehiculoReserva[];
 }
 
 export interface ServicioReporte extends ServicioAdmin {

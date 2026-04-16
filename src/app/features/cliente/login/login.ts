@@ -40,9 +40,9 @@ export class LoginComponent {
         }
         this.router.navigate(['/nueva-reserva']);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.error.set('Credenciales incorrectas o usuario inactivo.');
+        this.error.set(err?.error?.mensaje ?? 'Error al iniciar sesión.');
       },
     });
   }

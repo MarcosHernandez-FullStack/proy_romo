@@ -41,9 +41,9 @@ export class LoginAdminComponent {
         }
         this.router.navigate(['/admin/dashboard']);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.error.set('Credenciales incorrectas o usuario inactivo.');
+        this.error.set(err?.error?.mensaje ?? 'Error al iniciar sesión.');
       },
     });
   }

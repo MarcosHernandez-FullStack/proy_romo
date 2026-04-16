@@ -17,4 +17,8 @@ export interface LoginResponse {
   tarifaKm?:   number;
   tarifaBase?: number;
   empresa?:    string;
+  idOperador?:           number | null;
+  nroLicencia?:          string | null;
+  fecVenLic?:            string | null;
+  serviciosCompletados?: number | null;
 }

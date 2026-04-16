@@ -29,9 +29,15 @@
   <!-- Footer / User -->
   <div class="border-t border-[#314158] px-4 pt-4 pb-4 flex flex-col gap-3 shrink-0">
     <!-- User info -->
-    <div class="bg-[#314158] rounded-[10px] px-3 py-3">
-      <p class="text-[#90a1b9] text-xs leading-4">Usuario</p>
-      <p class="text-white text-sm font-medium truncate mt-1">{{ adminSvc.session()?.correo }}</p>
+    <div class="bg-[#314158] rounded-[10px] px-3 py-3 flex flex-col gap-0.5">
+      <p class="text-white text-sm font-semibold truncate leading-5">
+        {{ adminSvc.session()?.nombres }} {{ adminSvc.session()?.apellidos }}
+      </p>
+      <p class="text-[#90a1b9] text-xs truncate leading-4">{{ adminSvc.session()?.correo }}</p>
+      <span class="mt-1 self-start px-2 py-0.5 rounded-full text-[11px] font-medium leading-4"
+        style="background: rgba(43,127,255,0.18); color: #8ec5ff;">
+        {{ adminSvc.session()?.rol }}
+      </span>
     </div>
     <!-- Cerrar Sesión -->
     <button type="button" (click)="adminSvc.logoutAdmin()"
