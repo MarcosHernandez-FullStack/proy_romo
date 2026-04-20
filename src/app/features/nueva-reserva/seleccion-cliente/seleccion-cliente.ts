@@ -27,6 +27,8 @@ interface ParametroOperativo {
   tiempoRetornoBase:    number;
   timerAdministrativo: number;
   timerCliente:        number;
+  coordLatMaps:        string;
+  coordLonMaps:        string;
 }
 
 @Component({
@@ -78,7 +80,13 @@ export class SeleccionClienteComponent implements AfterViewInit {
 
     // Cargar parámetro operativo al inicializar
     this.http.get<ParametroOperativo>(`${API}/configuracion/parametro-operativo`)
-      .subscribe({ next: p => { this.parametroOperativo.set(p); this.parametroChange.emit(p); } });
+      .subscribe({ next: p => {
+        this.parametroOperativo.set(p);
+        this.parametroChange.emit(p);
+        const lat = parseFloat(p.coordLatMaps);
+        const lng = parseFloat(p.coordLonMaps);
+        if (!isNaN(lat) && !isNaN(lng)) this.map?.setCenter({ lat, lng });
+      }});
   }
 
   readonly modoCliente = input(false);
