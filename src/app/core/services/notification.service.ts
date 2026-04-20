@@ -11,7 +11,6 @@ export class NotificationService {
 
   mostrar(mensaje: string, tipo: ToastNotification['tipo'] = 'error'): void {
     this.toast.set({ mensaje, tipo });
-    setTimeout(() => this.toast.set(null), 6000);
   }
 
   cerrar(): void {
