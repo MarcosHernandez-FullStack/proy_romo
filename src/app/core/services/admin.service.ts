@@ -2,20 +2,27 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of, tap } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
+import { delay, map, catchError } from 'rxjs/operators';
 import {
   BitacoraEntry,
   ClienteB2B,
+  DIAS_SEMANA,
+  DiaSemana,
   DisponibilidadGrua,
   ExcepcionAgenda,
+  GridDisponibilidad,
+  HoraGrid,
   HorarioRegular,
+  HORAS_GRID,
   Operador,
   ParametrosOperativos,
   ReservaOperacion,
   ServicioAdmin,
+  ServicioProximo,
   ServicioReporte,
   Sugerencias,
   TarifaCliente,
+  TipoDisponibilidad,
   UnidadFlota,
   UsuarioAdmin,
 } from '../../models/admin.model';
@@ -158,9 +165,77 @@ export class AdminService {
     );
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/operadores')
-  getOperadores(): Observable<Operador[]> {
-    return of(OPERADORES).pipe(delay(200));
+  getOperadores(estado?: string): Observable<Operador[]> {
+    const params: Record<string, string> = {};
+    if (estado) params['estado'] = estado;
+
+    return this.http.get<OperadorApiItem[]>(`${API}/Operadores`, { params }).pipe(
+      map(items => items.map(r => this.mapOperador(r))),
+      catchError(() => of(OPERADORES))   // fallback a mock si la API no está disponible
+    );
+  }
+
+  getServiciosOperador(idOperador: number): Observable<ServicioProximo[]> {
+    return this.http
+      .get<ReservaApiItem[]>(`${API}/Operaciones`, { params: { idOperador: idOperador.toString() } })
+      .pipe(
+        map(reservas =>
+          reservas
+            .filter(r => !['CANCELADO','FINALIZADO'].includes(r.estadoOperacion?.toUpperCase() ?? ''))
+            .map(r => ({
+              id:      `SRV-${String(r.id).padStart(3, '0')}`,
+              fecha:   this.formatFechaCorta(r.fechaServicio),
+              hora:    (r.horaInicio ?? '').substring(0, 5),
+              cliente: r.nombreCliente ?? '',
+            }))
+        ),
+        catchError(() => of([]))
+      );
+  }
+
+  private mapOperador(r: OperadorApiItem): Operador {
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    let proximoServicio: Operador['proximoServicio'] = null;
+    if (r.proximaFechaServicio) {
+      const d = new Date(r.proximaFechaServicio);
+      const fecha = `${d.getUTCDate()} ${meses[d.getUTCMonth()]}`;
+      const hora  = (r.proximaHoraServicio ?? '').substring(0, 5);
+      proximoServicio = { fecha, hora };
+    }
+
+    const tipo: TipoDisponibilidad =
+      r.totalHorasSemanales >= 40 ? 'Tiempo Completo' :
+      r.totalHorasSemanales  >  0 ? 'Horario Parcial'  : 'Personalizado';
+
+    return {
+      id:                  `OP-${String(r.id).padStart(3, '0')}`,
+      nombre:              r.nombresCompleto,
+      telefono:            r.telefono ?? '',
+      loginId:             r.alias,
+      password:            '',
+      licencia:            r.nroLicencia,
+      vencimientoLicencia: r.fecVenLic,
+      proximoServicio,
+      serviciosAsignados:  [],
+      tipoDisponibilidad:  tipo,
+      disponibilidad:      this.emptyGrid(),
+      activo:              r.estado === 'ACTIVO',
+    };
+  }
+
+  private formatFechaCorta(dateStr: string): string {
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const d = new Date(dateStr);
+    return `${d.getUTCDate()} ${meses[d.getUTCMonth()]}`;
+  }
+
+  private emptyGrid(): GridDisponibilidad {
+    const grid = {} as GridDisponibilidad;
+    for (const dia of DIAS_SEMANA) {
+      grid[dia] = {} as Record<HoraGrid, boolean>;
+      for (const hora of HORAS_GRID) grid[dia][hora] = false;
+    }
+    return grid;
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/flota')
@@ -260,6 +335,44 @@ const CLIENTES_B2B: ClienteB2B[] = [
   },
 ];
 
+function buildGrid(diasActivos: DiaSemana[], horasActivas: HoraGrid[]): GridDisponibilidad {
+  const grid = {} as GridDisponibilidad;
+  for (const dia of DIAS_SEMANA) {
+    grid[dia] = {} as Record<HoraGrid, boolean>;
+    for (const hora of HORAS_GRID) {
+      grid[dia][hora] = diasActivos.includes(dia) && horasActivas.includes(hora);
+    }
+  }
+  return grid;
+}
+
+const DIAS_SEMANA_LAB: DiaSemana[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
+const HORAS_COMPLETO: HoraGrid[]   = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+const HORAS_MANANA:  HoraGrid[]    = ['08:00','09:00','10:00','11:00','12:00'];
+const HORAS_TARDE:   HoraGrid[]    = ['13:00','14:00','15:00','16:00','17:00'];
+
+interface OperadorApiItem {
+  id:                      number;
+  alias:                   string;
+  nombresCompleto:         string;
+  telefono:                string | null;
+  nroLicencia:             string;
+  fecVenLic:               string;
+  estado:                  string;
+  proximaFechaServicio:    string | null;
+  proximaHoraServicio:     string | null;
+  totalServiciosAsignados: number;
+  totalHorasSemanales:     number;
+}
+
+interface ReservaApiItem {
+  id:              number;
+  nombreCliente:   string | null;
+  fechaServicio:   string;
+  horaInicio:      string;
+  estadoOperacion: string;
+}
+
 const OPERADORES: Operador[] = [
   {
     id: 'OP-001',
@@ -268,8 +381,16 @@ const OPERADORES: Operador[] = [
     loginId: 'OPER001',
     password: 'driver123',
     licencia: 'D-12345678',
-    vencimientoLicencia: '2027-06-15',
-    proximoServicio: '18/02/2026',
+    vencimientoLicencia: '2025-06-14',
+    proximoServicio: { fecha: '03 mar', hora: '14:00' },
+    serviciosAsignados: [
+      { id: 'SRV-001', fecha: '03 mar', hora: '14:00', cliente: 'Transportes XYZ S.A.' },
+      { id: 'SRV-002', fecha: '04 mar', hora: '09:00', cliente: 'Logística ABC Ltda.' },
+      { id: 'SRV-003', fecha: '05 mar', hora: '16:00', cliente: 'Distribuidora Central' },
+      { id: 'SRV-004', fecha: '07 mar', hora: '10:00', cliente: 'Mudanzas Express Corp.' },
+    ],
+    tipoDisponibilidad: 'Tiempo Completo',
+    disponibilidad: buildGrid(DIAS_SEMANA_LAB, HORAS_COMPLETO),
     activo: true,
   },
   {
@@ -279,8 +400,14 @@ const OPERADORES: Operador[] = [
     loginId: 'OPER002',
     password: 'driver456',
     licencia: 'D-87654321',
-    vencimientoLicencia: '2026-09-30',
-    proximoServicio: '18/02/2026',
+    vencimientoLicencia: '2025-08-19',
+    proximoServicio: { fecha: '04 mar', hora: '11:00' },
+    serviciosAsignados: [
+      { id: 'SRV-005', fecha: '04 mar', hora: '11:00', cliente: 'Logística Beta Ltda.' },
+      { id: 'SRV-006', fecha: '06 mar', hora: '09:00', cliente: 'Transportes XYZ S.A.' },
+    ],
+    tipoDisponibilidad: 'Horario Parcial',
+    disponibilidad: buildGrid(DIAS_SEMANA_LAB, HORAS_MANANA),
     activo: true,
   },
   {
@@ -290,8 +417,11 @@ const OPERADORES: Operador[] = [
     loginId: 'OPER003',
     password: 'driver789',
     licencia: 'D-11223344',
-    vencimientoLicencia: '2025-12-01',
+    vencimientoLicencia: '2024-02-09',
     proximoServicio: null,
+    serviciosAsignados: [],
+    tipoDisponibilidad: 'Personalizado',
+    disponibilidad: buildGrid(['Lun', 'Mié', 'Vie'], HORAS_TARDE),
     activo: true,
   },
   {
@@ -301,8 +431,11 @@ const OPERADORES: Operador[] = [
     loginId: 'OPER004',
     password: 'driver000',
     licencia: 'D-99887766',
-    vencimientoLicencia: '2026-01-14',
+    vencimientoLicencia: '2025-01-14',
     proximoServicio: null,
+    serviciosAsignados: [],
+    tipoDisponibilidad: 'Horario Parcial',
+    disponibilidad: buildGrid(DIAS_SEMANA_LAB, HORAS_MANANA),
     activo: false,
   },
 ];

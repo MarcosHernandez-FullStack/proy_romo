@@ -1,7 +1,7 @@
 import { Component, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserCog, X, RefreshCw, AlertTriangle } from 'lucide-angular';
-import { Operador } from '../../../../models/admin.model';
+import { DIAS_SEMANA, GridDisponibilidad, HoraGrid, HORAS_GRID, Operador } from '../../../../models/admin.model';
 
 @Component({
   selector: 'app-nuevo-operador',
@@ -45,14 +45,26 @@ export class NuevoOperadorComponent {
   protected onGuardar(): void {
     if (!this.esValido) return;
     this.guardar.emit({
-      nombre: this.nombre(),
-      telefono: this.telefono(),
-      loginId: this.loginId(),
-      password: this.password(),
-      licencia: this.licencia(),
-      vencimientoLicencia: this.vencimientoLicencia(),
-      proximoServicio: null,
-      activo: true,
+      nombre:               this.nombre(),
+      telefono:             this.telefono(),
+      loginId:              this.loginId(),
+      password:             this.password(),
+      licencia:             this.licencia(),
+      vencimientoLicencia:  this.vencimientoLicencia(),
+      proximoServicio:      null,
+      serviciosAsignados:   [],
+      tipoDisponibilidad:   'Personalizado',
+      disponibilidad:       this.emptyGrid(),
+      activo:               true,
     });
+  }
+
+  private emptyGrid(): GridDisponibilidad {
+    const grid = {} as GridDisponibilidad;
+    for (const dia of DIAS_SEMANA) {
+      grid[dia] = {} as Record<HoraGrid, boolean>;
+      for (const hora of HORAS_GRID) grid[dia][hora] = false;
+    }
+    return grid;
   }
 }

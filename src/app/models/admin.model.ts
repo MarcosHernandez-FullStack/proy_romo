@@ -34,6 +34,21 @@ export interface ClienteB2B {
   activo: boolean;
 }
 
+export type TipoDisponibilidad = 'Tiempo Completo' | 'Horario Parcial' | 'Personalizado';
+
+export const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] as const;
+export const HORAS_GRID  = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'] as const;
+export type DiaSemana = typeof DIAS_SEMANA[number];
+export type HoraGrid  = typeof HORAS_GRID[number];
+export type GridDisponibilidad = Record<DiaSemana, Record<HoraGrid, boolean>>;
+
+export interface ServicioProximo {
+  id: string;
+  fecha: string;
+  hora: string;
+  cliente: string;
+}
+
 export interface Operador {
   id: string;
   nombre: string;
@@ -42,7 +57,10 @@ export interface Operador {
   password: string;
   licencia: string;
   vencimientoLicencia: string;
-  proximoServicio: string | null;
+  proximoServicio: { fecha: string; hora: string } | null;
+  serviciosAsignados: ServicioProximo[];
+  tipoDisponibilidad: TipoDisponibilidad;
+  disponibilidad: GridDisponibilidad;
   activo: boolean;
 }
 
