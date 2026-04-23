@@ -193,13 +193,13 @@
                 class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer">
                 <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
               </button>
-              <button type="button" (click)="toggleActivo(o.id)"
-                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer">
+              <button type="button" (click)="onCambiarEstado(o)" [disabled]="loadingEstado()"
+                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer disabled:opacity-50">
                 <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
               </button>
             } @else {
-              <button type="button" (click)="toggleActivo(o.id)"
-                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer">
+              <button type="button" (click)="onCambiarEstado(o)" [disabled]="loadingEstado()"
+                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer disabled:opacity-50">
                 <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#16a34a" [strokeWidth]="1.5" />
               </button>
             }
@@ -214,7 +214,7 @@
 <!-- Modal: Nuevo operador -->
 @if (showNuevo()) {
   <app-nuevo-operador
-    (guardar)="onNuevoOperador($event)"
+    (guardado)="onNuevoOperador()"
     (cerrar)="showNuevo.set(false)" />
 }
 
@@ -222,7 +222,7 @@
 @if (operadorEditar()) {
   <app-editar-operador
     [operador]="operadorEditar()!"
-    (guardar)="onEditarOperador($event)"
+    (guardar)="onEditarOperador()"
     (cerrar)="operadorEditar.set(null)" />
 }
 
@@ -239,4 +239,28 @@
     [operador]="operadorDisponib()!"
     (guardar)="onGuardarDisponibilidad($event)"
     (cerrar)="operadorDisponib.set(null)" />
+}
+
+<!-- Modal: Confirmar cambio de estado -->
+@if (showConfirmEstado() && operadorEnConfirmacion()) {
+  <app-mensaje-modal
+    [tipo]="operadorEnConfirmacion()!.activo ? 'advertencia' : 'info'"
+    [titulo]="operadorEnConfirmacion()!.activo ? 'Desactivar operador' : 'Reactivar operador'"
+    [mensaje]="operadorEnConfirmacion()!.activo
+      ? '¿Está seguro de que desea desactivar a ' + operadorEnConfirmacion()!.nombre + '?\nSu acceso al sistema quedará bloqueado.'
+      : '¿Está seguro de que desea reactivar a ' + operadorEnConfirmacion()!.nombre + '?\nRecuperará acceso al sistema.'"
+    [confirmable]="true"
+    [labelCancelar]="'Cancelar'"
+    [labelConfirmar]="operadorEnConfirmacion()!.activo ? 'Sí, desactivar' : 'Sí, reactivar'"
+    (cerrar)="showConfirmEstado.set(false); operadorEnConfirmacion.set(null)"
+    (confirmar)="confirmarCambioEstado()" />
+}
+
+<!-- Modal: Resultado cambio de estado -->
+@if (modalResultado()) {
+  <app-mensaje-modal
+    [tipo]="modalResultado()!.tipo"
+    [titulo]="modalResultado()!.titulo"
+    [mensaje]="modalResultado()!.mensaje"
+    (cerrar)="modalResultado.set(null)" />
 }

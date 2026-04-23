@@ -17,142 +17,228 @@
     <!-- Body scrollable -->
     <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
 
-      <!-- Templates -->
-      <div class="border border-[#e5e7eb] rounded-xl p-4">
-        <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-          <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/></svg>
-          TEMPLATES RÁPIDOS
-        </p>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          @for (t of templates; track t.label) {
-            <button type="button" (click)="applyTemplate(t)"
-              class="border rounded-xl px-3 py-2.5 text-[12px] font-semibold transition-colors cursor-pointer text-left {{ t.color }}">
-              {{ t.label }}
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Grid -->
-      <div class="border border-[#e5e7eb] rounded-xl p-4">
-        <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-4 flex items-center gap-1.5">
-          <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      <!-- Loading overlay -->
+      @if (cargando()) {
+        <div class="flex flex-col items-center justify-center py-12 gap-3">
+          <svg class="size-8 text-[#155dfc] animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
           </svg>
-          GRILLA SEMANAL DE DISPONIBILIDAD
-        </p>
+          <p class="text-[13px] text-[#6a7282]">Cargando disponibilidad...</p>
+        </div>
+      }
 
-        <div class="overflow-x-auto">
-          <table class="w-full min-w-[580px] border-collapse">
-            <!-- Col headers -->
-            <thead>
-              <tr>
-                <th class="w-14 text-[11px] text-[#9ca3af] font-semibold pb-2 text-left">Hora</th>
-                @for (dia of dias; track dia) {
-                  <th class="text-center pb-2 min-w-[70px]">
-                    <p class="text-[12px] font-bold text-[#374151] mb-1.5">{{ dia }}</p>
-                    <div class="flex items-center justify-center gap-1">
-                      <button type="button" (click)="toggleDia(dia, true)"
-                        class="size-6 flex items-center justify-center rounded bg-[#f0fdf4] border border-[#bbf7d0] hover:bg-[#dcfce7] cursor-pointer transition-colors text-[#16a34a]">
-                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                      </button>
-                      <button type="button" (click)="toggleDia(dia, false)"
-                        class="size-6 flex items-center justify-center rounded bg-[#fef2f2] border border-[#fca5a5] hover:bg-[#fee2e2] cursor-pointer transition-colors text-[#dc2626]">
-                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                      </button>
-                    </div>
-                  </th>
-                }
-              </tr>
-            </thead>
-            <!-- Rows -->
-            <tbody>
-              @for (hora of horas; track hora) {
-                <tr>
-                  <td class="py-1 pr-2 text-[12px] text-[#6a7282] font-mono">{{ hora }}</td>
-                  @for (dia of dias; track dia) {
-                    <td class="py-1 px-1 text-center">
-                      <button type="button" (click)="toggle(dia, hora)"
-                        class="w-full h-9 rounded-lg border transition-all cursor-pointer flex items-center justify-center"
-                        [class.bg-[#d1fae5]]="grid()[dia]?.[hora]"
-                        [class.border-[#6ee7b7]]="grid()[dia]?.[hora]"
-                        [class.text-[#059669]]="grid()[dia]?.[hora]"
-                        [class.bg-[#f9fafb]]="!grid()[dia]?.[hora]"
-                        [class.border-[#e5e7eb]]="!grid()[dia]?.[hora]">
-                        @if (grid()[dia]?.[hora]) {
-                          <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                        }
-                      </button>
-                    </td>
+      @if (!cargando()) {
+
+        <!-- Alerta de conflictos con confirmación -->
+        @if (conflictos().length > 0) {
+          <div class="border border-amber-300 rounded-xl bg-amber-50 p-4 flex flex-col gap-3">
+            <div class="flex items-start gap-2">
+              <svg class="size-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              </svg>
+              <div class="flex-1">
+                <p class="text-[13px] font-bold text-amber-800 mb-1">Conflicto de reservas asignadas</p>
+                <p class="text-[12px] text-amber-700">{{ mensajeConflicto() }}</p>
+              </div>
+            </div>
+
+            <!-- Lista de reservas afectadas -->
+            <div class="bg-white border border-amber-200 rounded-lg overflow-hidden">
+              <table class="w-full text-[12px]">
+                <thead class="bg-amber-100">
+                  <tr>
+                    <th class="px-3 py-2 text-left font-semibold text-amber-800">ID Reserva</th>
+                    <th class="px-3 py-2 text-left font-semibold text-amber-800">Fecha</th>
+                    <th class="px-3 py-2 text-left font-semibold text-amber-800">Hora inicio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of conflictos(); track c.idReserva) {
+                    <tr class="border-t border-amber-100">
+                      <td class="px-3 py-2 text-amber-900 font-mono font-bold">#{{ c.idReserva }}</td>
+                      <td class="px-3 py-2 text-amber-700">{{ c.fechaServicio }}</td>
+                      <td class="px-3 py-2 text-amber-700">{{ c.horaInicio }}</td>
+                    </tr>
                   }
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </tbody>
+              </table>
+            </div>
 
-      <!-- Bottom row: copiar + resumen -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex gap-2 pt-1">
+              <button type="button" (click)="onCancelarConfirmacion()"
+                class="flex-1 h-9 rounded-lg border border-[#d1d5dc] text-[#374151] text-[13px] font-semibold hover:bg-[#f9fafb] transition-colors cursor-pointer">
+                Cancelar
+              </button>
+              <button type="button" (click)="onConfirmar()" [disabled]="guardando()"
+                class="flex-1 h-9 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-[13px] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-2">
+                @if (guardando()) {
+                  <svg class="size-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                }
+                Confirmar y liberar reservas
+              </button>
+            </div>
+          </div>
+        }
 
-        <!-- Copiar horarios -->
+        <!-- Templates -->
         <div class="border border-[#e5e7eb] rounded-xl p-4">
           <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-3 flex items-center gap-1.5">
-            <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-            </svg>
-            Copiar Horarios
+            <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/></svg>
+            TEMPLATES RÁPIDOS
           </p>
-          <select [ngModel]="diaACopiar()" (ngModelChange)="diaACopiar.set($event)"
-            class="w-full border border-[#d1d5dc] rounded-lg px-3 py-2 text-[14px] text-[#374151] mb-3 focus:outline-none focus:border-[#155dfc]">
-            @for (dia of dias; track dia) {
-              <option [value]="dia">{{ dia }}</option>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            @for (t of templates; track t.label) {
+              <button type="button" (click)="applyTemplate(t)"
+                class="border rounded-xl px-3 py-2.5 text-[12px] font-semibold transition-colors cursor-pointer text-left {{ t.color }}">
+                {{ t.label }}
+              </button>
             }
-          </select>
-          <button type="button" (click)="copiarDia()"
-            class="w-full h-10 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[13px] font-semibold rounded-lg transition-colors cursor-pointer">
-            Copiar a todos los demás días
-          </button>
+          </div>
         </div>
 
-        <!-- Resumen -->
+        <!-- Grid -->
         <div class="border border-[#e5e7eb] rounded-xl p-4">
           <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-3 flex items-center gap-1.5">
             <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
             </svg>
-            Resumen de Disponibilidad
+            GRILLA SEMANAL DE DISPONIBILIDAD
           </p>
-          <div class="flex flex-col gap-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-[13px] text-[#6a7282]">Total horas semanales:</span>
-              <span class="text-[13px] font-bold text-[#374151]">{{ totalHoras() }}h</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[13px] text-[#6a7282]">Días activos:</span>
-              <span class="text-[13px] font-bold text-[#374151]">{{ diasActivos() }}</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[13px] text-[#6a7282]">Tipo:</span>
-              <span class="text-[13px] font-bold text-[#155dfc]">{{ tipoResumen() }}</span>
+
+          <!-- Tabla con scroll vertical y cabecera fija -->
+          <div class="overflow-x-auto">
+            <div class="relative overflow-y-auto max-h-[420px] rounded-lg border border-[#e5e7eb]">
+              <table class="w-full min-w-[560px] border-collapse">
+
+                <!-- Cabecera sticky -->
+                <thead class="sticky top-0 z-10 bg-white border-b border-[#e5e7eb]">
+                  <tr>
+                    <th class="w-14 px-2 py-2 text-[11px] text-[#9ca3af] font-semibold text-left bg-white">Hora</th>
+                    @for (dia of dias; track dia) {
+                      <th class="text-center py-2 min-w-[66px] bg-white">
+                        <p class="text-[12px] font-bold text-[#374151] mb-1">{{ dia }}</p>
+                        <div class="flex items-center justify-center gap-1">
+                          <button type="button" (click)="toggleDia(dia, true)"
+                            class="size-5 flex items-center justify-center rounded bg-[#f0fdf4] border border-[#bbf7d0] hover:bg-[#dcfce7] cursor-pointer transition-colors text-[#16a34a]"
+                            title="Activar todo el día">
+                            <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                          </button>
+                          <button type="button" (click)="toggleDia(dia, false)"
+                            class="size-5 flex items-center justify-center rounded bg-[#fef2f2] border border-[#fca5a5] hover:bg-[#fee2e2] cursor-pointer transition-colors text-[#dc2626]"
+                            title="Desactivar todo el día">
+                            <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          </button>
+                        </div>
+                      </th>
+                    }
+                  </tr>
+                </thead>
+
+                <!-- Filas de horas -->
+                <tbody>
+                  @for (hora of horas; track hora) {
+                    <tr class="border-t border-[#f3f4f6] hover:bg-[#fafafa]">
+                      <td class="px-2 py-0.5 text-[11px] text-[#6a7282] font-mono whitespace-nowrap">{{ hora }}</td>
+                      @for (dia of dias; track dia) {
+                        <td class="py-0.5 px-0.5 text-center">
+                          <button type="button" (click)="toggle(dia, hora)"
+                            class="w-full h-7 rounded border transition-all cursor-pointer flex items-center justify-center"
+                            [class.bg-[#d1fae5]]="grid()[dia]?.[hora]"
+                            [class.border-[#6ee7b7]]="grid()[dia]?.[hora]"
+                            [class.text-[#059669]]="grid()[dia]?.[hora]"
+                            [class.bg-[#f9fafb]]="!grid()[dia]?.[hora]"
+                            [class.border-transparent]="!grid()[dia]?.[hora]">
+                            @if (grid()[dia]?.[hora]) {
+                              <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            }
+                          </button>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+
+              </table>
             </div>
           </div>
         </div>
 
-      </div>
+        <!-- Bottom row: copiar + resumen -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <!-- Copiar horarios -->
+          <div class="border border-[#e5e7eb] rounded-xl p-4">
+            <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+              </svg>
+              Copiar Horarios
+            </p>
+            <select [ngModel]="diaACopiar()" (ngModelChange)="diaACopiar.set($event)"
+              class="w-full border border-[#d1d5dc] rounded-lg px-3 py-2 text-[14px] text-[#374151] mb-3 focus:outline-none focus:border-[#155dfc]">
+              @for (dia of dias; track dia) {
+                <option [value]="dia">{{ dia }}</option>
+              }
+            </select>
+            <button type="button" (click)="copiarDia()"
+              class="w-full h-10 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[13px] font-semibold rounded-lg transition-colors cursor-pointer">
+              Copiar a todos los demás días
+            </button>
+          </div>
+
+          <!-- Resumen -->
+          <div class="border border-[#e5e7eb] rounded-xl p-4">
+            <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Resumen de Disponibilidad
+            </p>
+            <div class="flex flex-col gap-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-[#6a7282]">Total horas semanales:</span>
+                <span class="text-[13px] font-bold text-[#374151]">{{ totalHoras() }}h</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-[#6a7282]">Días activos:</span>
+                <span class="text-[13px] font-bold text-[#374151]">{{ diasActivos() }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-[#6a7282]">Tipo:</span>
+                <span class="text-[13px] font-bold text-[#155dfc]">{{ tipoResumen() }}</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      }
     </div>
 
     <!-- Footer -->
-    <div class="px-6 py-4 border-t border-[#e5e7eb] flex items-center gap-3 flex-shrink-0">
-      <button type="button" (click)="cerrar.emit()"
-        class="flex-1 h-10 rounded-xl border border-[#d1d5dc] text-[#374151] text-[14px] font-semibold hover:bg-[#f9fafb] transition-colors cursor-pointer">
-        Cancelar
-      </button>
-      <button type="button" (click)="onGuardar()"
-        class="flex-1 h-10 rounded-xl bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold transition-colors cursor-pointer">
-        Guardar Disponibilidad
-      </button>
-    </div>
+    @if (!cargando()) {
+      <div class="px-6 py-4 border-t border-[#e5e7eb] flex items-center gap-3 flex-shrink-0">
+        <button type="button" (click)="cerrar.emit()"
+          class="flex-1 h-10 rounded-xl border border-[#d1d5dc] text-[#374151] text-[14px] font-semibold hover:bg-[#f9fafb] transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="button" (click)="onGuardar()" [disabled]="guardando() || conflictos().length > 0"
+          class="flex-1 h-10 rounded-xl bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-60 text-white text-[14px] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-2">
+          @if (guardando()) {
+            <svg class="size-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            Guardando...
+          } @else {
+            Guardar Disponibilidad
+          }
+        </button>
+      </div>
+    }
 
   </div>
 </div>

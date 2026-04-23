@@ -1,14 +1,13 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, output } from '@angular/core';
 import { Operador } from '../../../../models/admin.model';
 
 @Component({
   selector: 'app-proximos-servicios',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './proximos-servicios.html',
 })
 export class ProximosServiciosComponent {
-  @Input({ required: true }) operador!: Operador;
-  @Output() cerrar = new EventEmitter<void>();
+  readonly operador = input.required<Operador>();
+  readonly cerrar   = output<void>();
 }

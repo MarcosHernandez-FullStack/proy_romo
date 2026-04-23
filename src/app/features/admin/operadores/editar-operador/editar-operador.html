@@ -15,17 +15,22 @@
     </div>
 
     <div class="p-6 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+
       <!-- CREDENCIALES -->
       <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[12px] p-4">
         <p class="text-[#bb4d00] text-[11px] font-bold uppercase tracking-wider mb-3">Credenciales de Acceso</p>
         <div class="flex flex-col gap-3">
           <div>
             <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">ID de Usuario (Login)</label>
-            <input type="text" [ngModel]="loginId()" (ngModelChange)="loginId.set($event)" name="loginId"
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white" />
+            <input type="text" [value]="operador().loginId" disabled
+              class="w-full border border-[#e5e7eb] rounded-[10px] px-3 py-2.5 text-[14px] text-[#9ca3af] bg-[#f9fafb] cursor-not-allowed" />
+            <p class="text-[11px] text-[#9ca3af] mt-1">El alias no puede modificarse.</p>
           </div>
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Contraseña</label>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
+              Nueva Contraseña
+              <span class="text-[#9ca3af] font-normal">(dejar vacío para conservar la actual)</span>
+            </label>
             <div class="flex gap-2">
               <input type="text" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password"
                 class="flex-1 border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
@@ -43,9 +48,21 @@
       <div>
         <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-3">Información Personal</p>
         <div class="flex flex-col gap-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Nombres</label>
+              <input type="text" [ngModel]="nombres()" (ngModelChange)="nombres.set($event)" name="nombres"
+                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+            </div>
+            <div>
+              <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Apellidos</label>
+              <input type="text" [ngModel]="apellidos()" (ngModelChange)="apellidos.set($event)" name="apellidos"
+                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+            </div>
+          </div>
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Nombre Completo</label>
-            <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre"
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Correo Electrónico</label>
+            <input type="email" [ngModel]="correo()" (ngModelChange)="correo.set($event)" name="correo"
               class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
           </div>
           <div>
@@ -76,14 +93,30 @@
     </div>
 
     <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
-      <button type="button" (click)="cerrar.emit()"
-        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      <button type="button" (click)="cerrar.emit()" [disabled]="loading()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer disabled:opacity-50">
         Cancelar
       </button>
-      <button type="button" (click)="onGuardar()"
-        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
-        Guardar Cambios
+      <button type="button" (click)="onGuardar()" [disabled]="loading()"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer disabled:opacity-60">
+        {{ loading() ? 'Guardando...' : 'Guardar Cambios' }}
       </button>
     </div>
   </div>
 </div>
+
+@if (showExito()) {
+  <app-exito-modal
+    titulo="¡Cambios Guardados!"
+    mensaje="Los datos del operador fueron actualizados exitosamente."
+    labelCerrar="Aceptar"
+    (cerrar)="guardar.emit()" />
+}
+
+@if (errorModal()) {
+  <app-mensaje-modal
+    tipo="error"
+    titulo="Error al actualizar"
+    [mensaje]="errorModal()!"
+    (cerrar)="errorModal.set(null)" />
+}

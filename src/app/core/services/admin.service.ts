@@ -6,8 +6,15 @@ import { delay, map, catchError } from 'rxjs/operators';
 import {
   BitacoraEntry,
   ClienteB2B,
+  CrearOperadorRequest,
+  CrearUsuarioResult,
+  EditarOperadorRequest,
   DIAS_SEMANA,
   DiaSemana,
+  DispConflicto,
+  DispOperador,
+  DispRango,
+  DispResult,
   DisponibilidadGrua,
   ExcepcionAgenda,
   GridDisponibilidad,
@@ -175,20 +182,39 @@ export class AdminService {
     );
   }
 
+  getDispOperador(idOperador: number): Observable<DispOperador> {
+    return this.http.get<DispOperador>(`${API}/Operadores/${idOperador}/disponibilidad`);
+  }
+
+  guardarDispOperador(idOperador: number, disponibilidad: DispRango[], confirmar: boolean): Observable<DispResult> {
+    return this.http.post<DispResult>(
+      `${API}/Operadores/${idOperador}/disponibilidad`,
+      { disponibilidad, confirmar }
+    );
+  }
+
+  crearOperador(data: CrearOperadorRequest): Observable<CrearUsuarioResult> {
+    return this.http.post<CrearUsuarioResult>(`${API}/Operadores`, data);
+  }
+
+  actualizarEstadoOperador(idOperador: number, nuevoEstado: 'ACTIVO' | 'INACTIVO'): Observable<CrearUsuarioResult> {
+    return this.http.patch<CrearUsuarioResult>(`${API}/Operadores/${idOperador}/estado`, { nuevoEstado });
+  }
+
+  editarOperador(idOperador: number, data: EditarOperadorRequest): Observable<CrearUsuarioResult> {
+    return this.http.put<CrearUsuarioResult>(`${API}/Operadores/${idOperador}`, data);
+  }
+
   getServiciosOperador(idOperador: number): Observable<ServicioProximo[]> {
     return this.http
-      .get<ReservaApiItem[]>(`${API}/Operaciones`, { params: { idOperador: idOperador.toString() } })
+      .get<ProxServApiItem[]>(`${API}/Operadores/${idOperador}/proximos-servicios`)
       .pipe(
-        map(reservas =>
-          reservas
-            .filter(r => !['CANCELADO','FINALIZADO'].includes(r.estadoOperacion?.toUpperCase() ?? ''))
-            .map(r => ({
-              id:      `SRV-${String(r.id).padStart(3, '0')}`,
-              fecha:   this.formatFechaCorta(r.fechaServicio),
-              hora:    (r.horaInicio ?? '').substring(0, 5),
-              cliente: r.nombreCliente ?? '',
-            }))
-        ),
+        map(items => items.map(r => ({
+          id:      `SRV-${String(r.id).padStart(3, '0')}`,
+          fecha:   r.fechaAbreviada,
+          hora:    r.horaInicio,
+          cliente: r.nomCliente,
+        }))),
         catchError(() => of([]))
       );
   }
@@ -210,6 +236,9 @@ export class AdminService {
     return {
       id:                  `OP-${String(r.id).padStart(3, '0')}`,
       nombre:              r.nombresCompleto,
+      nombres:             r.nombres,
+      apellidos:           r.apellidos,
+      correo:              r.correo,
       telefono:            r.telefono ?? '',
       loginId:             r.alias,
       password:            '',
@@ -221,12 +250,6 @@ export class AdminService {
       disponibilidad:      this.emptyGrid(),
       activo:              r.estado === 'ACTIVO',
     };
-  }
-
-  private formatFechaCorta(dateStr: string): string {
-    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    const d = new Date(dateStr);
-    return `${d.getUTCDate()} ${meses[d.getUTCMonth()]}`;
   }
 
   private emptyGrid(): GridDisponibilidad {
@@ -355,6 +378,9 @@ interface OperadorApiItem {
   id:                      number;
   alias:                   string;
   nombresCompleto:         string;
+  nombres:                 string;
+  apellidos:               string;
+  correo:                  string;
   telefono:                string | null;
   nroLicencia:             string;
   fecVenLic:               string;
@@ -365,18 +391,22 @@ interface OperadorApiItem {
   totalHorasSemanales:     number;
 }
 
-interface ReservaApiItem {
-  id:              number;
-  nombreCliente:   string | null;
-  fechaServicio:   string;
-  horaInicio:      string;
-  estadoOperacion: string;
+interface ProxServApiItem {
+  id:             number;
+  fechaServicio:  string;
+  horaInicio:     string;
+  horaFin:        string;
+  nomCliente:     string;
+  fechaAbreviada: string;
 }
 
 const OPERADORES: Operador[] = [
   {
     id: 'OP-001',
     nombre: 'Roberto Sánchez',
+    nombres: 'Roberto',
+    apellidos: 'Sánchez',
+    correo: 'roberto.sanchez@romo.com',
     telefono: '+54 11 2222-3333',
     loginId: 'OPER001',
     password: 'driver123',
@@ -396,6 +426,9 @@ const OPERADORES: Operador[] = [
   {
     id: 'OP-002',
     nombre: 'Fernando López',
+    nombres: 'Fernando',
+    apellidos: 'López',
+    correo: 'fernando.lopez@romo.com',
     telefono: '+54 11 3333-4444',
     loginId: 'OPER002',
     password: 'driver456',
@@ -413,6 +446,9 @@ const OPERADORES: Operador[] = [
   {
     id: 'OP-003',
     nombre: 'Martín Gómez',
+    nombres: 'Martín',
+    apellidos: 'Gómez',
+    correo: 'martin.gomez@romo.com',
     telefono: '+54 11 4444-5555',
     loginId: 'OPER003',
     password: 'driver789',
@@ -427,6 +463,9 @@ const OPERADORES: Operador[] = [
   {
     id: 'OP-004',
     nombre: 'Carlos Morales',
+    nombres: 'Carlos',
+    apellidos: 'Morales',
+    correo: 'carlos.morales@romo.com',
     telefono: '+54 11 5555-6666',
     loginId: 'OPER004',
     password: 'driver000',

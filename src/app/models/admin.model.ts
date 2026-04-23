@@ -37,7 +37,12 @@ export interface ClienteB2B {
 export type TipoDisponibilidad = 'Tiempo Completo' | 'Horario Parcial' | 'Personalizado';
 
 export const DIAS_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] as const;
-export const HORAS_GRID  = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'] as const;
+export const HORAS_GRID = [
+  '00:00','01:00','02:00','03:00','04:00','05:00',
+  '06:00','07:00','08:00','09:00','10:00','11:00',
+  '12:00','13:00','14:00','15:00','16:00','17:00',
+  '18:00','19:00','20:00','21:00','22:00','23:00',
+] as const;
 export type DiaSemana = typeof DIAS_SEMANA[number];
 export type HoraGrid  = typeof HORAS_GRID[number];
 export type GridDisponibilidad = Record<DiaSemana, Record<HoraGrid, boolean>>;
@@ -52,6 +57,9 @@ export interface ServicioProximo {
 export interface Operador {
   id: string;
   nombre: string;
+  nombres: string;
+  apellidos: string;
+  correo: string;
   telefono: string;
   loginId: string;
   password: string;
@@ -62,6 +70,35 @@ export interface Operador {
   tipoDisponibilidad: TipoDisponibilidad;
   disponibilidad: GridDisponibilidad;
   activo: boolean;
+}
+
+export interface EditarOperadorRequest {
+  contrasena: string;
+  nombres: string;
+  apellidos: string;
+  telefono: string;
+  correo: string;
+  rol: 'OPERADOR';
+  nroLicencia: string;
+  fecVenLic: string;  // YYYY-MM-DD
+}
+
+export interface CrearOperadorRequest {
+  alias: string;
+  contrasena: string;
+  nombres: string;
+  apellidos: string;
+  telefono: string;
+  correo: string;
+  rol: 'OPERADOR';
+  nroLicencia: string;
+  fecVenLic: string;  // YYYY-MM-DD
+}
+
+export interface CrearUsuarioResult {
+  exitoso: number;
+  mensaje: string;
+  idNuevo: number;
 }
 
 export interface UnidadFlota {
@@ -199,4 +236,39 @@ export interface DisponibilidadGrua {
   cantidadReservas:        number;
   cantidadGruas:           number;
   cantidadGruasDisponible: number;
+}
+
+// ── Disponibilidad de Operadores ──────────────────────────────
+
+export interface DispSlot {
+  id:         number;
+  nroDia:     number;
+  nombreDia:  string;
+  horaInicio: string; // "HH:mm"
+  horaFin:    string; // "HH:mm"
+}
+
+export interface DispOperador {
+  slots:               DispSlot[];
+  totalHorasSemanales: number;
+  diasActivos:         number;
+}
+
+export interface DispRango {
+  NroDia:     number;
+  NombreDia:  string;
+  HoraInicio: string; // "HH:mm"
+  HoraFin:    string; // "HH:mm"
+}
+
+export interface DispConflicto {
+  idReserva:     number;
+  fechaServicio: string;
+  horaInicio:    string;
+}
+
+export interface DispResult {
+  exitoso:     number;
+  mensaje:     string;
+  conflictos?: DispConflicto[];
 }
