@@ -39,15 +39,17 @@ export class NuevoClienteComponent {
   protected onGuardar(): void {
     if (!this.esValido) return;
     this.guardar.emit({
-      empresa: this.empresa(),
-      contacto: this.contacto(),
-      correo: this.correo(),
-      telefono: this.telefono(),
-      loginId: this.loginId(),
-      password: this.password(),
-      tarifaBase: this.tarifaBase(),
-      tarifaKm: this.tarifaKm(),
-      activo: true,
+      empresa:        this.empresa(),
+      contacto:       this.contacto(),
+      correo:         this.correo(),
+      telefono:       this.telefono(),
+      loginId:        this.loginId(),
+      password:       this.password(),
+      tarifaBase:     this.tarifaBase(),
+      tarifaKm:       this.tarifaKm(),
+      tipoTarifaBase: this.tarifaBase() === 0 ? 'GLOBAL' : 'CUSTOM',
+      tipoTarifaKm:   this.tarifaKm()   === 0 ? 'GLOBAL' : 'CUSTOM',
+      activo:         true,
     });
   }
 }

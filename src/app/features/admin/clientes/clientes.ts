@@ -8,6 +8,12 @@ import {
   Pencil,
   RotateCcw,
   Trash2,
+  Building2,
+  CheckCircle,
+  Ban,
+  KeyRound,
+  Mail,
+  Phone,
 } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
 import { ClienteB2B } from '../../../models/admin.model';
@@ -25,12 +31,18 @@ type FiltroEstado = 'Activos' | 'Bajas';
 export class ClientesComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
-  protected readonly UsersIcon = Users;
-  protected readonly PlusIcon = Plus;
-  protected readonly SearchIcon = Search;
-  protected readonly PencilIcon = Pencil;
-  protected readonly RotateCcwIcon = RotateCcw;
-  protected readonly Trash2Icon = Trash2;
+  protected readonly UsersIcon       = Users;
+  protected readonly PlusIcon        = Plus;
+  protected readonly SearchIcon      = Search;
+  protected readonly PencilIcon      = Pencil;
+  protected readonly RotateCcwIcon   = RotateCcw;
+  protected readonly Trash2Icon      = Trash2;
+  protected readonly Building2Icon   = Building2;
+  protected readonly CheckCircleIcon = CheckCircle;
+  protected readonly BanIcon         = Ban;
+  protected readonly KeyRoundIcon    = KeyRound;
+  protected readonly MailIcon        = Mail;
+  protected readonly PhoneIcon       = Phone;
 
   protected readonly clientes = signal<ClienteB2B[]>([]);
   protected readonly filtroEstado = signal<FiltroEstado>('Activos');
@@ -59,14 +71,23 @@ export class ClientesComponent implements OnInit {
 
   protected onNuevoCliente(data: Omit<ClienteB2B, 'id'>): void {
     const id = `CLI-${String(this.clientes().length + 1).padStart(3, '0')}`;
-    this.clientes.update((prev) => [...prev, { ...data, id }]);
+    const cliente: ClienteB2B = {
+      ...data,
+      id,
+      tipoTarifaBase: data.tarifaBase === 0 ? 'GLOBAL' : 'CUSTOM',
+      tipoTarifaKm:   data.tarifaKm   === 0 ? 'GLOBAL' : 'CUSTOM',
+    };
+    this.clientes.update((prev) => [...prev, cliente]);
     this.showNuevo.set(false);
   }
 
   protected onEditarCliente(data: ClienteB2B): void {
-    this.clientes.update((prev) =>
-      prev.map((c) => (c.id === data.id ? data : c))
-    );
+    const actualizado: ClienteB2B = {
+      ...data,
+      tipoTarifaBase: data.tarifaBase === 0 ? 'GLOBAL' : 'CUSTOM',
+      tipoTarifaKm:   data.tarifaKm   === 0 ? 'GLOBAL' : 'CUSTOM',
+    };
+    this.clientes.update((prev) => prev.map((c) => (c.id === actualizado.id ? actualizado : c)));
     this.clienteEditar.set(null);
   }
 

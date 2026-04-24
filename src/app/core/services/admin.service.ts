@@ -159,18 +159,20 @@ export class AdminService {
   }
 
   getClientes(): Observable<ClienteB2B[]> {
-    return this.http.get<any[]>(`${API}/clientes`, { params: { estado: 'ACTIVO' } }).pipe(
+    return this.http.get<ClienteApiItem[]>(`${API}/clientes`).pipe(
       map(data => data.map(c => ({
-        id:         String(c.id),
-        empresa:    c.empresa,
-        contacto:   c.nomContacto,
-        correo:     c.correoContacto,
-        telefono:   c.nroContacto,
-        loginId:    c.alias,
-        password:   '',
-        tarifaBase: c.tarifaBase,
-        tarifaKm:   c.tarifaKm,
-        activo:     true,
+        id:             `CLI-${String(c.id).padStart(3, '0')}`,
+        empresa:        c.empresa,
+        contacto:       c.nomContacto,
+        correo:         c.correoContacto,
+        telefono:       c.nroContacto       ?? '',
+        loginId:        c.alias,
+        password:       c.contraseña        ?? '',
+        tarifaBase:     c.tarifaBase,
+        tarifaKm:       c.tarifaKm,
+        tipoTarifaBase: (c.tipoTarifaBase as 'GLOBAL' | 'CUSTOM') || (c.tarifaBase === 0 ? 'GLOBAL' : 'CUSTOM'),
+        tipoTarifaKm:   (c.tipoTarifaKm   as 'GLOBAL' | 'CUSTOM') || (c.tarifaKm   === 0 ? 'GLOBAL' : 'CUSTOM'),
+        activo:         c.estado === 'ACTIVO',
       })))
     );
   }
@@ -372,52 +374,28 @@ export class AdminService {
 
 const CLIENTES_B2B: ClienteB2B[] = [
   {
-    id: 'CLI-001',
-    empresa: 'Transportes XYZ S.A.',
-    contacto: 'Juan Pérez',
-    correo: 'juan@txyz.com',
-    telefono: '+54 11 1234-5678',
-    loginId: 'TXYZ',
-    password: 'temp123',
-    tarifaBase: 150,
-    tarifaKm: 45,
-    activo: true,
+    id: 'CLI-001', empresa: 'Transportes XYZ S.A.', contacto: 'Juan Pérez',
+    correo: 'juan@txyz.com', telefono: '+54 11 1234-5678',
+    loginId: 'TXYZ', password: 'temp123',
+    tarifaBase: 150, tarifaKm: 45, tipoTarifaBase: 'CUSTOM', tipoTarifaKm: 'CUSTOM', activo: true,
   },
   {
-    id: 'CLI-002',
-    empresa: 'Logística Beta Ltda.',
-    contacto: 'María González',
-    correo: 'mgonzalez@logbeta.com',
-    telefono: '+54 11 2345-6789',
-    loginId: 'LBETA',
-    password: 'pass456',
-    tarifaBase: 120,
-    tarifaKm: 40,
-    activo: true,
+    id: 'CLI-002', empresa: 'Logística Beta Ltda.', contacto: 'María González',
+    correo: 'mgonzalez@logbeta.com', telefono: '+54 11 2345-6789',
+    loginId: 'LBETA', password: 'pass456',
+    tarifaBase: 0, tarifaKm: 40, tipoTarifaBase: 'GLOBAL', tipoTarifaKm: 'CUSTOM', activo: true,
   },
   {
-    id: 'CLI-003',
-    empresa: 'Mudanzas Express Corp.',
-    contacto: 'Carlos Rodríguez',
-    correo: 'carlos@mudex.com',
-    telefono: '+54 11 3456-7890',
-    loginId: 'MUDEX',
-    password: 'mudex789',
-    tarifaBase: 140,
-    tarifaKm: 40,
-    activo: false,
+    id: 'CLI-003', empresa: 'Mudanzas Express Corp.', contacto: 'Carlos Rodríguez',
+    correo: 'carlos@mudex.com', telefono: '+54 11 3456-7890',
+    loginId: 'MUDEX', password: 'mudex789',
+    tarifaBase: 140, tarifaKm: 40, tipoTarifaBase: 'CUSTOM', tipoTarifaKm: 'CUSTOM', activo: false,
   },
   {
-    id: 'CLI-004',
-    empresa: 'Distribuidora Central',
-    contacto: 'Ana López',
-    correo: 'ana@distcentral.com',
-    telefono: '+54 11 4567-8901',
-    loginId: 'DCENTRAL',
-    password: 'central321',
-    tarifaBase: 160,
-    tarifaKm: 50,
-    activo: true,
+    id: 'CLI-004', empresa: 'Distribuidora Central', contacto: 'Ana López',
+    correo: 'ana@distcentral.com', telefono: '+54 11 4567-8901',
+    loginId: 'DCENTRAL', password: 'central321',
+    tarifaBase: 160, tarifaKm: 50, tipoTarifaBase: 'CUSTOM', tipoTarifaKm: 'CUSTOM', activo: true,
   },
 ];
 
@@ -436,6 +414,21 @@ const DIAS_SEMANA_LAB: DiaSemana[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
 const HORAS_COMPLETO: HoraGrid[]   = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
 const HORAS_MANANA:  HoraGrid[]    = ['08:00','09:00','10:00','11:00','12:00'];
 const HORAS_TARDE:   HoraGrid[]    = ['13:00','14:00','15:00','16:00','17:00'];
+
+interface ClienteApiItem {
+  id:              number;
+  empresa:         string;
+  nomContacto:     string;
+  nroContacto:     string | null;
+  correoContacto:  string;
+  tarifaBase:      number;
+  tarifaKm:        number;
+  tipoTarifaBase:  string;
+  tipoTarifaKm:    string;
+  estado:          string;
+  alias:           string;
+  contraseña:      string | null;
+}
 
 interface IngresoTallerRequest {
   nombreResponsable: string;

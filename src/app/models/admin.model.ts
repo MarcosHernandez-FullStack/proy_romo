@@ -22,16 +22,18 @@ export interface ServicioAdmin {
 }
 
 export interface ClienteB2B {
-  id: string;
-  empresa: string;
-  contacto: string;
-  correo: string;
-  telefono: string;
-  loginId: string;
-  password: string;
-  tarifaBase: number;
-  tarifaKm: number;
-  activo: boolean;
+  id:              string;
+  empresa:         string;
+  contacto:        string;
+  correo:          string;
+  telefono:        string;
+  loginId:         string;
+  password:        string;
+  tarifaBase:      number;
+  tarifaKm:        number;
+  tipoTarifaBase:  'GLOBAL' | 'CUSTOM';
+  tipoTarifaKm:    'GLOBAL' | 'CUSTOM';
+  activo:          boolean;
 }
 
 export type TipoDisponibilidad = 'Tiempo Completo' | 'Horario Parcial' | 'Personalizado';

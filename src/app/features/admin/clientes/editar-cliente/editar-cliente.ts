@@ -34,9 +34,9 @@ export class EditarClienteComponent implements OnInit {
     this.correo.set(c.correo);
     this.telefono.set(c.telefono);
     this.loginId.set(c.loginId);
-    this.password.set(c.password);
     this.tarifaBase.set(c.tarifaBase);
     this.tarifaKm.set(c.tarifaKm);
+    // password inicia vacío: dejar vacío conserva la contraseña actual
   }
 
   protected generarPassword(): void {
@@ -48,14 +48,16 @@ export class EditarClienteComponent implements OnInit {
   protected onGuardar(): void {
     this.guardar.emit({
       ...this.cliente(),
-      empresa: this.empresa(),
-      contacto: this.contacto(),
-      correo: this.correo(),
-      telefono: this.telefono(),
-      loginId: this.loginId(),
-      password: this.password(),
-      tarifaBase: this.tarifaBase(),
-      tarifaKm: this.tarifaKm(),
+      empresa:        this.empresa(),
+      contacto:       this.contacto(),
+      correo:         this.correo(),
+      telefono:       this.telefono(),
+      loginId:        this.loginId(),
+      password:       this.password(),
+      tarifaBase:     this.tarifaBase(),
+      tarifaKm:       this.tarifaKm(),
+      tipoTarifaBase: this.tarifaBase() === 0 ? 'GLOBAL' : 'CUSTOM',
+      tipoTarifaKm:   this.tarifaKm()   === 0 ? 'GLOBAL' : 'CUSTOM',
     });
   }
 }
