@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, UserCog, Plus, Search, Pencil, RotateCcw, Trash2, Phone, Calendar, Clock } from 'lucide-angular';
+import { LucideAngularModule, UserCog, Plus, Search, Pencil, RotateCcw, Trash2, Phone, Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
 import { DIAS_SEMANA, DiaSemana, GridDisponibilidad, HoraGrid, HORAS_GRID, Operador, TipoDisponibilidad } from '../../../models/admin.model';
 import { NuevoOperadorComponent } from './nuevo-operador/nuevo-operador';
@@ -28,20 +28,25 @@ type FiltroEstado = 'Activos' | 'Bajas';
 export class OperadoresComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
-  protected readonly UserCogIcon  = UserCog;
-  protected readonly PlusIcon     = Plus;
-  protected readonly SearchIcon   = Search;
-  protected readonly PencilIcon   = Pencil;
-  protected readonly RotateCcwIcon = RotateCcw;
-  protected readonly Trash2Icon   = Trash2;
-  protected readonly PhoneIcon    = Phone;
-  protected readonly CalendarIcon = Calendar;
-  protected readonly ClockIcon    = Clock;
+  protected readonly UserCogIcon    = UserCog;
+  protected readonly PlusIcon       = Plus;
+  protected readonly SearchIcon     = Search;
+  protected readonly PencilIcon     = Pencil;
+  protected readonly RotateCcwIcon  = RotateCcw;
+  protected readonly Trash2Icon     = Trash2;
+  protected readonly PhoneIcon      = Phone;
+  protected readonly CalendarIcon   = Calendar;
+  protected readonly ClockIcon      = Clock;
+  protected readonly ChevronLeftIcon  = ChevronLeft;
+  protected readonly ChevronRightIcon = ChevronRight;
+
+  readonly ITEMS_POR_PAGINA = 10;
 
   protected readonly operadores    = signal<Operador[]>([]);
   protected readonly filtroEstado  = signal<FiltroEstado>('Activos');
   protected readonly filtroEstados: FiltroEstado[] = ['Activos', 'Bajas'];
   protected readonly busqueda      = signal('');
+  protected readonly paginaActual  = signal(1);
 
   protected readonly showNuevo          = signal(false);
   protected readonly operadorEditar     = signal<Operador | null>(null);
@@ -78,8 +83,48 @@ export class OperadoresComponent implements OnInit {
     );
   });
 
+  protected readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.operadoresFiltrados().length / this.ITEMS_POR_PAGINA))
+  );
+
+  protected readonly operadoresPaginados = computed(() => {
+    const inicio = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA;
+    return this.operadoresFiltrados().slice(inicio, inicio + this.ITEMS_POR_PAGINA);
+  });
+
+  protected readonly paginas = computed(() => {
+    const total  = this.totalPaginas();
+    const actual = this.paginaActual();
+    const inicio = Math.max(1, actual - 2);
+    const fin    = Math.min(total, actual + 2);
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  });
+
   ngOnInit(): void {
     this.adminSvc.getOperadores().subscribe(data => this.operadores.set(data));
+  }
+
+  protected cambiarFiltro(f: FiltroEstado): void {
+    this.filtroEstado.set(f);
+    this.paginaActual.set(1);
+  }
+
+  protected setBusqueda(v: string): void {
+    this.busqueda.set(v);
+    this.paginaActual.set(1);
+  }
+
+  protected cambiarPagina(n: number): void {
+    if (n < 1 || n > this.totalPaginas()) return;
+    this.paginaActual.set(n);
+  }
+
+  protected rangoMostrado(): string {
+    const total = this.operadoresFiltrados().length;
+    if (total === 0) return '0';
+    const desde = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA + 1;
+    const hasta  = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
+    return `${desde} - ${hasta}`;
   }
 
   protected abrirServicios(o: Operador): void {

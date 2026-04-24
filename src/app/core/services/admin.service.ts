@@ -9,6 +9,8 @@ import {
   CrearOperadorRequest,
   CrearUsuarioResult,
   EditarOperadorRequest,
+  GruaRequest,
+  EstadoUnidad,
   DIAS_SEMANA,
   DiaSemana,
   DispConflicto,
@@ -261,14 +263,60 @@ export class AdminService {
     return grid;
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/flota')
   getFlota(): Observable<UnidadFlota[]> {
-    return of(FLOTA).pipe(delay(200));
+    return this.http.get<GruaApiItem[]>(`${API}/flota`).pipe(
+      map(items => items.map(i => this.mapGrua(i)))
+    );
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/flota/:id/bitacora')
-  getBitacora(_unidadId: string): Observable<BitacoraEntry[]> {
-    return of(BITACORA_MOCK).pipe(delay(200));
+  crearGrua(data: GruaRequest): Observable<CrearUsuarioResult> {
+    return this.http.post<CrearUsuarioResult>(`${API}/flota`, data);
+  }
+
+  editarGrua(idGrua: number, data: GruaRequest): Observable<CrearUsuarioResult> {
+    return this.http.put<CrearUsuarioResult>(`${API}/flota/${idGrua}`, data);
+  }
+
+  darDeBajaGrua(idGrua: number): Observable<CrearUsuarioResult> {
+    return this.http.delete<CrearUsuarioResult>(`${API}/flota/${idGrua}`);
+  }
+
+  private mapGrua(item: GruaApiItem): UnidadFlota {
+    return {
+      id:                `GRU-${String(item.id).padStart(3, '0')}`,
+      placa:             item.placa,
+      marca:             item.marca,
+      modelo:            item.modelo,
+      anio:              item.añoFabricacion,
+      capacidad:         item.capacidad,
+      vencimientoSeguro: this.parseFecVenSeg(item.fecVenSeg),
+      estado:            this.mapEstadoGrua(item.estado, item.estadoOperacion),
+    };
+  }
+
+  private mapEstadoGrua(estado: string, estadoOperacion: string): EstadoUnidad {
+    if (estado?.toUpperCase() === 'INACTIVO') return 'Baja';
+    if (estadoOperacion?.toUpperCase() === 'ENTALLER') return 'En Taller';
+    return 'Operativa';
+  }
+
+  private parseFecVenSeg(fec: string | null): string {
+    if (!fec) return '';
+    const [d, m, y] = fec.split('/');
+    return `${y}-${m}-${d}`;
+  }
+
+  getBitacora(unidadId: string): Observable<BitacoraEntry[]> {
+    const idNumerico = parseInt(unidadId.split('-')[1], 10);
+    return this.http.get<BitaMantApiItem[]>(`${API}/flota/${idNumerico}/bitacora`).pipe(
+      map(items => items.map(i => ({
+        tipo:        i.titulo,
+        fecha:       i.fechaCreacion,
+        responsable: i.responsable,
+        kilometraje: i.kilometraje,
+        nota:        i.nota ?? '',
+      })))
+    );
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/excepciones')
@@ -373,6 +421,27 @@ const DIAS_SEMANA_LAB: DiaSemana[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
 const HORAS_COMPLETO: HoraGrid[]   = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
 const HORAS_MANANA:  HoraGrid[]    = ['08:00','09:00','10:00','11:00','12:00'];
 const HORAS_TARDE:   HoraGrid[]    = ['13:00','14:00','15:00','16:00','17:00'];
+
+interface BitaMantApiItem {
+  titulo:          string;
+  fechaCreacion:   string;
+  responsable:     string;
+  kilometraje:     number;
+  nota:            string | null;
+  estadoOperacion: string;
+}
+
+interface GruaApiItem {
+  id:              number;
+  placa:           string;
+  marca:           string;
+  modelo:          string;
+  añoFabricacion:  number;
+  capacidad:       number;
+  fecVenSeg:       string | null;
+  estadoOperacion: string;
+  estado:          string;
+}
 
 interface OperadorApiItem {
   id:                      number;
@@ -479,75 +548,7 @@ const OPERADORES: Operador[] = [
   },
 ];
 
-const FLOTA: UnidadFlota[] = [
-  {
-    id: 'UNI-001',
-    placa: 'ABC-123',
-    marca: 'Ford',
-    modelo: 'F-550 Super Duty',
-    anio: 2022,
-    capacidad: 1,
-    vencimientoSeguro: '2026-06-25',
-    estado: 'Operativa',
-  },
-  {
-    id: 'UNI-002',
-    placa: 'XYZ-456',
-    marca: 'Chevrolet',
-    modelo: 'Silverado 3500HD',
-    anio: 2021,
-    capacidad: 2,
-    vencimientoSeguro: '2026-03-14',
-    estado: 'Operativa',
-  },
-  {
-    id: 'UNI-003',
-    placa: 'DEF-789',
-    marca: 'International',
-    modelo: 'Durastar',
-    anio: 2020,
-    capacidad: 3,
-    vencimientoSeguro: '2025-12-19',
-    estado: 'En Taller',
-  },
-  {
-    id: 'UNI-004',
-    placa: 'GHI-321',
-    marca: 'Mercedes-Benz',
-    modelo: 'Actros 2646',
-    anio: 2023,
-    capacidad: 2,
-    vencimientoSeguro: '2026-05-09',
-    estado: 'Operativa',
-  },
-  {
-    id: 'UNI-005',
-    placa: 'JKL-654',
-    marca: 'Volvo',
-    modelo: 'FMX 420',
-    anio: 2022,
-    capacidad: 3,
-    vencimientoSeguro: '2026-01-14',
-    estado: 'Operativa',
-  },
-];
 
-const BITACORA_MOCK: BitacoraEntry[] = [
-  {
-    tipo: 'Retorno a Operativa',
-    fecha: 'dom. 9 nov 2025',
-    responsable: 'Carlos Ruiz',
-    kilometraje: 38200,
-    nota: 'Mantenimiento preventivo 20,000 km completado',
-  },
-  {
-    tipo: 'Ingreso a Taller',
-    fecha: 'lun. 28 oct 2025',
-    responsable: 'Carlos Ruiz',
-    kilometraje: 37900,
-    nota: 'Revisión periódica según plan de mantenimiento',
-  },
-];
 
 const SERVICIOS_ADMIN: ServicioAdmin[] = [
   {

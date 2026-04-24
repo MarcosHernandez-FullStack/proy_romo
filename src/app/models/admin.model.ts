@@ -112,6 +112,16 @@ export interface UnidadFlota {
   estado: EstadoUnidad;
 }
 
+export interface GruaRequest {
+  placa:          string;
+  marca:          string;
+  modelo:         string;
+  añoFabricacion: number;
+  capacidad:      number;
+  fecVenSeg:      string;  // YYYY-MM-DD
+}
+
+
 export interface BitacoraEntry {
   tipo: string;
   fecha: string;

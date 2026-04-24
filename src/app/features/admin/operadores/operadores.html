@@ -66,14 +66,14 @@
     <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
       <div class="flex-1 min-w-[200px] relative">
         <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="text" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" name="busqueda"
+        <input type="text" [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda"
           placeholder="Buscar por nombre, licencia..."
           class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
       </div>
       <div class="flex items-center gap-0.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
         <span class="text-[12px] text-[#6a7282] font-medium px-2">Estado:</span>
         @for (f of filtroEstados; track f) {
-          <button type="button" (click)="filtroEstado.set(f)"
+          <button type="button" (click)="cambiarFiltro(f)"
             class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
             [class.bg-[#155dfc]]="filtroEstado() === f"
             [class.text-white]="filtroEstado() === f"
@@ -85,7 +85,7 @@
     </div>
 
     <p class="px-5 py-2 text-[12px] text-[#9ca3af]">
-      Mostrando {{ operadoresFiltrados().length }} operador(es)
+      Mostrando {{ rangoMostrado() }} de {{ operadoresFiltrados().length }} operador(es)
     </p>
 
     <div class="overflow-x-auto">
@@ -104,7 +104,7 @@
         </div>
       }
 
-      @for (o of operadoresFiltrados(); track o.id) {
+      @for (o of operadoresPaginados(); track o.id) {
         <div class="grid gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[900px]"
           style="grid-template-columns: 0.9fr 1.4fr 1.1fr 1fr 1fr 1.2fr 1.2fr 0.8fr">
 
@@ -208,6 +208,38 @@
         </div>
       }
     </div>
+
+    <!-- Paginación -->
+    @if (totalPaginas() > 1) {
+      <div class="flex items-center justify-between px-5 py-4 border-t border-[#e5e7eb]">
+        <span class="text-[#6a7282] text-[13px]">
+          Mostrando {{ rangoMostrado() }} de {{ operadoresFiltrados().length }} operadores
+        </span>
+        <div class="flex items-center gap-1">
+          <button type="button" (click)="cambiarPagina(paginaActual() - 1)"
+            [disabled]="paginaActual() === 1"
+            class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] disabled:opacity-40 hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+            <lucide-angular [img]="ChevronLeftIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          </button>
+          @for (p of paginas(); track p) {
+            <button type="button" (click)="cambiarPagina(p)"
+              class="size-8 flex items-center justify-center rounded-[8px] text-[13px] font-semibold border transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="paginaActual() === p"
+              [class.text-white]="paginaActual() === p"
+              [class.border-[#155dfc]]="paginaActual() === p"
+              [class.border-[#e5e7eb]]="paginaActual() !== p"
+              [class.text-[#364153]]="paginaActual() !== p">
+              {{ p }}
+            </button>
+          }
+          <button type="button" (click)="cambiarPagina(paginaActual() + 1)"
+            [disabled]="paginaActual() === totalPaginas()"
+            class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] disabled:opacity-40 hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+            <lucide-angular [img]="ChevronRightIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          </button>
+        </div>
+      </div>
+    }
   </div>
 </div>
 

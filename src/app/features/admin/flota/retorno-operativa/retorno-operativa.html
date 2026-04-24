@@ -1,0 +1,66 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[480px] overflow-hidden">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-[#16a34a] to-[#15803d] px-6 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="size-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+          <lucide-angular [img]="CheckCircleIcon" class="size-5" color="white" [strokeWidth]="2" />
+        </div>
+        <div>
+          <h2 class="text-white text-[20px] font-bold leading-tight">Cierre de Mantenimiento - Retorno a Operativa</h2>
+          <p class="text-white/80 text-[13px] mt-0.5">Complete los datos de retorno obligatorios</p>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-white/20 transition-colors cursor-pointer shrink-0">
+        <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </button>
+    </div>
+
+    <div class="p-6 flex flex-col gap-5">
+
+      <!-- Unidad info -->
+      <div class="bg-[#eff6ff] border border-[#bfdbfe] rounded-[12px] px-4 py-3">
+        <p class="text-[#1d4ed8] text-[12px] font-semibold mb-0.5">Unidad:</p>
+        <p class="text-[#1d4ed8] text-[15px] font-bold">{{ unidad().placa }} — {{ unidad().marca }} {{ unidad().modelo }}</p>
+      </div>
+
+      <!-- Kilometraje -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
+          Kilometraje Actual * <span class="text-[#6a7282] font-normal">(Manual)</span>
+        </label>
+        <input type="number" [ngModel]="kilometraje()" (ngModelChange)="kilometraje.set(+$event || null)" name="kilometraje"
+          placeholder="45320" min="1"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a]/30" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Registre el kilometraje exacto del odómetro</p>
+      </div>
+
+      <!-- Nota -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
+          Nota de Retorno * <span class="text-[#6a7282] font-normal">(Descripción del trabajo realizado)</span>
+        </label>
+        <textarea [ngModel]="nota()" (ngModelChange)="nota.set($event)" name="nota" rows="4"
+          placeholder="Ej: Cambio de aceite, revisión de frenos, alineación y balanceo completado"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a]/30 resize-none"></textarea>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      <button type="button" (click)="onConfirmar()" [disabled]="!esValido"
+        class="flex-1 flex items-center justify-center gap-2 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        <lucide-angular [img]="CheckCircleIcon" class="size-4" color="white" [strokeWidth]="2" />
+        Confirmar Retorno a Operativa
+      </button>
+    </div>
+
+  </div>
+</div>

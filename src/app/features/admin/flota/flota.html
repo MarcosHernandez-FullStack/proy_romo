@@ -9,7 +9,7 @@
     <button type="button" (click)="showNueva.set(true)"
       class="flex items-center gap-2 bg-[#155dfc] text-white text-[14px] font-semibold rounded-[10px] px-4 h-10 hover:bg-[#1447e6] transition-colors cursor-pointer">
       <lucide-angular [img]="PlusIcon" class="size-4" color="white" [strokeWidth]="1.5" />
-      + Nueva Unidad
+      Nueva Unidad
     </button>
   </div>
 
@@ -65,7 +65,7 @@
     <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
       <div class="flex-1 relative">
         <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="text" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" name="busqueda"
+        <input type="text" [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda"
           placeholder="Buscar por placa, marca, modelo..."
           class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
       </div>
@@ -73,7 +73,7 @@
         <span class="text-[#6a7282] text-[13px] font-medium">Estado:</span>
         <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
           @for (f of filtrosFlota; track f) {
-            <button type="button" (click)="filtroFlota.set(f)"
+            <button type="button" (click)="cambiarFiltro(f)"
               class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
               [class.bg-[#155dfc]]="filtroFlota() === f"
               [class.text-white]="filtroFlota() === f"
@@ -87,7 +87,7 @@
 
     <!-- Count -->
     <div class="px-5 py-2 border-b border-[#f3f4f6]">
-      <p class="text-[#6a7282] text-[13px]">Mostrando <strong class="text-[#101828]">{{ flotaFiltrada().length }}</strong> unidad(es)</p>
+      <p class="text-[#6a7282] text-[13px]">Mostrando <strong class="text-[#101828]">{{ rangoMostrado() }}</strong> de {{ flotaFiltrada().length }} unidad(es)</p>
     </div>
 
     <div class="overflow-x-auto">
@@ -110,7 +110,7 @@
     }
 
     <!-- Rows -->
-    @for (u of flotaFiltrada(); track u.id) {
+    @for (u of flotaPaginada(); track u.id) {
       <div class="grid grid-cols-[1.1fr_2fr_0.8fr_1.3fr_1fr_0.8fr] gap-3 items-center px-5 py-3.5 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[650px]">
 
         <!-- ID / PLACA -->
@@ -144,8 +144,10 @@
         </div>
 
         <!-- ESTADO ACTUAL -->
-        <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-          [class]="estadoClass(u.estado)">
+        <button type="button" (click)="onEstadoClick(u)"
+          class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+          [class]="estadoClass(u.estado)"
+          title="Gestionar servicios / cambiar estado">
           @if (u.estado === 'Operativa') {
             <lucide-angular [img]="CheckCircleIcon" class="size-3" color="#166534" [strokeWidth]="2" />
           } @else if (u.estado === 'En Taller') {
@@ -154,7 +156,7 @@
             <lucide-angular [img]="AlertTriangleIcon" class="size-3" color="#c10007" [strokeWidth]="2" />
           }
           {{ u.estado }}
-        </span>
+        </button>
 
         <!-- ACCIONES -->
         <div class="flex items-center gap-1">
@@ -188,6 +190,37 @@
       </div>
     }
 
+    <!-- Paginación -->
+    @if (totalPaginas() > 1) {
+      <div class="flex items-center justify-between px-5 py-4 border-t border-[#e5e7eb]">
+        <span class="text-[#6a7282] text-[13px]">
+          Mostrando {{ rangoMostrado() }} de {{ flotaFiltrada().length }} unidades
+        </span>
+        <div class="flex items-center gap-1">
+          <button type="button" (click)="cambiarPagina(paginaActual() - 1)"
+            [disabled]="paginaActual() === 1"
+            class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] disabled:opacity-40 hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+            <lucide-angular [img]="ChevronLeftIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          </button>
+          @for (p of paginas(); track p) {
+            <button type="button" (click)="cambiarPagina(p)"
+              class="size-8 flex items-center justify-center rounded-[8px] text-[13px] font-semibold border transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="paginaActual() === p"
+              [class.text-white]="paginaActual() === p"
+              [class.border-[#155dfc]]="paginaActual() === p"
+              [class.border-[#e5e7eb]]="paginaActual() !== p"
+              [class.text-[#364153]]="paginaActual() !== p">
+              {{ p }}
+            </button>
+          }
+          <button type="button" (click)="cambiarPagina(paginaActual() + 1)"
+            [disabled]="paginaActual() === totalPaginas()"
+            class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] disabled:opacity-40 hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+            <lucide-angular [img]="ChevronRightIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          </button>
+        </div>
+      </div>
+    }
     </div>
   </div>
 </div>
@@ -209,4 +242,19 @@
   <app-detalle-unidad
     [unidad]="unidadDetalle()!"
     (cerrar)="unidadDetalle.set(null)" />
+}
+
+@if (unidadLiberar()) {
+  <app-liberar-servicio
+    [unidad]="unidadLiberar()!"
+    [servicios]="serviciosDeUnidad(unidadLiberar()!)"
+    (confirmar)="onConfirmarLiberar()"
+    (cerrar)="unidadLiberar.set(null)" />
+}
+
+@if (unidadRetorno()) {
+  <app-retorno-operativa
+    [unidad]="unidadRetorno()!"
+    (confirmar)="onConfirmarRetorno($event)"
+    (cerrar)="unidadRetorno.set(null)" />
 }

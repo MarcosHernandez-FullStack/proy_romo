@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCcw,
+  Eye,
 } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
 import { ReservaOperacion } from '../../../models/admin.model';
@@ -23,7 +24,7 @@ import { CancelarServicioComponent } from './cancelar-servicio/cancelar-servicio
 import { ReprogramarServicioComponent } from './reprogramar-servicio/reprogramar-servicio';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
-type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO';
+type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELADO';
 
 @Component({
   selector: 'app-operaciones',
@@ -54,6 +55,7 @@ export class OperacionesComponent implements OnInit {
   protected readonly ChevronLeftIcon    = ChevronLeft;
   protected readonly ChevronRightIcon   = ChevronRight;
   protected readonly RotateCcwIcon      = RotateCcw;
+  protected readonly EyeIcon            = Eye;
 
   readonly ITEMS_POR_PAGINA = 10;
 
@@ -65,11 +67,13 @@ export class OperacionesComponent implements OnInit {
   protected readonly paginaActual  = signal(1);
   protected readonly tiempoCorte   = signal<number | null>(null);
 
-  protected readonly filtroTabs: FiltroTab[] = ['RESERVADO', 'ASIGNADO', 'EN_CURSO'];
+  protected readonly filtroTabs: FiltroTab[] = ['RESERVADO', 'ASIGNADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'];
   protected readonly tabLabel: Record<FiltroTab, string> = {
-    RESERVADO: 'Reservado',
-    ASIGNADO:  'Asignado',
-    EN_CURSO:  'En Curso',
+    RESERVADO:  'Reservado',
+    ASIGNADO:   'Asignado',
+    EN_CURSO:   'En Curso',
+    FINALIZADO: 'Finalizado',
+    CANCELADO:  'Cancelado',
   };
 
   // Modal state
@@ -171,7 +175,9 @@ export class OperacionesComponent implements OnInit {
    * - Cuando la fecha es hoy pero la horaInicio está a menos de TiempoCorte minutos.
    */
   protected soloDetalle(r: ReservaOperacion): boolean {
-    if (r.estadoOperacion === 'EN_CURSO') return true;
+    if (r.estadoOperacion === 'EN_CURSO')   return true;
+    if (r.estadoOperacion === 'FINALIZADO') return true;
+    if (r.estadoOperacion === 'CANCELADO')  return true;
 
     const tc = this.tiempoCorte();
     if (tc === null) return false; // aún cargando, permitir por defecto

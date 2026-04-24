@@ -126,14 +126,20 @@
             {{ estadoLabel(r.estadoOperacion) }}
           </span>
           <div class="flex items-center gap-1">
-            <!-- Asignar: siempre visible; en modo soloDetalle abre solo el detalle -->
-            <button type="button" (click)="abrirAsignar(r)"
-              class="size-7 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
-              [title]="soloDetalle(r) ? 'Ver detalle' : 'Asignar'">
-              <lucide-angular [img]="PencilIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
-            </button>
-            <!-- Cancelar: oculto si EN_CURSO o fuera del tiempo de corte -->
-            @if (!soloDetalle(r)) {
+            @if (soloDetalle(r)) {
+              <!-- Solo visualización -->
+              <button type="button" (click)="abrirAsignar(r)"
+                class="size-7 flex items-center justify-center rounded-lg hover:bg-[#f3f4f6] transition-colors cursor-pointer"
+                title="Ver detalle">
+                <lucide-angular [img]="EyeIcon" class="size-3.5" color="#6a7282" [strokeWidth]="1.5" />
+              </button>
+            } @else {
+              <!-- Acciones operativas -->
+              <button type="button" (click)="abrirAsignar(r)"
+                class="size-7 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
+                title="Asignar">
+                <lucide-angular [img]="PencilIcon" class="size-3.5" color="#155dfc" [strokeWidth]="1.5" />
+              </button>
               <button type="button" (click)="abrirCancelar(r)"
                 class="size-7 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
                 title="Cancelar">
