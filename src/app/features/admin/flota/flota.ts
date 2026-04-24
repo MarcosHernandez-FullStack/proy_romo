@@ -19,11 +19,11 @@ import {
   ChevronRight,
 } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
-import { EstadoUnidad, GruaRequest, ServicioAdmin, UnidadFlota } from '../../../models/admin.model';
+import { EstadoUnidad, GruaRequest, UnidadFlota } from '../../../models/admin.model';
 import { NuevaUnidadComponent } from './nueva-unidad/nueva-unidad';
 import { EditarUnidadComponent } from './editar-unidad/editar-unidad';
 import { DetalleUnidadComponent } from './detalle-unidad/detalle-unidad';
-import { LiberarServicioComponent } from './liberar-servicio/liberar-servicio';
+import { LiberarServicioComponent, LiberarData } from './liberar-servicio/liberar-servicio';
 import { RetornoOperativaComponent, RetornoData } from './retorno-operativa/retorno-operativa';
 
 type FiltroFlota = 'Activas' | 'En Taller' | 'Bajas';
@@ -69,7 +69,6 @@ export class FlotaComponent implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly errorGuardar = signal<string | null>(null);
 
-  private readonly operaciones = signal<ServicioAdmin[]>([]);
 
   protected readonly totalUnidades   = computed(() => this.flota().length);
   protected readonly operativas      = computed(() => this.flota().filter(u => u.estado === 'Operativa').length);
@@ -113,7 +112,6 @@ export class FlotaComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarFlota();
-    this.adminSvc.getOperaciones().subscribe((data) => this.operaciones.set(data));
   }
 
   protected cambiarFiltro(f: FiltroFlota): void {
@@ -143,15 +141,6 @@ export class FlotaComponent implements OnInit {
     this.adminSvc.getFlota().subscribe((gruas) => this.flota.set(gruas));
   }
 
-  protected serviciosDeUnidad(u: UnidadFlota): ServicioAdmin[] {
-    return this.operaciones().filter(
-      (s) =>
-        (s.unidad === u.id || s.unidad === u.placa) &&
-        s.estado !== 'Finalizado' &&
-        s.estado !== 'Cancelado'
-    );
-  }
-
   protected onEstadoClick(u: UnidadFlota): void {
     if (u.estado === 'En Taller') {
       this.unidadRetorno.set(u);
@@ -164,21 +153,38 @@ export class FlotaComponent implements OnInit {
     this.unidadLiberar.set(u);
   }
 
+  protected onConfirmarLiberar(data: LiberarData): void {
+    const u = this.unidadLiberar();
+    if (!u) return;
+    const idNumerico = parseInt(u.id.split('-')[1], 10);
+    this.guardando.set(true);
+    this.errorGuardar.set(null);
+    this.adminSvc.ingresoTaller(idNumerico, data).subscribe({
+      next: (result) => {
+        this.guardando.set(false);
+        if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
+        this.unidadLiberar.set(null);
+        this.cargarFlota();
+      },
+      error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
+    });
+  }
+
   protected onConfirmarRetorno(data: RetornoData): void {
     const u = this.unidadRetorno();
     if (!u) return;
-    this.flota.update((prev) => prev.map((f) => (f.id === u.id ? { ...f, estado: 'Operativa' as EstadoUnidad } : f)));
-    this.unidadRetorno.set(null);
-  }
-
-  protected onConfirmarLiberar(): void {
-    const u = this.unidadLiberar();
-    if (!u) return;
-    this.flota.update((prev) => prev.map((f) => (f.id === u.id ? { ...f, estado: 'En Taller' as EstadoUnidad } : f)));
-    this.operaciones.update((prev) =>
-      prev.map((s) => (s.unidad === u.id || s.unidad === u.placa ? { ...s, unidad: null } : s))
-    );
-    this.unidadLiberar.set(null);
+    const idNumerico = parseInt(u.id.split('-')[1], 10);
+    this.guardando.set(true);
+    this.errorGuardar.set(null);
+    this.adminSvc.retornoOperativa(idNumerico, data).subscribe({
+      next: (result) => {
+        this.guardando.set(false);
+        if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
+        this.unidadRetorno.set(null);
+        this.cargarFlota();
+      },
+      error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
+    });
   }
 
   protected onNuevaUnidad(data: Omit<UnidadFlota, 'id'>): void {

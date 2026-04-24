@@ -86,10 +86,10 @@ export class AsignarServicioComponent implements OnInit {
   );
   protected readonly showConfirmacion  = signal(false);
 
-  /** Verdadero si la reserva ya tiene asignación guardada en BD */
+  /** Verdadero si la reserva tiene al menos un recurso asignado en BD */
   protected get tieneAsignacion(): boolean {
     const r = this.reserva();
-    return r.estadoOperacion === 'ASIGNADO' && !!(r.gruaAsignada || r.operadorAsignado);
+    return !!(r.gruaAsignada || r.operadorAsignado);
   }
 
   protected get mensajeConfirmacion(): string {

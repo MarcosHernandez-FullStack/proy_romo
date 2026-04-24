@@ -8,7 +8,7 @@
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
         <h2 class="text-white text-[18px] font-bold">
-          Gestión de Disponibilidad: {{ operador.nombre }} ({{ operador.id }})
+          Gestión de Disponibilidad: {{ operador().nombre }} ({{ operador().id }})
         </h2>
       </div>
       <p class="text-blue-200 text-[13px]">Configure los horarios en los que el operador está disponible para servicios</p>
@@ -31,40 +31,17 @@
       @if (!cargando()) {
 
         <!-- Alerta de conflictos con confirmación -->
-        @if (conflictos().length > 0) {
+        @if (mensajeConflicto()) {
           <div class="border border-amber-300 rounded-xl bg-amber-50 p-4 flex flex-col gap-3">
             <div class="flex items-start gap-2">
               <svg class="size-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
               </svg>
               <div class="flex-1">
-                <p class="text-[13px] font-bold text-amber-800 mb-1">Conflicto de reservas asignadas</p>
-                <p class="text-[12px] text-amber-700">{{ mensajeConflicto() }}</p>
+                <p class="text-[13px] font-bold text-amber-800 mb-2">Conflicto de reservas asignadas</p>
+                <p class="text-[12px] text-amber-700 whitespace-pre-line leading-relaxed">{{ mensajeConflicto() }}</p>
               </div>
             </div>
-
-            <!-- Lista de reservas afectadas -->
-            <div class="bg-white border border-amber-200 rounded-lg overflow-hidden">
-              <table class="w-full text-[12px]">
-                <thead class="bg-amber-100">
-                  <tr>
-                    <th class="px-3 py-2 text-left font-semibold text-amber-800">ID Reserva</th>
-                    <th class="px-3 py-2 text-left font-semibold text-amber-800">Fecha</th>
-                    <th class="px-3 py-2 text-left font-semibold text-amber-800">Hora inicio</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (c of conflictos(); track c.idReserva) {
-                    <tr class="border-t border-amber-100">
-                      <td class="px-3 py-2 text-amber-900 font-mono font-bold">#{{ c.idReserva }}</td>
-                      <td class="px-3 py-2 text-amber-700">{{ c.fechaServicio }}</td>
-                      <td class="px-3 py-2 text-amber-700">{{ c.horaInicio }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-
             <div class="flex gap-2 pt-1">
               <button type="button" (click)="onCancelarConfirmacion()"
                 class="flex-1 h-9 rounded-lg border border-[#d1d5dc] text-[#374151] text-[13px] font-semibold hover:bg-[#f9fafb] transition-colors cursor-pointer">
@@ -109,12 +86,10 @@
             GRILLA SEMANAL DE DISPONIBILIDAD
           </p>
 
-          <!-- Tabla con scroll vertical y cabecera fija -->
           <div class="overflow-x-auto">
             <div class="relative overflow-y-auto max-h-[420px] rounded-lg border border-[#e5e7eb]">
               <table class="w-full min-w-[560px] border-collapse">
 
-                <!-- Cabecera sticky -->
                 <thead class="sticky top-0 z-10 bg-white border-b border-[#e5e7eb]">
                   <tr>
                     <th class="w-14 px-2 py-2 text-[11px] text-[#9ca3af] font-semibold text-left bg-white">Hora</th>
@@ -138,7 +113,6 @@
                   </tr>
                 </thead>
 
-                <!-- Filas de horas -->
                 <tbody>
                   @for (hora of horas; track hora) {
                     <tr class="border-t border-[#f3f4f6] hover:bg-[#fafafa]">
@@ -170,7 +144,6 @@
         <!-- Bottom row: copiar + resumen -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          <!-- Copiar horarios -->
           <div class="border border-[#e5e7eb] rounded-xl p-4">
             <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -190,7 +163,6 @@
             </button>
           </div>
 
-          <!-- Resumen -->
           <div class="border border-[#e5e7eb] rounded-xl p-4">
             <p class="text-[12px] font-bold text-[#6a7282] uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -225,7 +197,7 @@
           class="flex-1 h-10 rounded-xl border border-[#d1d5dc] text-[#374151] text-[14px] font-semibold hover:bg-[#f9fafb] transition-colors cursor-pointer">
           Cancelar
         </button>
-        <button type="button" (click)="onGuardar()" [disabled]="guardando() || conflictos().length > 0"
+        <button type="button" (click)="onGuardar()" [disabled]="guardando() || !!mensajeConflicto()"
           class="flex-1 h-10 rounded-xl bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-60 text-white text-[14px] font-semibold transition-colors cursor-pointer flex items-center justify-center gap-2">
           @if (guardando()) {
             <svg class="size-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -242,3 +214,19 @@
 
   </div>
 </div>
+
+@if (showExito()) {
+  <app-exito-modal
+    titulo="¡Disponibilidad Guardada!"
+    [mensaje]="mensajeExito()"
+    labelCerrar="Aceptar"
+    (cerrar)="guardar.emit(grid())" />
+}
+
+@if (errorModal()) {
+  <app-mensaje-modal
+    tipo="error"
+    titulo="Error al guardar"
+    [mensaje]="errorModal()!"
+    (cerrar)="errorModal.set(null)" />
+}

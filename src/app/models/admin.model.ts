@@ -233,6 +233,14 @@ export interface ReservaOperacion {
   vehiculos?:       VehiculoReserva[];
 }
 
+export interface ReservaALiberar {
+  id:              number;
+  fechaServicio:   string;
+  horaInicio:      string;
+  nombreCliente:   string;
+  estadoOperacion: string;
+}
+
 export interface ServicioReporte extends ServicioAdmin {
   estadoAdministrativo: EstadoAdminServicio;
   fechaCompleta: string;
@@ -271,14 +279,7 @@ export interface DispRango {
   HoraFin:    string; // "HH:mm"
 }
 
-export interface DispConflicto {
-  idReserva:     number;
-  fechaServicio: string;
-  horaInicio:    string;
-}
-
 export interface DispResult {
-  exitoso:     number;
-  mensaje:     string;
-  conflictos?: DispConflicto[];
+  exitoso: number;
+  mensaje: string;
 }

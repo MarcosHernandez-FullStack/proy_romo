@@ -177,7 +177,8 @@
 
           <!-- Disponibilidad -->
           <div class="flex items-center gap-1.5">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full border text-[12px] font-semibold {{ colorDisponibilidad(o.tipoDisponibilidad) }}">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full border text-[12px] font-semibold {{ colorDisponibilidad(o.tipoDisponibilidad) }}"
+              [title]="tooltipDisponibilidad(o.tipoDisponibilidad)">
               {{ o.tipoDisponibilidad }}
             </span>
             <button type="button" (click)="operadorDisponib.set(o)"

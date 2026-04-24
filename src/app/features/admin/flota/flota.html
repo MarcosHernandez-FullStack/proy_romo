@@ -247,8 +247,7 @@
 @if (unidadLiberar()) {
   <app-liberar-servicio
     [unidad]="unidadLiberar()!"
-    [servicios]="serviciosDeUnidad(unidadLiberar()!)"
-    (confirmar)="onConfirmarLiberar()"
+    (confirmar)="onConfirmarLiberar($event)"
     (cerrar)="unidadLiberar.set(null)" />
 }
 

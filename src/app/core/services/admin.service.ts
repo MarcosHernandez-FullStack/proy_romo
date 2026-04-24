@@ -13,7 +13,6 @@ import {
   EstadoUnidad,
   DIAS_SEMANA,
   DiaSemana,
-  DispConflicto,
   DispOperador,
   DispRango,
   DispResult,
@@ -25,6 +24,7 @@ import {
   HORAS_GRID,
   Operador,
   ParametrosOperativos,
+  ReservaALiberar,
   ReservaOperacion,
   ServicioAdmin,
   ServicioProximo,
@@ -114,9 +114,10 @@ export class AdminService {
     return this.http.delete<void>(`${API}/reservas/timer/${id}`);
   }
 
-  getReservas(fecha?: string): Observable<ReservaOperacion[]> {
+  getReservas(fecha?: string, idGrua?: number): Observable<ReservaOperacion[]> {
     const params: Record<string, string> = {};
-    if (fecha) params['fechaServicio'] = fecha;
+    if (fecha)   params['fechaServicio'] = fecha;
+    if (idGrua)  params['idGrua']        = String(idGrua);
     return this.http.get<ReservaOperacion[]>(`${API}/operaciones`, { params }).pipe(
       map(data => data ?? [])
     );
@@ -281,6 +282,20 @@ export class AdminService {
     return this.http.delete<CrearUsuarioResult>(`${API}/flota/${idGrua}`);
   }
 
+  getReservasALiberar(idGrua: number): Observable<ReservaALiberar[]> {
+    return this.http.get<ReservaALiberar[]>(`${API}/flota/${idGrua}/reservas-a-liberar`).pipe(
+      map(data => data ?? [])
+    );
+  }
+
+  ingresoTaller(idGrua: number, body: IngresoTallerRequest): Observable<CrearUsuarioResult> {
+    return this.http.put<CrearUsuarioResult>(`${API}/flota/${idGrua}/taller`, body);
+  }
+
+  retornoOperativa(idGrua: number, body: RetornoOperativaRequest): Observable<CrearUsuarioResult> {
+    return this.http.put<CrearUsuarioResult>(`${API}/flota/${idGrua}/operativa`, body);
+  }
+
   private mapGrua(item: GruaApiItem): UnidadFlota {
     return {
       id:                `GRU-${String(item.id).padStart(3, '0')}`,
@@ -421,6 +436,18 @@ const DIAS_SEMANA_LAB: DiaSemana[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
 const HORAS_COMPLETO: HoraGrid[]   = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
 const HORAS_MANANA:  HoraGrid[]    = ['08:00','09:00','10:00','11:00','12:00'];
 const HORAS_TARDE:   HoraGrid[]    = ['13:00','14:00','15:00','16:00','17:00'];
+
+interface IngresoTallerRequest {
+  nombreResponsable: string;
+  kilometraje:       number;
+  nota?:             string;
+}
+
+interface RetornoOperativaRequest {
+  nombreResponsable: string;
+  kilometraje:       number;
+  nota?:             string;
+}
 
 interface BitaMantApiItem {
   titulo:          string;

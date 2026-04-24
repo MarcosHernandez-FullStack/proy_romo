@@ -4,8 +4,9 @@ import { LucideAngularModule, CheckCircle, X, Truck } from 'lucide-angular';
 import { UnidadFlota } from '../../../../models/admin.model';
 
 export interface RetornoData {
-  kilometraje: number;
-  nota: string;
+  nombreResponsable: string;
+  kilometraje:       number;
+  nota:              string;
 }
 
 @Component({
@@ -23,16 +24,21 @@ export class RetornoOperativaComponent {
   protected readonly XIcon = X;
   protected readonly TruckIcon = Truck;
 
-  protected readonly kilometraje = signal<number | null>(null);
-  protected readonly nota = signal('');
+  protected readonly nombreResponsable = signal('');
+  protected readonly kilometraje       = signal<number | null>(null);
+  protected readonly nota              = signal('');
 
   protected get esValido(): boolean {
     const km = this.kilometraje();
-    return km !== null && km > 0 && this.nota().trim().length > 0;
+    return this.nombreResponsable().trim().length > 0 && km !== null && km > 0 && this.nota().trim().length > 0;
   }
 
   protected onConfirmar(): void {
     if (!this.esValido) return;
-    this.confirmar.emit({ kilometraje: this.kilometraje()!, nota: this.nota().trim() });
+    this.confirmar.emit({
+      nombreResponsable: this.nombreResponsable().trim(),
+      kilometraje:       this.kilometraje()!,
+      nota:              this.nota().trim(),
+    });
   }
 }

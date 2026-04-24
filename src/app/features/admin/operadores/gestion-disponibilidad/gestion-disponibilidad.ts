@@ -1,10 +1,8 @@
-import { Component, computed, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   DIAS_SEMANA,
   DiaSemana,
-  DispConflicto,
   DispRango,
   GridDisponibilidad,
   HoraGrid,
@@ -13,7 +11,8 @@ import {
   TipoDisponibilidad,
 } from '../../../../models/admin.model';
 import { AdminService } from '../../../../core/services/admin.service';
-import { NotificationService } from '../../../../core/services/notification.service';
+import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
 interface Template {
   label: string;
@@ -27,7 +26,6 @@ const NRO_DIA: Record<DiaSemana, number> = {
   Dom: 1, Lun: 2, Mar: 3, Mié: 4, Jue: 5, Vie: 6, Sáb: 7,
 };
 
-// Horas de negocio estándar (08:00-17:00) usadas por los templates y el tipoResumen
 const HORAS_NEGOCIO: HoraGrid[] = [
   '08:00','09:00','10:00','11:00','12:00',
   '13:00','14:00','15:00','16:00','17:00',
@@ -36,16 +34,15 @@ const HORAS_NEGOCIO: HoraGrid[] = [
 @Component({
   selector: 'app-gestion-disponibilidad',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, ExitoModalComponent, MensajeModalComponent],
   templateUrl: './gestion-disponibilidad.html',
 })
 export class GestionDisponibilidadComponent implements OnInit {
-  @Input({ required: true }) operador!: Operador;
-  @Output() guardar = new EventEmitter<GridDisponibilidad>();
-  @Output() cerrar  = new EventEmitter<void>();
+  private readonly adminSvc = inject(AdminService);
 
-  private readonly adminSvc        = inject(AdminService);
-  private readonly notificationSvc = inject(NotificationService);
+  readonly operador = input.required<Operador>();
+  readonly guardar  = output<GridDisponibilidad>();
+  readonly cerrar   = output<void>();
 
   readonly dias  = DIAS_SEMANA;
   readonly horas = HORAS_GRID;
@@ -56,10 +53,12 @@ export class GestionDisponibilidadComponent implements OnInit {
   cargando  = signal(false);
   guardando = signal(false);
 
-  // Estado de confirmación de conflictos
-  conflictos       = signal<DispConflicto[]>([]);
   mensajeConflicto = signal('');
   rangosEnEspera   = signal<DispRango[] | null>(null);
+
+  showExito  = signal(false);
+  errorModal = signal<string | null>(null);
+  mensajeExito = signal('');
 
   readonly templates: Template[] = [
     {
@@ -105,7 +104,6 @@ export class GestionDisponibilidadComponent implements OnInit {
   readonly tipoResumen = computed((): TipoDisponibilidad => {
     const g = this.grid();
     const diasLab: DiaSemana[] = ['Lun','Mar','Mié','Jue','Vie'];
-    // "Tiempo Completo" = exactamente el template estándar 08:00-17:00 en días laborales, sin fines de semana
     const esCompleto =
       diasLab.every(d =>
         HORAS_NEGOCIO.every(h => g[d]?.[h]) &&
@@ -119,7 +117,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.grid.set(this.clonarGrid(this.operador.disponibilidad));
+    this.grid.set(this.clonarGrid(this.operador().disponibilidad));
     this.cargarDesdeApi();
   }
 
@@ -134,7 +132,6 @@ export class GestionDisponibilidadComponent implements OnInit {
         for (const slot of resp.slots) {
           const dia = this.nroDiaADia(slot.nroDia);
           if (!dia) continue;
-          // Expandir el rango en bloques de 1 hora
           const inicio = this.horaAMinutos(slot.horaInicio);
           const fin    = this.horaAMinutos(slot.horaFin);
           for (let m = inicio; m < fin; m += 60) {
@@ -146,7 +143,6 @@ export class GestionDisponibilidadComponent implements OnInit {
         this.cargando.set(false);
       },
       error: () => {
-        // Si falla la carga, mantener grid vacío sin bloquear la edición
         this.cargando.set(false);
       },
     });
@@ -187,7 +183,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   copiarDia(): void {
     const origen = this.diaACopiar();
     this.grid.update(g => {
-      const next   = this.clonarGrid(g);
+      const next    = this.clonarGrid(g);
       const origen_ = { ...next[origen] };
       for (const dia of this.dias) {
         if (dia !== origen) next[dia] = { ...origen_ };
@@ -197,7 +193,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   }
 
   onGuardar(): void {
-    this.limpiarConflictos();
+    this.limpiarConflicto();
     const id = this.idNumerico();
     if (!id) return;
 
@@ -207,19 +203,18 @@ export class GestionDisponibilidadComponent implements OnInit {
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 1) {
-          this.notificationSvc.mostrar('Disponibilidad actualizada correctamente.', 'advertencia');
-          this.guardar.emit(this.grid());
+          this.mensajeExito.set(result.mensaje);
+          this.showExito.set(true);
         } else if (result.exitoso === 3) {
-          // Requiere confirmación
-          this.conflictos.set(result.conflictos ?? []);
           this.mensajeConflicto.set(result.mensaje);
           this.rangosEnEspera.set(rangos);
+        } else {
+          this.errorModal.set(result.mensaje || 'Error al guardar la disponibilidad.');
         }
       },
       error: err => {
         this.guardando.set(false);
-        const msg = err?.error?.mensaje ?? 'Error al guardar la disponibilidad.';
-        this.notificationSvc.mostrar(msg, 'error');
+        this.errorModal.set(err?.error?.mensaje ?? 'Error al guardar la disponibilidad.');
       },
     });
   }
@@ -229,32 +224,30 @@ export class GestionDisponibilidadComponent implements OnInit {
     const rangos = this.rangosEnEspera();
     if (!id || !rangos) return;
 
-    this.limpiarConflictos();
+    this.limpiarConflicto();
     this.guardando.set(true);
     this.adminSvc.guardarDispOperador(id, rangos, true).subscribe({
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 1) {
-          this.notificationSvc.mostrar('Disponibilidad actualizada. Las reservas afectadas volvieron a estado RESERVADO.', 'advertencia');
-          this.guardar.emit(this.grid());
+          this.mensajeExito.set(result.mensaje);
+          this.showExito.set(true);
         } else {
-          this.notificationSvc.mostrar(result.mensaje || 'Error inesperado.', 'error');
+          this.errorModal.set(result.mensaje || 'Error inesperado al confirmar.');
         }
       },
       error: err => {
         this.guardando.set(false);
-        const msg = err?.error?.mensaje ?? 'Error al confirmar el guardado.';
-        this.notificationSvc.mostrar(msg, 'error');
+        this.errorModal.set(err?.error?.mensaje ?? 'Error al confirmar el guardado.');
       },
     });
   }
 
   onCancelarConfirmacion(): void {
-    this.limpiarConflictos();
+    this.limpiarConflicto();
   }
 
-  private limpiarConflictos(): void {
-    this.conflictos.set([]);
+  private limpiarConflicto(): void {
     this.mensajeConflicto.set('');
     this.rangosEnEspera.set(null);
   }
@@ -262,7 +255,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   // ── Helpers de conversión ──────────────────────────────────
 
   private idNumerico(): number | null {
-    const raw = this.operador.id.replace('OP-', '');
+    const raw = this.operador().id.replace('OP-', '');
     const n   = parseInt(raw, 10);
     return isNaN(n) ? null : n;
   }
@@ -270,7 +263,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   private gridARangos(): DispRango[] {
     const rangos: DispRango[] = [];
     for (const dia of this.dias) {
-      let inicio: HoraGrid | null = null;
+      let inicio: HoraGrid | null     = null;
       let ultimaHora: HoraGrid | null = null;
 
       for (const hora of this.horas) {
@@ -290,7 +283,6 @@ export class GestionDisponibilidadComponent implements OnInit {
           ultimaHora = null;
         }
       }
-      // Cerrar rango pendiente al final del día
       if (inicio && ultimaHora) {
         rangos.push({
           NroDia:     NRO_DIA[dia],
@@ -305,7 +297,7 @@ export class GestionDisponibilidadComponent implements OnInit {
 
   private sumarUnaHora(hora: HoraGrid): string {
     const [h] = hora.split(':').map(Number);
-    if (h === 23) return '00:00'; // el slot 23:00 cierra a medianoche
+    if (h === 23) return '00:00';
     return `${String(h + 1).padStart(2, '0')}:00`;
   }
 

@@ -20,64 +20,117 @@
 
     <div class="p-6 flex flex-col gap-4">
 
-      <!-- Counter alert -->
-      <div class="bg-[#fff7ed] border border-[#fed7aa] rounded-[12px] p-4 flex items-start gap-4">
-        <div class="size-10 bg-[#f97316] rounded-xl flex items-center justify-center shrink-0">
-          <span class="text-white text-[18px] font-bold">{{ servicios().length }}</span>
+      <!-- Loading -->
+      @if (cargando()) {
+        <div class="flex flex-col items-center justify-center py-10 gap-3">
+          <svg class="size-7 text-[#f97316] animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          <p class="text-[13px] text-[#6a7282]">Consultando servicios asignados...</p>
         </div>
-        <div>
-          <p class="text-[#101828] text-[14px] font-semibold">
-            Esta unidad tiene <strong>{{ servicios().length }} servicio(s) asignado(s)</strong>
-          </p>
-          <p class="text-[#6a7282] text-[13px] mt-0.5">
-            Al pasar a taller, estos servicios <strong class="text-[#e7000b]">perderán su asignación</strong> y deberán ser gestionados
-            (<strong>Reprogramar/Cancelar</strong>) en el <strong>Módulo de Operaciones</strong>.
-          </p>
-        </div>
-      </div>
+      }
 
-      <!-- Services table -->
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <lucide-angular [img]="FileTextIcon" class="size-4" color="#4a5565" [strokeWidth]="1.5" />
-          <p class="text-[#364153] text-[13px] font-semibold">Servicios que Perderán Asignación:</p>
+      @if (errorCarga()) {
+        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-xl p-4 text-[13px] text-[#c10007]">
+          {{ errorCarga() }}
+        </div>
+      }
+
+      @if (!cargando() && !errorCarga()) {
+
+        <!-- Counter alert -->
+        <div class="bg-[#fff7ed] border border-[#fed7aa] rounded-[12px] p-4 flex items-start gap-4">
+          <div class="size-10 bg-[#f97316] rounded-xl flex items-center justify-center shrink-0">
+            <span class="text-white text-[18px] font-bold">{{ reservas().length }}</span>
+          </div>
+          <div>
+            <p class="text-[#101828] text-[14px] font-semibold">
+              Esta unidad tiene <strong>{{ reservas().length }} servicio(s) asignado(s)</strong>
+            </p>
+            <p class="text-[#6a7282] text-[13px] mt-0.5">
+              Al pasar a taller, estos servicios <strong class="text-[#e7000b]">perderán su asignación</strong> y deberán ser gestionados
+              (<strong>Reprogramar/Cancelar</strong>) en el <strong>Módulo de Operaciones</strong>.
+            </p>
+          </div>
         </div>
 
-        <div class="border border-[#e5e7eb] rounded-[12px] overflow-hidden">
-          <!-- Table header -->
-          <div class="grid grid-cols-[1fr_1.2fr_1.5fr_1fr] bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5">
-            <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">ID Servicio</span>
-            <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">Fecha</span>
-            <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">Cliente B2B</span>
-            <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">Estado</span>
+        <!-- Services table -->
+        @if (reservas().length > 0) {
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <lucide-angular [img]="FileTextIcon" class="size-4" color="#4a5565" [strokeWidth]="1.5" />
+              <p class="text-[#364153] text-[13px] font-semibold">Servicios que Perderán Asignación:</p>
+            </div>
+
+            <div class="border border-[#e5e7eb] rounded-[12px] overflow-hidden">
+              <div class="grid grid-cols-[1fr_1.2fr_1.5fr_1fr] bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5">
+                <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">ID Servicio</span>
+                <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">Fecha</span>
+                <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">Cliente B2B</span>
+                <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">Estado</span>
+              </div>
+
+              @for (r of reservas(); track r.id) {
+                <div class="grid grid-cols-[1fr_1.2fr_1.5fr_1fr] items-center px-4 py-3 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors">
+                  <span class="text-[#101828] text-[13px] font-bold font-mono">RVA-{{ r.id }}</span>
+                  <span class="text-[#4a5565] text-[13px]">{{ formatFecha(r.fechaServicio) }}</span>
+                  <span class="text-[#101828] text-[13px] truncate pr-2">{{ r.nombreCliente }}</span>
+                  <span class="inline-flex items-center border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
+                    [class]="estadoBadgeClass(r.estadoOperacion)">
+                    {{ r.estadoOperacion }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Info note -->
+        <div class="bg-[#eff6ff] border-l-4 border-[#155dfc] rounded-r-[10px] px-4 py-3 flex items-start gap-3">
+          <lucide-angular [img]="InfoIcon" class="size-4 shrink-0 mt-0.5" color="#155dfc" [strokeWidth]="1.5" />
+          <div>
+            <p class="text-[#364153] text-[12px] leading-relaxed">
+              <strong class="text-[#101828]">Nota de Flujo Operativo:</strong><br />
+              Esta acción <strong>limpia automáticamente la columna "Asignación"</strong> en el Módulo de Operaciones para los servicios
+              vinculados a <strong>{{ unidad().placa }}</strong>. Los servicios deberán ser reprogramados manualmente con otra unidad disponible o cancelados.
+            </p>
+          </div>
+        </div>
+
+        <!-- Datos de ingreso a taller -->
+        <div class="border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col gap-4">
+          <p class="text-[#364153] text-[13px] font-semibold">Datos de Ingreso a Taller</p>
+
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
+              Nombre del Responsable *
+            </label>
+            <input type="text" [ngModel]="nombreResponsable()" (ngModelChange)="nombreResponsable.set($event)" name="nombreResponsable"
+              placeholder="Ej: Carlos Gómez"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#f97316] focus:ring-1 focus:ring-[#f97316]/30" />
           </div>
 
-          <!-- Rows -->
-          @for (s of servicios(); track s.id) {
-            <div class="grid grid-cols-[1fr_1.2fr_1.5fr_1fr] items-center px-4 py-3 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors">
-              <span class="text-[#101828] text-[13px] font-bold font-mono">{{ s.id }}</span>
-              <span class="text-[#4a5565] text-[13px]">{{ formatFecha(s.fecha) }}</span>
-              <span class="text-[#101828] text-[13px] truncate pr-2">{{ s.cliente }}</span>
-              <span class="inline-flex items-center border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
-                [class]="estadoBadgeClass(s.estado)">
-                {{ s.estado }}
-              </span>
-            </div>
-          }
-        </div>
-      </div>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
+              Kilometraje Actual * <span class="text-[#6a7282] font-normal">(Manual)</span>
+            </label>
+            <input type="number" [ngModel]="kilometraje()" (ngModelChange)="kilometraje.set(+$event || null)" name="kilometraje"
+              placeholder="45320" min="1"
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#f97316] focus:ring-1 focus:ring-[#f97316]/30" />
+          </div>
 
-      <!-- Info note -->
-      <div class="bg-[#eff6ff] border-l-4 border-[#155dfc] rounded-r-[10px] px-4 py-3 flex items-start gap-3">
-        <lucide-angular [img]="InfoIcon" class="size-4 shrink-0 mt-0.5" color="#155dfc" [strokeWidth]="1.5" />
-        <div>
-          <p class="text-[#364153] text-[12px] leading-relaxed">
-            <strong class="text-[#101828]">Nota de Flujo Operativo:</strong><br />
-            Esta acción <strong>limpia automáticamente la columna "Asignación"</strong> en el Módulo de Operaciones para los servicios
-            vinculados a <strong>{{ unidad().placa }}</strong>. Los servicios deberán ser reprogramados manualmente con otra unidad disponible o cancelados.
-          </p>
+          <div>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
+              Motivo de Ingreso <span class="text-[#6a7282] font-normal">(Opcional)</span>
+            </label>
+            <textarea [ngModel]="nota()" (ngModelChange)="nota.set($event)" name="nota" rows="2"
+              placeholder="Ej: Revisión preventiva, cambio de aceite..."
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#f97316] focus:ring-1 focus:ring-[#f97316]/30 resize-none"></textarea>
+          </div>
         </div>
-      </div>
+
+      }
 
     </div>
 
@@ -87,8 +140,8 @@
         class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
         Cancelar
       </button>
-      <button type="button" (click)="confirmar.emit()"
-        class="flex-1 flex items-center justify-center gap-2 bg-[#e7000b] hover:bg-[#c10007] text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+      <button type="button" (click)="onConfirmar()" [disabled]="!esValido || cargando()"
+        class="flex-1 flex items-center justify-center gap-2 bg-[#e7000b] hover:bg-[#c10007] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
         <lucide-angular [img]="AlertTriangleIcon" class="size-4" color="white" [strokeWidth]="2" />
         Confirmar y Liberar Servicios
       </button>

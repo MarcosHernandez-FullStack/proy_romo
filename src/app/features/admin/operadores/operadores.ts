@@ -238,4 +238,12 @@ export class OperadoresComponent implements OnInit {
       default:                return 'bg-[#f5f3ff] text-[#5b21b6] border-[#ddd6fe]';
     }
   }
+
+  protected tooltipDisponibilidad(tipo: string): string {
+    switch (tipo) {
+      case 'Tiempo Completo': return 'Lun–Vie, 08:00–17:00 exactos, sin fines de semana';
+      case 'Horario Parcial': return 'Entre 1 y 25 horas semanales configuradas';
+      default:                return 'Sin horario configurado o más de 25h con patrón personalizado';
+    }
+  }
 }

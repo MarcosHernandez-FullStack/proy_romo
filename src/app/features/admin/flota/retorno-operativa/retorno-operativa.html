@@ -26,6 +26,16 @@
         <p class="text-[#1d4ed8] text-[15px] font-bold">{{ unidad().placa }} — {{ unidad().marca }} {{ unidad().modelo }}</p>
       </div>
 
+      <!-- Nombre Responsable -->
+      <div>
+        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
+          Nombre del Responsable *
+        </label>
+        <input type="text" [ngModel]="nombreResponsable()" (ngModelChange)="nombreResponsable.set($event)" name="nombreResponsable"
+          placeholder="Ej: Carlos Gómez"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#16a34a] focus:ring-1 focus:ring-[#16a34a]/30" />
+      </div>
+
       <!-- Kilometraje -->
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
