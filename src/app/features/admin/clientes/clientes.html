@@ -155,13 +155,13 @@
                 title="Editar">
                 <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
               </button>
-              <button type="button" (click)="toggleActivo(c.id)"
+              <button type="button" (click)="darDeBajaCliente(c.id)"
                 class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
                 title="Dar de baja">
                 <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
               </button>
             } @else {
-              <button type="button" (click)="toggleActivo(c.id)"
+              <button type="button" (click)="reactivarCliente(c.id)"
                 class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer"
                 title="Reactivar">
                 <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
@@ -178,13 +178,23 @@
 
 @if (showNuevo()) {
   <app-nuevo-cliente
-    (guardar)="onNuevoCliente($event)"
+    (guardar)="onNuevoCliente()"
     (cerrar)="showNuevo.set(false)" />
 }
 
 @if (clienteEditar()) {
   <app-editar-cliente
     [cliente]="clienteEditar()!"
-    (guardar)="onEditarCliente($event)"
+    (guardar)="onEditarCliente()"
     (cerrar)="clienteEditar.set(null)" />
+}
+
+@if (exitoEstado()) {
+  <app-exito-modal
+    [titulo]="exitoEstado()!.titulo"
+    mensaje="El estado del cliente fue actualizado correctamente."
+    etiqueta="ID CLIENTE"
+    [detalle]="exitoEstado()!.id"
+    labelCerrar="Aceptar"
+    (cerrar)="exitoEstado.set(null)" />
 }

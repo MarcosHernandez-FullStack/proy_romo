@@ -158,6 +158,14 @@ export class AdminService {
     return of(SERVICIOS_ADMIN).pipe(delay(300));
   }
 
+  crearCliente(data: CrearClienteRequest): Observable<CrearUsuarioResult> {
+    return this.http.post<CrearUsuarioResult>(`${API}/clientes`, data);
+  }
+
+  editarCliente(idCliente: number, data: EditarClienteRequest): Observable<CrearUsuarioResult> {
+    return this.http.put<CrearUsuarioResult>(`${API}/clientes/${idCliente}`, data);
+  }
+
   getClientes(): Observable<ClienteB2B[]> {
     return this.http.get<ClienteApiItem[]>(`${API}/clientes`).pipe(
       map(data => data.map(c => ({
@@ -414,6 +422,27 @@ const DIAS_SEMANA_LAB: DiaSemana[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
 const HORAS_COMPLETO: HoraGrid[]   = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
 const HORAS_MANANA:  HoraGrid[]    = ['08:00','09:00','10:00','11:00','12:00'];
 const HORAS_TARDE:   HoraGrid[]    = ['13:00','14:00','15:00','16:00','17:00'];
+
+interface CrearClienteRequest {
+  alias:          string;
+  contrasena:     string;
+  empresa:        string;
+  nomContacto:    string;
+  nroContacto?:   string;
+  correoContacto: string;
+  tarifaBase:     number;
+  tarifaKm:       number;
+}
+
+interface EditarClienteRequest {
+  contrasena?:    string;
+  empresa:        string;
+  nomContacto:    string;
+  nroContacto?:   string;
+  correoContacto: string;
+  tarifaBase:     number;
+  tarifaKm:       number;
+}
 
 interface ClienteApiItem {
   id:              number;

@@ -19,13 +19,14 @@ import { AdminService } from '../../../core/services/admin.service';
 import { ClienteB2B } from '../../../models/admin.model';
 import { NuevoClienteComponent } from './nuevo-cliente/nuevo-cliente';
 import { EditarClienteComponent } from './editar-cliente/editar-cliente';
+import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
 type FiltroEstado = 'Activos' | 'Bajas';
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, NuevoClienteComponent, EditarClienteComponent],
+  imports: [FormsModule, LucideAngularModule, NuevoClienteComponent, EditarClienteComponent, ExitoModalComponent],
   templateUrl: './clientes.html',
 })
 export class ClientesComponent implements OnInit {
@@ -51,6 +52,7 @@ export class ClientesComponent implements OnInit {
 
   protected readonly showNuevo = signal(false);
   protected readonly clienteEditar = signal<ClienteB2B | null>(null);
+  protected readonly exitoEstado = signal<{ titulo: string; id: string } | null>(null);
 
   protected readonly totalClientes = computed(() => this.clientes().length);
   protected readonly clientesActivos = computed(() => this.clientes().filter((c) => c.activo).length);
@@ -69,35 +71,23 @@ export class ClientesComponent implements OnInit {
     this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 
-  protected onNuevoCliente(data: Omit<ClienteB2B, 'id'>): void {
-    const id = `CLI-${String(this.clientes().length + 1).padStart(3, '0')}`;
-    const cliente: ClienteB2B = {
-      ...data,
-      id,
-      tipoTarifaBase: data.tarifaBase === 0 ? 'GLOBAL' : 'CUSTOM',
-      tipoTarifaKm:   data.tarifaKm   === 0 ? 'GLOBAL' : 'CUSTOM',
-    };
-    this.clientes.update((prev) => [...prev, cliente]);
+  protected onNuevoCliente(): void {
     this.showNuevo.set(false);
+    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 
-  protected onEditarCliente(data: ClienteB2B): void {
-    const actualizado: ClienteB2B = {
-      ...data,
-      tipoTarifaBase: data.tarifaBase === 0 ? 'GLOBAL' : 'CUSTOM',
-      tipoTarifaKm:   data.tarifaKm   === 0 ? 'GLOBAL' : 'CUSTOM',
-    };
-    this.clientes.update((prev) => prev.map((c) => (c.id === actualizado.id ? actualizado : c)));
+  protected onEditarCliente(): void {
     this.clienteEditar.set(null);
+    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 
-  protected toggleActivo(id: string): void {
-    this.clientes.update((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, activo: !c.activo } : c))
-    );
+  protected darDeBajaCliente(id: string): void {
+    this.clientes.update((prev) => prev.map((c) => (c.id === id ? { ...c, activo: false } : c)));
+    this.exitoEstado.set({ titulo: '¡Cliente Dado de Baja!', id });
   }
 
-  protected eliminar(id: string): void {
-    this.clientes.update((prev) => prev.filter((c) => c.id !== id));
+  protected reactivarCliente(id: string): void {
+    this.clientes.update((prev) => prev.map((c) => (c.id === id ? { ...c, activo: true } : c)));
+    this.exitoEstado.set({ titulo: '¡Cliente Reactivado!', id });
   }
 }

@@ -98,15 +98,34 @@
       </div>
     </div>
 
+    @if (errorMsg()) {
+      <div class="px-6 pb-2">
+        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-2.5 flex items-center gap-2">
+          <lucide-angular [img]="AlertTriangleIcon" class="size-4 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
+          <p class="text-[#c10007] text-[13px]">{{ errorMsg() }}</p>
+        </div>
+      </div>
+    }
+
     <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
-      <button type="button" (click)="cerrar.emit()"
-        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] disabled:opacity-50 transition-colors cursor-pointer">
         Cancelar
       </button>
-      <button type="button" (click)="onGuardar()" [disabled]="!esValido"
+      <button type="button" (click)="onGuardar()" [disabled]="!esValido || guardando()"
         class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
-        Crear Cliente y Credenciales
+        @if (guardando()) { Creando... } @else { Crear Cliente y Credenciales }
       </button>
     </div>
   </div>
 </div>
+
+@if (showExito()) {
+  <app-exito-modal
+    titulo="¡Cliente Creado!"
+    mensaje="El cliente y sus credenciales de acceso fueron registrados exitosamente."
+    etiqueta="ID CLIENTE"
+    [detalle]="idNuevoFormato"
+    labelCerrar="Aceptar"
+    (cerrar)="guardar.emit()" />
+}

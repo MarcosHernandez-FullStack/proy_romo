@@ -8,6 +8,7 @@ import { EditarOperadorComponent } from './editar-operador/editar-operador';
 import { ProximosServiciosComponent } from './proximos-servicios/proximos-servicios';
 import { GestionDisponibilidadComponent } from './gestion-disponibilidad/gestion-disponibilidad';
 import { MensajeModalComponent } from '../../../shared/components/mensaje-modal/mensaje-modal';
+import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
 type FiltroEstado = 'Activos' | 'Bajas';
 
@@ -22,6 +23,7 @@ type FiltroEstado = 'Activos' | 'Bajas';
     ProximosServiciosComponent,
     GestionDisponibilidadComponent,
     MensajeModalComponent,
+    ExitoModalComponent,
   ],
   templateUrl: './operadores.html',
 })
@@ -57,7 +59,8 @@ export class OperadoresComponent implements OnInit {
   protected readonly showConfirmEstado      = signal(false);
   protected readonly operadorEnConfirmacion = signal<Operador | null>(null);
   protected readonly loadingEstado          = signal(false);
-  protected readonly modalResultado         = signal<{ tipo: 'exito' | 'error'; titulo: string; mensaje: string } | null>(null);
+  protected readonly modalResultado         = signal<{ tipo: 'error'; titulo: string; mensaje: string } | null>(null);
+  protected readonly exitoEstado            = signal<{ titulo: string; id: string } | null>(null);
 
   protected readonly totalOperadores  = computed(() => this.operadores().length);
   protected readonly conServiciosHoy  = computed(() =>
@@ -202,7 +205,8 @@ export class OperadoresComponent implements OnInit {
         this.operadorEnConfirmacion.set(null);
         if (result.exitoso === 1) {
           this.adminSvc.getOperadores().subscribe(data => this.operadores.set(data));
-          this.modalResultado.set({ tipo: 'exito', titulo: '¡Estado Actualizado!', mensaje: result.mensaje });
+          const titulo = op.activo ? '¡Operador Dado de Baja!' : '¡Operador Reactivado!';
+          this.exitoEstado.set({ titulo, id: op.id });
         } else {
           this.modalResultado.set({ tipo: 'error', titulo: 'Error al actualizar', mensaje: result.mensaje || 'No se pudo actualizar el estado del operador.' });
         }

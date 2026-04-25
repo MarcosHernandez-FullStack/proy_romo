@@ -227,14 +227,14 @@
 
 @if (showNueva()) {
   <app-nueva-unidad
-    (guardar)="onNuevaUnidad($event)"
+    (guardar)="onNuevaUnidad()"
     (cerrar)="showNueva.set(false)" />
 }
 
 @if (unidadEditar()) {
   <app-editar-unidad
     [unidad]="unidadEditar()!"
-    (guardar)="onEditarUnidad($event)"
+    (guardar)="onEditarUnidad()"
     (cerrar)="unidadEditar.set(null)" />
 }
 
@@ -256,4 +256,34 @@
     [unidad]="unidadRetorno()!"
     (confirmar)="onConfirmarRetorno($event)"
     (cerrar)="unidadRetorno.set(null)" />
+}
+
+@if (exitoBaja()) {
+  <app-exito-modal
+    titulo="¡Grúa Dada de Baja!"
+    mensaje="La unidad fue dada de baja del sistema correctamente."
+    etiqueta="ID GRÚA"
+    [detalle]="exitoBaja()!"
+    labelCerrar="Aceptar"
+    (cerrar)="exitoBaja.set(null)" />
+}
+
+@if (exitoLiberar()) {
+  <app-exito-modal
+    titulo="¡Servicios Liberados!"
+    mensaje="Los servicios asignados fueron desvinculados. La unidad pasó a estado En Taller."
+    etiqueta="ID GRÚA"
+    [detalle]="exitoLiberar()!"
+    labelCerrar="Aceptar"
+    (cerrar)="exitoLiberar.set(null)" />
+}
+
+@if (exitoRetorno()) {
+  <app-exito-modal
+    titulo="¡Grúa Retornada!"
+    mensaje="La unidad retornó a estado Operativa exitosamente."
+    etiqueta="ID GRÚA"
+    [detalle]="exitoRetorno()!"
+    labelCerrar="Aceptar"
+    (cerrar)="exitoRetorno.set(null)" />
 }

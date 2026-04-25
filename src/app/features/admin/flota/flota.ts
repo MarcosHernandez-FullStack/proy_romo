@@ -19,19 +19,20 @@ import {
   ChevronRight,
 } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
-import { EstadoUnidad, GruaRequest, UnidadFlota } from '../../../models/admin.model';
+import { EstadoUnidad, UnidadFlota } from '../../../models/admin.model';
 import { NuevaUnidadComponent } from './nueva-unidad/nueva-unidad';
 import { EditarUnidadComponent } from './editar-unidad/editar-unidad';
 import { DetalleUnidadComponent } from './detalle-unidad/detalle-unidad';
 import { LiberarServicioComponent, LiberarData } from './liberar-servicio/liberar-servicio';
 import { RetornoOperativaComponent, RetornoData } from './retorno-operativa/retorno-operativa';
+import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
 type FiltroFlota = 'Activas' | 'En Taller' | 'Bajas';
 
 @Component({
   selector: 'app-flota',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, NuevaUnidadComponent, EditarUnidadComponent, DetalleUnidadComponent, LiberarServicioComponent, RetornoOperativaComponent],
+  imports: [FormsModule, LucideAngularModule, NuevaUnidadComponent, EditarUnidadComponent, DetalleUnidadComponent, LiberarServicioComponent, RetornoOperativaComponent, ExitoModalComponent],
   templateUrl: './flota.html',
 })
 export class FlotaComponent implements OnInit {
@@ -69,6 +70,9 @@ export class FlotaComponent implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly errorGuardar = signal<string | null>(null);
 
+  protected readonly exitoBaja    = signal<string | null>(null);
+  protected readonly exitoLiberar = signal<string | null>(null);
+  protected readonly exitoRetorno = signal<string | null>(null);
 
   protected readonly totalUnidades   = computed(() => this.flota().length);
   protected readonly operativas      = computed(() => this.flota().filter(u => u.estado === 'Operativa').length);
@@ -153,6 +157,16 @@ export class FlotaComponent implements OnInit {
     this.unidadLiberar.set(u);
   }
 
+  protected onNuevaUnidad(): void {
+    this.showNueva.set(false);
+    this.cargarFlota();
+  }
+
+  protected onEditarUnidad(): void {
+    this.unidadEditar.set(null);
+    this.cargarFlota();
+  }
+
   protected onConfirmarLiberar(data: LiberarData): void {
     const u = this.unidadLiberar();
     if (!u) return;
@@ -165,6 +179,7 @@ export class FlotaComponent implements OnInit {
         if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
         this.unidadLiberar.set(null);
         this.cargarFlota();
+        this.exitoLiberar.set(u.id);
       },
       error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
     });
@@ -182,51 +197,10 @@ export class FlotaComponent implements OnInit {
         if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
         this.unidadRetorno.set(null);
         this.cargarFlota();
+        this.exitoRetorno.set(u.id);
       },
       error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
     });
-  }
-
-  protected onNuevaUnidad(data: Omit<UnidadFlota, 'id'>): void {
-    const req = this.toGruaRequest(data);
-    this.guardando.set(true);
-    this.errorGuardar.set(null);
-    this.adminSvc.crearGrua(req).subscribe({
-      next: (result) => {
-        this.guardando.set(false);
-        if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
-        this.showNueva.set(false);
-        this.cargarFlota();
-      },
-      error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
-    });
-  }
-
-  protected onEditarUnidad(data: UnidadFlota): void {
-    const idNumerico = parseInt(data.id.split('-')[1], 10);
-    const req = this.toGruaRequest(data);
-    this.guardando.set(true);
-    this.errorGuardar.set(null);
-    this.adminSvc.editarGrua(idNumerico, req).subscribe({
-      next: (result) => {
-        this.guardando.set(false);
-        if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
-        this.unidadEditar.set(null);
-        this.cargarFlota();
-      },
-      error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
-    });
-  }
-
-  private toGruaRequest(data: Omit<UnidadFlota, 'id'>): GruaRequest {
-    return {
-      placa:          data.placa,
-      marca:          data.marca,
-      modelo:         data.modelo,
-      añoFabricacion: data.anio,
-      capacidad:      data.capacidad,
-      fecVenSeg:      data.vencimientoSeguro,
-    };
   }
 
   protected darDeBaja(id: string): void {
@@ -238,6 +212,7 @@ export class FlotaComponent implements OnInit {
         this.guardando.set(false);
         if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
         this.cargarFlota();
+        this.exitoBaja.set(id);
       },
       error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
     });
