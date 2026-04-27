@@ -219,7 +219,7 @@ export class NuevaReservaComponent implements OnInit {
       horaFin,
       cantidadCarga:        this.capacidadEfectiva(),
       rol:                  session.rol,
-      idCliente:            session.idCliente ?? parseInt(this.clienteId()),
+      idCliente:            session.idCliente ?? parseInt(this.clienteId().replace('CLI-', ''), 10),
       idOperador:           null as number | null,
       direccionOrigen:      this.origen(),
       coordLatOrigen:       this.coordLatOrigen(),
