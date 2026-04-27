@@ -26,30 +26,55 @@
 
           <!-- Alias -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">ID de Usuario (Login) *</label>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">ID de Usuario (Login) *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="alias().length > 10"
+                [class.text-[#e17100]]="alias().length >= 8 && alias().length <= 10"
+                [class.text-[#9ca3af]]="alias().length < 8">
+                {{ alias().length }}/10
+              </span>
+            </div>
             <input type="text" [ngModel]="alias()" (ngModelChange)="alias.set($event)" name="alias"
               placeholder="Ej: OPER001" maxlength="10"
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white" />
-            <p class="text-right text-[11px] mt-0.5"
-              [class.text-[#e17100]]="alias().length >= 8"
-              [class.text-[#9ca3af]]="alias().length < 8">
-              {{ alias().length }}/10
-            </p>
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none bg-white transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorAlias"
+              [class.focus:border-[#e7000b]]="mostrarErrores() && errorAlias"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorAlias)"
+              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorAlias)" />
+            @if (mostrarErrores() && errorAlias) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorAlias }}</p>
+            }
           </div>
 
           <!-- Contraseña -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Contraseña *</label>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Contraseña *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="contrasena().length > 20"
+                [class.text-[#e17100]]="contrasena().length >= 16 && contrasena().length <= 20"
+                [class.text-[#9ca3af]]="contrasena().length < 16">
+                {{ contrasena().length }}/20
+              </span>
+            </div>
             <div class="flex gap-2">
               <input type="text" [ngModel]="contrasena()" (ngModelChange)="contrasena.set($event)" name="contrasena"
-                placeholder="Contraseña de acceso" maxlength="100"
-                class="flex-1 border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+                placeholder="Contraseña de acceso" maxlength="20"
+                class="flex-1 border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+                [class.border-[#e7000b]]="mostrarErrores() && errorContrasena"
+                [class.focus:border-[#e7000b]]="mostrarErrores() && errorContrasena"
+                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorContrasena)"
+                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorContrasena)" />
               <button type="button" (click)="generarContrasena()"
                 class="flex items-center gap-1.5 bg-[#e17100] text-white text-[13px] font-semibold rounded-[10px] px-3 h-10 hover:bg-[#bb4d00] transition-colors cursor-pointer shrink-0">
                 <lucide-angular [img]="RefreshCwIcon" class="size-4" color="white" [strokeWidth]="1.5" />
                 Generar
               </button>
             </div>
+            @if (mostrarErrores() && errorContrasena) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorContrasena }}</p>
+            }
           </div>
 
         </div>
@@ -60,36 +85,96 @@
         <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-3">Datos Personales</p>
         <div class="flex flex-col gap-3">
 
-          <!-- Nombres + Apellidos en fila -->
+          <!-- Nombres + Apellidos -->
           <div class="flex gap-3">
             <div class="flex-1">
-              <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Nombres *</label>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-[#364153] text-[13px] font-medium">Nombres *</label>
+                <span class="text-[11px]"
+                  [class.text-[#e7000b]]="nombres().length > 100"
+                  [class.text-[#e17100]]="nombres().length > 80 && nombres().length <= 100"
+                  [class.text-[#9ca3af]]="nombres().length <= 80">
+                  {{ nombres().length }}/100
+                </span>
+              </div>
               <input type="text" [ngModel]="nombres()" (ngModelChange)="nombres.set($event)" name="nombres"
                 placeholder="Ej: Roberto" maxlength="100"
-                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+                class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+                [class.border-[#e7000b]]="mostrarErrores() && errorNombres"
+                [class.focus:border-[#e7000b]]="mostrarErrores() && errorNombres"
+                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorNombres)"
+                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorNombres)" />
+              @if (mostrarErrores() && errorNombres) {
+                <p class="text-[#e7000b] text-[11px] mt-1">{{ errorNombres }}</p>
+              }
             </div>
             <div class="flex-1">
-              <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Apellidos *</label>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-[#364153] text-[13px] font-medium">Apellidos *</label>
+                <span class="text-[11px]"
+                  [class.text-[#e7000b]]="apellidos().length > 100"
+                  [class.text-[#e17100]]="apellidos().length > 80 && apellidos().length <= 100"
+                  [class.text-[#9ca3af]]="apellidos().length <= 80">
+                  {{ apellidos().length }}/100
+                </span>
+              </div>
               <input type="text" [ngModel]="apellidos()" (ngModelChange)="apellidos.set($event)" name="apellidos"
                 placeholder="Ej: Sánchez" maxlength="100"
-                class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+                class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+                [class.border-[#e7000b]]="mostrarErrores() && errorApellidos"
+                [class.focus:border-[#e7000b]]="mostrarErrores() && errorApellidos"
+                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorApellidos)"
+                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorApellidos)" />
+              @if (mostrarErrores() && errorApellidos) {
+                <p class="text-[#e7000b] text-[11px] mt-1">{{ errorApellidos }}</p>
+              }
             </div>
           </div>
 
           <!-- Correo -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Correo electrónico *</label>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Correo electrónico *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="correo().length > 100"
+                [class.text-[#e17100]]="correo().length > 80 && correo().length <= 100"
+                [class.text-[#9ca3af]]="correo().length <= 80">
+                {{ correo().length }}/100
+              </span>
+            </div>
             <input type="email" [ngModel]="correo()" (ngModelChange)="correo.set($event)" name="correo"
               placeholder="Ej: roberto@empresa.com" maxlength="100"
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorCorreo"
+              [class.focus:border-[#e7000b]]="mostrarErrores() && errorCorreo"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorCorreo)"
+              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorCorreo)" />
+            @if (mostrarErrores() && errorCorreo) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorCorreo }}</p>
+            }
           </div>
 
           <!-- Teléfono -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Teléfono</label>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Teléfono *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="telefono().length > 50"
+                [class.text-[#e17100]]="telefono().length > 40 && telefono().length <= 50"
+                [class.text-[#9ca3af]]="telefono().length <= 40">
+                {{ telefono().length }}/50
+              </span>
+            </div>
             <input type="tel" [ngModel]="telefono()" (ngModelChange)="telefono.set($event)" name="telefono"
-              placeholder="+54 11 2222-3333" maxlength="50"
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+              placeholder="+51 11 2222-3333" maxlength="50"
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorTelefono"
+              [class.focus:border-[#e7000b]]="mostrarErrores() && errorTelefono"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorTelefono)"
+              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorTelefono)" />
+            @if (mostrarErrores() && errorTelefono) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorTelefono }}</p>
+            }
           </div>
 
         </div>
@@ -102,27 +187,39 @@
 
           <!-- Nro Licencia -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Número de Licencia *</label>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Número de Licencia *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="nroLicencia().length > 9"
+                [class.text-[#e17100]]="nroLicencia().length >= 7 && nroLicencia().length <= 9"
+                [class.text-[#9ca3af]]="nroLicencia().length < 7">
+                {{ nroLicencia().length }}/9
+              </span>
+            </div>
             <input type="text" [ngModel]="nroLicencia()" (ngModelChange)="nroLicencia.set($event)" name="nroLicencia"
               placeholder="Ej: D-12345" maxlength="9"
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-            <p class="text-right text-[11px] mt-0.5"
-              [class.text-[#e17100]]="nroLicencia().length >= 7"
-              [class.text-[#9ca3af]]="nroLicencia().length < 7">
-              {{ nroLicencia().length }}/9
-            </p>
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorNroLicencia"
+              [class.focus:border-[#e7000b]]="mostrarErrores() && errorNroLicencia"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorNroLicencia)"
+              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorNroLicencia)" />
+            @if (mostrarErrores() && errorNroLicencia) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorNroLicencia }}</p>
+            }
           </div>
 
           <!-- Fecha vencimiento -->
           <div>
             <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Fecha de Vencimiento *</label>
             <input type="date" [ngModel]="fecVenLic()" (ngModelChange)="fecVenLic.set($event)" name="fecVenLic"
-              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none"
-              [class.border-[#ffd230]]="licenciaVenceProximo"
-              [class.border-[#d1d5dc]]="!licenciaVenceProximo"
-              [class.focus:border-[#ffd230]]="licenciaVenceProximo"
-              [class.focus:border-[#155dfc]]="!licenciaVenceProximo" />
-            @if (licenciaVenceProximo) {
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorFecVenLic"
+              [class.border-[#ffd230]]="!errorFecVenLic && licenciaVenceProximo"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorFecVenLic) && !licenciaVenceProximo"
+              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorFecVenLic)" />
+            @if (mostrarErrores() && errorFecVenLic) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorFecVenLic }}</p>
+            } @else if (licenciaVenceProximo) {
               <div class="flex items-center gap-1.5 mt-1">
                 <lucide-angular [img]="AlertTriangleIcon" class="size-3.5" color="#bb4d00" [strokeWidth]="1.5" />
                 <p class="text-[#bb4d00] text-[11px]">La licencia vence en menos de 15 días</p>
@@ -141,8 +238,9 @@
     <div class="px-6 py-4 border-t border-[#e5e7eb] flex flex-col gap-3">
 
       @if (errorMsg()) {
-        <div class="bg-[#fff1f1] border border-[#fca5a5] rounded-[10px] px-4 py-2.5 text-[#b91c1c] text-[13px]">
-          {{ errorMsg() }}
+        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-2.5 flex items-center gap-2">
+          <lucide-angular [img]="AlertTriangleIcon" class="size-4 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
+          <p class="text-[#c10007] text-[13px]">{{ errorMsg() }}</p>
         </div>
       }
 
@@ -151,13 +249,9 @@
           class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer disabled:opacity-50">
           Cancelar
         </button>
-        <button type="button" (click)="onGuardar()" [disabled]="!esValido || guardando()"
+        <button type="button" (click)="onGuardar()" [disabled]="guardando()"
           class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
-          @if (guardando()) {
-            Creando...
-          } @else {
-            Crear Operador y Credenciales
-          }
+          @if (guardando()) { Creando... } @else { Crear Operador y Credenciales }
         </button>
       </div>
 

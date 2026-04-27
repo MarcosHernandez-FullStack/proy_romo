@@ -288,8 +288,8 @@ export class AdminService {
     return this.http.put<CrearUsuarioResult>(`${API}/flota/${idGrua}`, data);
   }
 
-  darDeBajaGrua(idGrua: number): Observable<CrearUsuarioResult> {
-    return this.http.delete<CrearUsuarioResult>(`${API}/flota/${idGrua}`);
+  actualizarEstadoGrua(idGrua: number, nuevoEstado: 'ACTIVO' | 'INACTIVO'): Observable<CrearUsuarioResult> {
+    return this.http.patch<CrearUsuarioResult>(`${API}/flota/${idGrua}/estado`, { nuevoEstado });
   }
 
   getReservasALiberar(idGrua: number): Observable<ReservaALiberar[]> {

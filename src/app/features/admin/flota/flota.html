@@ -145,9 +145,12 @@
 
         <!-- ESTADO ACTUAL -->
         <button type="button" (click)="onEstadoClick(u)"
-          class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold cursor-pointer hover:opacity-80 transition-opacity"
+          class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-opacity"
           [class]="estadoClass(u.estado)"
-          title="Gestionar servicios / cambiar estado">
+          [class.cursor-pointer]="u.estado !== 'Baja'"
+          [class.hover:opacity-80]="u.estado !== 'Baja'"
+          [class.cursor-default]="u.estado === 'Baja'"
+          [title]="u.estado === 'Baja' ? '' : 'Gestionar servicios / cambiar estado'">
           @if (u.estado === 'Operativa') {
             <lucide-angular [img]="CheckCircleIcon" class="size-3" color="#166534" [strokeWidth]="2" />
           } @else if (u.estado === 'En Taller') {
@@ -247,14 +250,14 @@
 @if (unidadLiberar()) {
   <app-liberar-servicio
     [unidad]="unidadLiberar()!"
-    (confirmar)="onConfirmarLiberar($event)"
+    (confirmar)="onConfirmarLiberar()"
     (cerrar)="unidadLiberar.set(null)" />
 }
 
 @if (unidadRetorno()) {
   <app-retorno-operativa
     [unidad]="unidadRetorno()!"
-    (confirmar)="onConfirmarRetorno($event)"
+    (confirmar)="onConfirmarRetorno()"
     (cerrar)="unidadRetorno.set(null)" />
 }
 
@@ -266,6 +269,16 @@
     [detalle]="exitoBaja()!"
     labelCerrar="Aceptar"
     (cerrar)="exitoBaja.set(null)" />
+}
+
+@if (exitoReactivar()) {
+  <app-exito-modal
+    titulo="¡Grúa Reactivada!"
+    mensaje="La unidad fue reactivada y está nuevamente operativa."
+    etiqueta="ID GRÚA"
+    [detalle]="exitoReactivar()!"
+    labelCerrar="Aceptar"
+    (cerrar)="exitoReactivar.set(null)" />
 }
 
 @if (exitoLiberar()) {

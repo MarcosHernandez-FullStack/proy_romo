@@ -29,13 +29,12 @@ export class EditarUnidadComponent implements OnInit {
   protected readonly capacidad         = signal(1);
   protected readonly vencimientoSeguro = signal('');
 
-  protected readonly guardando = signal(false);
-  protected readonly errorMsg  = signal('');
-  protected readonly showExito = signal(false);
+  protected readonly guardando      = signal(false);
+  protected readonly errorMsg       = signal('');
+  protected readonly showExito      = signal(false);
+  protected readonly mostrarErrores = signal(false);
 
-  protected get esValido(): boolean {
-    return !!this.placa() && !!this.marca() && !!this.modelo() && !!this.anio();
-  }
+  private readonly anioActual = new Date().getFullYear();
 
   ngOnInit(): void {
     const u = this.unidad();
@@ -47,7 +46,49 @@ export class EditarUnidadComponent implements OnInit {
     this.vencimientoSeguro.set(u.vencimientoSeguro);
   }
 
+  // ── Validaciones por campo ────────────────────────────────
+  protected get errorPlaca(): string {
+    if (!this.placa().trim()) return 'La placa es obligatoria.';
+    if (this.placa().length > 10) return 'Máximo 10 caracteres.';
+    return '';
+  }
+
+  protected get errorMarca(): string {
+    if (!this.marca().trim()) return 'La marca es obligatoria.';
+    if (this.marca().length > 30) return 'Máximo 30 caracteres.';
+    return '';
+  }
+
+  protected get errorModelo(): string {
+    if (!this.modelo().trim()) return 'El modelo es obligatorio.';
+    if (this.modelo().length > 30) return 'Máximo 30 caracteres.';
+    return '';
+  }
+
+  protected get errorAnio(): string {
+    if (!this.anio()) return 'El año de fabricación es obligatorio.';
+    const n = Number(this.anio());
+    if (!Number.isInteger(n) || n < 1900 || n > this.anioActual) return `Ingrese un año entre 1900 y ${this.anioActual}.`;
+    return '';
+  }
+
+  protected get errorCapacidad(): string {
+    if (this.capacidad() < 1) return 'La capacidad mínima es 1.';
+    return '';
+  }
+
+  protected get errorVencimiento(): string {
+    if (!this.vencimientoSeguro()) return 'La fecha de vencimiento del seguro es obligatoria.';
+    return '';
+  }
+
+  protected get esValido(): boolean {
+    return !this.errorPlaca && !this.errorMarca && !this.errorModelo &&
+           !this.errorAnio && !this.errorCapacidad && !this.errorVencimiento;
+  }
+
   protected onGuardar(): void {
+    this.mostrarErrores.set(true);
     if (!this.esValido || this.guardando()) return;
 
     this.errorMsg.set('');

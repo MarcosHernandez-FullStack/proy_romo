@@ -27,20 +27,73 @@ export class NuevoClienteComponent {
   protected readonly telefono   = signal('');
   protected readonly loginId    = signal('');
   protected readonly password   = signal('');
-  protected readonly tarifaBase = signal(0);
-  protected readonly tarifaKm   = signal(0);
+  protected readonly tarifaBase = signal<number>(0);
+  protected readonly tarifaKm   = signal<number>(0);
 
-  protected readonly guardando  = signal(false);
-  protected readonly errorMsg   = signal('');
-  protected readonly showExito  = signal(false);
-  protected readonly idNuevo    = signal(0);
+  protected readonly guardando      = signal(false);
+  protected readonly errorMsg       = signal('');
+  protected readonly showExito      = signal(false);
+  protected readonly idNuevo        = signal(0);
+  protected readonly mostrarErrores = signal(false);
 
   protected get idNuevoFormato(): string {
     return `CLI-${String(this.idNuevo()).padStart(3, '0')}`;
   }
 
+  // ── Validaciones por campo ────────────────────────────────
+  protected get errorEmpresa(): string {
+    if (!this.empresa().trim()) return 'La razón social es obligatoria.';
+    if (this.empresa().length > 100) return 'Máximo 100 caracteres.';
+    return '';
+  }
+
+  protected get errorContacto(): string {
+    if (!this.contacto().trim()) return 'El nombre de contacto es obligatorio.';
+    if (this.contacto().length > 50) return 'Máximo 50 caracteres.';
+    return '';
+  }
+
+  protected get errorTelefono(): string {
+    if (!this.telefono().trim()) return 'El teléfono es obligatorio.';
+    if (this.telefono().length > 20) return 'Máximo 20 caracteres.';
+    return '';
+  }
+
+  protected get errorCorreo(): string {
+    if (!this.correo().trim()) return 'El correo electrónico es obligatorio.';
+    if (this.correo().length > 100) return 'Máximo 100 caracteres.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correo())) return 'Ingrese un correo válido.';
+    return '';
+  }
+
+  protected get errorLoginId(): string {
+    if (!this.loginId().trim()) return 'El ID de usuario es obligatorio.';
+    if (this.loginId().length > 10) return 'Máximo 10 caracteres.';
+    return '';
+  }
+
+  protected get errorPassword(): string {
+    if (!this.password().trim()) return 'La contraseña es obligatoria.';
+    if (this.password().length > 20) return 'Máximo 20 caracteres.';
+    return '';
+  }
+
+  protected get errorTarifaBase(): string {
+    if (this.tarifaBase() < 0) return 'La tarifa no puede ser negativa.';
+    if (this.tarifaBase() > 99999999.99) return 'Valor fuera de rango.';
+    return '';
+  }
+
+  protected get errorTarifaKm(): string {
+    if (this.tarifaKm() < 0) return 'La tarifa no puede ser negativa.';
+    if (this.tarifaKm() > 99999999.99) return 'Valor fuera de rango.';
+    return '';
+  }
+
   protected get esValido(): boolean {
-    return !!this.empresa() && !!this.contacto() && !!this.correo() && !!this.loginId() && !!this.password();
+    return !this.errorEmpresa && !this.errorContacto && !this.errorTelefono &&
+           !this.errorCorreo && !this.errorLoginId && !this.errorPassword &&
+           !this.errorTarifaBase && !this.errorTarifaKm;
   }
 
   protected generarPassword(): void {
@@ -50,6 +103,7 @@ export class NuevoClienteComponent {
   }
 
   protected onGuardar(): void {
+    this.mostrarErrores.set(true);
     if (!this.esValido || this.guardando()) return;
 
     this.errorMsg.set('');

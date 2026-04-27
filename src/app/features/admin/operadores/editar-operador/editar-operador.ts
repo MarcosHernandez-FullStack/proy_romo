@@ -31,9 +31,11 @@ export class EditarOperadorComponent implements OnInit {
   protected readonly password            = signal('');
   protected readonly licencia            = signal('');
   protected readonly vencimientoLicencia = signal('');
-  protected readonly loading    = signal(false);
-  protected readonly showExito  = signal(false);
-  protected readonly errorModal = signal<string | null>(null);
+
+  protected readonly loading        = signal(false);
+  protected readonly showExito      = signal(false);
+  protected readonly errorModal     = signal<string | null>(null);
+  protected readonly mostrarErrores = signal(false);
 
   ngOnInit(): void {
     const o = this.operador();
@@ -46,10 +48,52 @@ export class EditarOperadorComponent implements OnInit {
     this.vencimientoLicencia.set(o.vencimientoLicencia);
   }
 
-  protected generarPassword(): void {
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    const pwd = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    this.password.set(pwd);
+  // ── Validaciones por campo ────────────────────────────────
+  protected get errorNombres(): string {
+    if (!this.nombres().trim()) return 'Los nombres son obligatorios.';
+    if (this.nombres().length > 100) return 'Máximo 100 caracteres.';
+    return '';
+  }
+
+  protected get errorApellidos(): string {
+    if (!this.apellidos().trim()) return 'Los apellidos son obligatorios.';
+    if (this.apellidos().length > 100) return 'Máximo 100 caracteres.';
+    return '';
+  }
+
+  protected get errorCorreo(): string {
+    if (!this.correo().trim()) return 'El correo electrónico es obligatorio.';
+    if (this.correo().length > 100) return 'Máximo 100 caracteres.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correo())) return 'Ingrese un correo válido.';
+    return '';
+  }
+
+  protected get errorTelefono(): string {
+    if (!this.telefono().trim()) return 'El teléfono es obligatorio.';
+    if (this.telefono().length > 50) return 'Máximo 50 caracteres.';
+    return '';
+  }
+
+  protected get errorPassword(): string {
+    if (this.password().length > 20) return 'Máximo 20 caracteres.';
+    return '';
+  }
+
+  protected get errorLicencia(): string {
+    if (!this.licencia().trim()) return 'El número de licencia es obligatorio.';
+    if (this.licencia().length > 9) return 'Máximo 9 caracteres.';
+    return '';
+  }
+
+  protected get errorFecVencimiento(): string {
+    if (!this.vencimientoLicencia()) return 'La fecha de vencimiento es obligatoria.';
+    return '';
+  }
+
+  protected get esValido(): boolean {
+    return !this.errorNombres && !this.errorApellidos && !this.errorCorreo &&
+           !this.errorTelefono && !this.errorPassword && !this.errorLicencia &&
+           !this.errorFecVencimiento;
   }
 
   protected get licenciaVenceProximo(): boolean {
@@ -58,7 +102,16 @@ export class EditarOperadorComponent implements OnInit {
     return diff < 15;
   }
 
+  protected generarPassword(): void {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const pwd = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    this.password.set(pwd);
+  }
+
   protected onGuardar(): void {
+    this.mostrarErrores.set(true);
+    if (!this.esValido || this.loading()) return;
+
     const o = this.operador();
     const idNum = parseInt(o.id.replace('OP-', ''), 10);
 
@@ -83,8 +136,7 @@ export class EditarOperadorComponent implements OnInit {
       },
       error: err => {
         this.loading.set(false);
-        const msg = err?.error?.mensaje ?? 'Error al actualizar el operador.';
-        this.errorModal.set(msg);
+        this.errorModal.set(err?.error?.mensaje ?? 'Error al actualizar el operador.');
       },
     });
   }

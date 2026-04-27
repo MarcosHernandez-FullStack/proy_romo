@@ -29,23 +29,70 @@ export class NuevoOperadorComponent {
   protected readonly correo      = signal('');
   protected readonly nroLicencia = signal('');
   protected readonly fecVenLic   = signal('');
-  protected readonly guardando   = signal(false);
-  protected readonly errorMsg    = signal('');
-  protected readonly showExito = signal(false);
-  protected readonly idNuevo  = signal(0);
+
+  protected readonly guardando      = signal(false);
+  protected readonly errorMsg       = signal('');
+  protected readonly showExito      = signal(false);
+  protected readonly idNuevo        = signal(0);
+  protected readonly mostrarErrores = signal(false);
 
   protected get idNuevoFormato(): string {
     return `OP-${String(this.idNuevo()).padStart(3, '0')}`;
   }
 
+  // ── Validaciones por campo ────────────────────────────────
+  protected get errorAlias(): string {
+    if (!this.alias().trim()) return 'El ID de usuario es obligatorio.';
+    if (this.alias().length > 10) return 'Máximo 10 caracteres.';
+    return '';
+  }
+
+  protected get errorContrasena(): string {
+    if (!this.contrasena().trim()) return 'La contraseña es obligatoria.';
+    if (this.contrasena().length > 20) return 'Máximo 20 caracteres.';
+    return '';
+  }
+
+  protected get errorNombres(): string {
+    if (!this.nombres().trim()) return 'Los nombres son obligatorios.';
+    if (this.nombres().length > 100) return 'Máximo 100 caracteres.';
+    return '';
+  }
+
+  protected get errorApellidos(): string {
+    if (!this.apellidos().trim()) return 'Los apellidos son obligatorios.';
+    if (this.apellidos().length > 100) return 'Máximo 100 caracteres.';
+    return '';
+  }
+
+  protected get errorCorreo(): string {
+    if (!this.correo().trim()) return 'El correo electrónico es obligatorio.';
+    if (this.correo().length > 100) return 'Máximo 100 caracteres.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correo())) return 'Ingrese un correo válido.';
+    return '';
+  }
+
+  protected get errorTelefono(): string {
+    if (!this.telefono().trim()) return 'El teléfono es obligatorio.';
+    if (this.telefono().length > 50) return 'Máximo 50 caracteres.';
+    return '';
+  }
+
+  protected get errorNroLicencia(): string {
+    if (!this.nroLicencia().trim()) return 'El número de licencia es obligatorio.';
+    if (this.nroLicencia().length > 9) return 'Máximo 9 caracteres.';
+    return '';
+  }
+
+  protected get errorFecVenLic(): string {
+    if (!this.fecVenLic()) return 'La fecha de vencimiento es obligatoria.';
+    return '';
+  }
+
   protected get esValido(): boolean {
-    return !!this.alias() &&
-           !!this.contrasena() &&
-           !!this.nombres() &&
-           !!this.apellidos() &&
-           !!this.correo() &&
-           !!this.nroLicencia() &&
-           !!this.fecVenLic();
+    return !this.errorAlias && !this.errorContrasena && !this.errorNombres &&
+           !this.errorApellidos && !this.errorCorreo && !this.errorTelefono &&
+           !this.errorNroLicencia && !this.errorFecVenLic;
   }
 
   protected get licenciaVenceProximo(): boolean {
@@ -61,6 +108,7 @@ export class NuevoOperadorComponent {
   }
 
   protected onGuardar(): void {
+    this.mostrarErrores.set(true);
     if (!this.esValido || this.guardando()) return;
 
     this.errorMsg.set('');
@@ -88,8 +136,7 @@ export class NuevoOperadorComponent {
       },
       error: err => {
         this.guardando.set(false);
-        const msg = err?.error?.mensaje ?? 'Error al crear el operador.';
-        this.errorMsg.set(msg);
+        this.errorMsg.set(err?.error?.mensaje ?? 'Error al crear el operador.');
       },
     });
   }

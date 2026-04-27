@@ -4,12 +4,6 @@ import { LucideAngularModule, AlertTriangle, X, FileText, Info } from 'lucide-an
 import { UnidadFlota, ReservaALiberar } from '../../../../models/admin.model';
 import { AdminService } from '../../../../core/services/admin.service';
 
-export interface LiberarData {
-  nombreResponsable: string;
-  kilometraje:       number;
-  nota:              string;
-}
-
 @Component({
   selector: 'app-liberar-servicio',
   standalone: true,
@@ -20,7 +14,7 @@ export class LiberarServicioComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
   readonly unidad    = input.required<UnidadFlota>();
-  readonly confirmar = output<LiberarData>();
+  readonly confirmar = output<void>();
   readonly cerrar    = output<void>();
 
   protected readonly AlertTriangleIcon = AlertTriangle;
@@ -28,24 +22,59 @@ export class LiberarServicioComponent implements OnInit {
   protected readonly FileTextIcon      = FileText;
   protected readonly InfoIcon          = Info;
 
-  cargando           = signal(false);
-  errorCarga         = signal<string | null>(null);
-  reservas           = signal<ReservaALiberar[]>([]);
-  nombreResponsable  = signal('');
-  kilometraje        = signal<number | null>(null);
-  nota               = signal('');
+  cargando          = signal(false);
+  guardando         = signal(false);
+  errorCarga        = signal<string | null>(null);
+  errorMsg          = signal<string | null>(null);
+  reservas          = signal<ReservaALiberar[]>([]);
+  nombreResponsable = signal('');
+  kilometraje       = signal<number | null>(null);
+  nota              = signal('');
+  mostrarErrores    = signal(false);
+
+  get errorNombreResponsable(): string {
+    if (!this.nombreResponsable().trim()) return 'El nombre del responsable es obligatorio.';
+    if (this.nombreResponsable().length > 50) return 'Máximo 50 caracteres.';
+    return '';
+  }
+
+  get errorKilometraje(): string {
+    const km = this.kilometraje();
+    if (km === null || km === 0) return 'El kilometraje es obligatorio.';
+    if (km < 1 || !Number.isInteger(km)) return 'Ingrese un valor entero mayor a 0.';
+    return '';
+  }
 
   get esValido(): boolean {
-    const km = this.kilometraje();
-    return this.nombreResponsable().trim().length > 0 && km !== null && km > 0;
+    return !this.errorNombreResponsable && !this.errorKilometraje;
   }
 
   onConfirmar(): void {
-    if (!this.esValido) return;
-    this.confirmar.emit({
+    this.mostrarErrores.set(true);
+    if (!this.esValido || this.guardando()) return;
+
+    this.errorMsg.set(null);
+    this.guardando.set(true);
+
+    const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
+
+    this.adminSvc.ingresoTaller(idNumerico, {
       nombreResponsable: this.nombreResponsable().trim(),
       kilometraje:       this.kilometraje()!,
       nota:              this.nota().trim(),
+    }).subscribe({
+      next: result => {
+        this.guardando.set(false);
+        if (result.exitoso === 1) {
+          this.confirmar.emit();
+        } else {
+          this.errorMsg.set(result.mensaje || 'Error al registrar el ingreso a taller.');
+        }
+      },
+      error: err => {
+        this.guardando.set(false);
+        this.errorMsg.set(err?.error?.mensaje ?? 'Error al registrar el ingreso a taller.');
+      },
     });
   }
 

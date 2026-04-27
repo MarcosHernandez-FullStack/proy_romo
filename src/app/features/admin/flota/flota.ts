@@ -23,8 +23,8 @@ import { EstadoUnidad, UnidadFlota } from '../../../models/admin.model';
 import { NuevaUnidadComponent } from './nueva-unidad/nueva-unidad';
 import { EditarUnidadComponent } from './editar-unidad/editar-unidad';
 import { DetalleUnidadComponent } from './detalle-unidad/detalle-unidad';
-import { LiberarServicioComponent, LiberarData } from './liberar-servicio/liberar-servicio';
-import { RetornoOperativaComponent, RetornoData } from './retorno-operativa/retorno-operativa';
+import { LiberarServicioComponent } from './liberar-servicio/liberar-servicio';
+import { RetornoOperativaComponent } from './retorno-operativa/retorno-operativa';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
 type FiltroFlota = 'Activas' | 'En Taller' | 'Bajas';
@@ -70,9 +70,10 @@ export class FlotaComponent implements OnInit {
   protected readonly guardando = signal(false);
   protected readonly errorGuardar = signal<string | null>(null);
 
-  protected readonly exitoBaja    = signal<string | null>(null);
-  protected readonly exitoLiberar = signal<string | null>(null);
-  protected readonly exitoRetorno = signal<string | null>(null);
+  protected readonly exitoBaja       = signal<string | null>(null);
+  protected readonly exitoReactivar  = signal<string | null>(null);
+  protected readonly exitoLiberar    = signal<string | null>(null);
+  protected readonly exitoRetorno    = signal<string | null>(null);
 
   protected readonly totalUnidades   = computed(() => this.flota().length);
   protected readonly operativas      = computed(() => this.flota().filter(u => u.estado === 'Operativa').length);
@@ -146,6 +147,7 @@ export class FlotaComponent implements OnInit {
   }
 
   protected onEstadoClick(u: UnidadFlota): void {
+    if (u.estado === 'Baja') return;
     if (u.estado === 'En Taller') {
       this.unidadRetorno.set(u);
     } else {
@@ -167,48 +169,28 @@ export class FlotaComponent implements OnInit {
     this.cargarFlota();
   }
 
-  protected onConfirmarLiberar(data: LiberarData): void {
+  protected onConfirmarLiberar(): void {
     const u = this.unidadLiberar();
     if (!u) return;
-    const idNumerico = parseInt(u.id.split('-')[1], 10);
-    this.guardando.set(true);
-    this.errorGuardar.set(null);
-    this.adminSvc.ingresoTaller(idNumerico, data).subscribe({
-      next: (result) => {
-        this.guardando.set(false);
-        if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
-        this.unidadLiberar.set(null);
-        this.cargarFlota();
-        this.exitoLiberar.set(u.id);
-      },
-      error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
-    });
+    this.unidadLiberar.set(null);
+    this.cargarFlota();
+    this.exitoLiberar.set(u.id);
   }
 
-  protected onConfirmarRetorno(data: RetornoData): void {
+  protected onConfirmarRetorno(): void {
     const u = this.unidadRetorno();
     if (!u) return;
-    const idNumerico = parseInt(u.id.split('-')[1], 10);
-    this.guardando.set(true);
-    this.errorGuardar.set(null);
-    this.adminSvc.retornoOperativa(idNumerico, data).subscribe({
-      next: (result) => {
-        this.guardando.set(false);
-        if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
-        this.unidadRetorno.set(null);
-        this.cargarFlota();
-        this.exitoRetorno.set(u.id);
-      },
-      error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
-    });
+    this.unidadRetorno.set(null);
+    this.cargarFlota();
+    this.exitoRetorno.set(u.id);
   }
 
   protected darDeBaja(id: string): void {
     const idNumerico = parseInt(id.split('-')[1], 10);
     this.guardando.set(true);
     this.errorGuardar.set(null);
-    this.adminSvc.darDeBajaGrua(idNumerico).subscribe({
-      next: (result) => {
+    this.adminSvc.actualizarEstadoGrua(idNumerico, 'INACTIVO').subscribe({
+      next: result => {
         this.guardando.set(false);
         if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
         this.cargarFlota();
@@ -219,7 +201,16 @@ export class FlotaComponent implements OnInit {
   }
 
   protected reactivar(id: string): void {
-    this.flota.update((prev) => prev.map((u) => (u.id === id ? { ...u, estado: 'Operativa' as EstadoUnidad } : u)));
+    const idNumerico = parseInt(id.split('-')[1], 10);
+    this.adminSvc.actualizarEstadoGrua(idNumerico, 'ACTIVO').subscribe({
+      next: result => {
+        if (result.exitoso === 1) {
+          this.cargarFlota();
+          this.exitoReactivar.set(id);
+        }
+      },
+      error: () => {},
+    });
   }
 
   protected estadoClass(estado: EstadoUnidad): string {

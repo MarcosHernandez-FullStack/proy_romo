@@ -219,6 +219,8 @@
   <app-exito-modal
     titulo="¡Disponibilidad Guardada!"
     [mensaje]="mensajeExito()"
+    etiqueta="ID OPERADOR"
+    [detalle]="operador().id"
     labelCerrar="Aceptar"
     (cerrar)="guardar.emit(grid())" />
 }

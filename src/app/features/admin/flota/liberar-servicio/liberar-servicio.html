@@ -102,31 +102,52 @@
         <div class="border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col gap-4">
           <p class="text-[#364153] text-[13px] font-semibold">Datos de Ingreso a Taller</p>
 
+          <!-- Nombre Responsable -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
-              Nombre del Responsable *
-            </label>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Nombre del Responsable *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="nombreResponsable().length > 50"
+                [class.text-[#e17100]]="nombreResponsable().length > 40 && nombreResponsable().length <= 50"
+                [class.text-[#9ca3af]]="nombreResponsable().length <= 40">
+                {{ nombreResponsable().length }}/50
+              </span>
+            </div>
             <input type="text" [ngModel]="nombreResponsable()" (ngModelChange)="nombreResponsable.set($event)" name="nombreResponsable"
-              placeholder="Ej: Carlos Gómez"
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#f97316] focus:ring-1 focus:ring-[#f97316]/30" />
+              placeholder="Ej: Carlos Gómez" maxlength="50"
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorNombreResponsable"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorNombreResponsable)"
+              [class.focus:border-[#f97316]]="!(mostrarErrores() && errorNombreResponsable)" />
+            @if (mostrarErrores() && errorNombreResponsable) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorNombreResponsable }}</p>
+            }
           </div>
 
+          <!-- Kilometraje -->
           <div>
             <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
               Kilometraje Actual * <span class="text-[#6a7282] font-normal">(Manual)</span>
             </label>
             <input type="number" [ngModel]="kilometraje()" (ngModelChange)="kilometraje.set(+$event || null)" name="kilometraje"
-              placeholder="45320" min="1"
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#f97316] focus:ring-1 focus:ring-[#f97316]/30" />
+              placeholder="45320" min="1" step="1"
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorKilometraje"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorKilometraje)"
+              [class.focus:border-[#f97316]]="!(mostrarErrores() && errorKilometraje)" />
+            @if (mostrarErrores() && errorKilometraje) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorKilometraje }}</p>
+            }
           </div>
 
+          <!-- Nota (opcional) -->
           <div>
             <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">
               Motivo de Ingreso <span class="text-[#6a7282] font-normal">(Opcional)</span>
             </label>
             <textarea [ngModel]="nota()" (ngModelChange)="nota.set($event)" name="nota" rows="2"
               placeholder="Ej: Revisión preventiva, cambio de aceite..."
-              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#f97316] focus:ring-1 focus:ring-[#f97316]/30 resize-none"></textarea>
+              class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#f97316] resize-none"></textarea>
           </div>
         </div>
 
@@ -135,15 +156,23 @@
     </div>
 
     <!-- Footer -->
+    @if (errorMsg()) {
+      <div class="px-6 pb-3">
+        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-2.5 flex items-center gap-2">
+          <lucide-angular [img]="AlertTriangleIcon" class="size-4 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
+          <p class="text-[#c10007] text-[13px]">{{ errorMsg() }}</p>
+        </div>
+      </div>
+    }
     <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
-      <button type="button" (click)="cerrar.emit()"
-        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] disabled:opacity-50 transition-colors cursor-pointer">
         Cancelar
       </button>
-      <button type="button" (click)="onConfirmar()" [disabled]="!esValido || cargando()"
+      <button type="button" (click)="onConfirmar()" [disabled]="cargando() || guardando()"
         class="flex-1 flex items-center justify-center gap-2 bg-[#e7000b] hover:bg-[#c10007] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
         <lucide-angular [img]="AlertTriangleIcon" class="size-4" color="white" [strokeWidth]="2" />
-        Confirmar y Liberar Servicios
+        @if (guardando()) { Guardando... } @else { Guardar Liberación }
       </button>
     </div>
 
