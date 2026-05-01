@@ -1,76 +1,210 @@
-<div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[540px] overflow-hidden">
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[560px] overflow-hidden">
+
     <!-- Header -->
     <div class="bg-[#155dfc] px-6 py-5 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <lucide-angular [img]="UserPlusIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
-          <h2 class="text-white text-[20px] font-bold">Añadir Nuevo Usuario</h2>
-          <p class="text-[#dbeafe] text-[13px]">Complete todos los campos obligatorios (*)</p>
+          <h2 class="text-white text-[20px] font-bold">Nuevo Usuario</h2>
+          <p class="text-[#bedbff] text-[13px]">Registro de acceso al sistema</p>
         </div>
       </div>
-      <button type="button" (click)="cerrar.emit()"
-        class="size-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.2)] transition-colors cursor-pointer">
+      <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"
+        class="size-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.2)] transition-colors cursor-pointer disabled:opacity-50">
         <lucide-angular [img]="XIcon" class="size-5" color="white" [strokeWidth]="1.5" />
       </button>
     </div>
 
-    <div class="p-6 flex flex-col gap-4">
-      <!-- Info banner -->
-      <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[10px] px-4 py-3 flex items-start gap-3">
-        <lucide-angular [img]="InfoIcon" class="size-5 flex-shrink-0 mt-0.5" color="#193cb8" [strokeWidth]="1.5" />
+    <div class="p-6 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+
+      <!-- DATOS DE CONTACTO -->
+      <div>
+        <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-3">Datos de Contacto</p>
+        <div class="flex flex-col gap-3">
+
+          <!-- Nombres + Apellidos -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-[#364153] text-[13px] font-medium">Nombres *</label>
+                <span class="text-[11px]"
+                  [class.text-[#e7000b]]="nombres().length > 100"
+                  [class.text-[#e17100]]="nombres().length > 80 && nombres().length <= 100"
+                  [class.text-[#9ca3af]]="nombres().length <= 80">
+                  {{ nombres().length }}/100
+                </span>
+              </div>
+              <input type="text" [ngModel]="nombres()" (ngModelChange)="nombres.set($event)" name="nombres"
+                placeholder="Ej: Roberto" maxlength="100"
+                class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+                [class.border-[#e7000b]]="mostrarErrores() && errorNombres"
+                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorNombres)"
+                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorNombres)" />
+              @if (mostrarErrores() && errorNombres) {
+                <p class="text-[#e7000b] text-[11px] mt-1">{{ errorNombres }}</p>
+              }
+            </div>
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label class="text-[#364153] text-[13px] font-medium">Apellidos *</label>
+                <span class="text-[11px]"
+                  [class.text-[#e7000b]]="apellidos().length > 100"
+                  [class.text-[#e17100]]="apellidos().length > 80 && apellidos().length <= 100"
+                  [class.text-[#9ca3af]]="apellidos().length <= 80">
+                  {{ apellidos().length }}/100
+                </span>
+              </div>
+              <input type="text" [ngModel]="apellidos()" (ngModelChange)="apellidos.set($event)" name="apellidos"
+                placeholder="Ej: Sánchez" maxlength="100"
+                class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+                [class.border-[#e7000b]]="mostrarErrores() && errorApellidos"
+                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorApellidos)"
+                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorApellidos)" />
+              @if (mostrarErrores() && errorApellidos) {
+                <p class="text-[#e7000b] text-[11px] mt-1">{{ errorApellidos }}</p>
+              }
+            </div>
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Teléfono *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="telefono().length > 50"
+                [class.text-[#e17100]]="telefono().length > 40 && telefono().length <= 50"
+                [class.text-[#9ca3af]]="telefono().length <= 40">
+                {{ telefono().length }}/50
+              </span>
+            </div>
+            <input type="tel" [ngModel]="telefono()" (ngModelChange)="telefono.set($event)" name="telefono"
+              placeholder="+51 999 999 999" maxlength="50"
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorTelefono"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorTelefono)"
+              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorTelefono)" />
+            @if (mostrarErrores() && errorTelefono) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorTelefono }}</p>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- CREDENCIALES DE ACCESO -->
+      <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[12px] p-4">
+        <p class="text-[#bb4d00] text-[11px] font-bold uppercase tracking-wider mb-1">Credenciales de Acceso</p>
+        <p class="text-[#e17100] text-[12px] mb-3">Correo y contraseña para iniciar sesión en el sistema</p>
+        <div class="flex flex-col gap-3">
+
+          <!-- Correo -->
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Correo Electrónico *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="correo().length > 100"
+                [class.text-[#e17100]]="correo().length > 80 && correo().length <= 100"
+                [class.text-[#9ca3af]]="correo().length <= 80">
+                {{ correo().length }}/100
+              </span>
+            </div>
+            <input type="email" [ngModel]="correo()" (ngModelChange)="correo.set($event)" name="correo"
+              placeholder="usuario@empresa.com" maxlength="100"
+              class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+              [class.border-[#e7000b]]="mostrarErrores() && errorCorreo"
+              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorCorreo)"
+              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorCorreo)" />
+            @if (mostrarErrores() && errorCorreo) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorCorreo }}</p>
+            }
+          </div>
+
+          <!-- Contraseña -->
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-[#364153] text-[13px] font-medium">Contraseña *</label>
+              <span class="text-[11px]"
+                [class.text-[#e7000b]]="contrasena().length > 20"
+                [class.text-[#e17100]]="contrasena().length >= 16 && contrasena().length <= 20"
+                [class.text-[#9ca3af]]="contrasena().length < 16">
+                {{ contrasena().length }}/20
+              </span>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" [ngModel]="contrasena()" (ngModelChange)="contrasena.set($event)" name="contrasena"
+                placeholder="Contraseña de acceso" maxlength="20"
+                class="flex-1 border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
+                [class.border-[#e7000b]]="mostrarErrores() && errorContrasena"
+                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorContrasena)"
+                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorContrasena)" />
+              <button type="button" (click)="generarContrasena()"
+                class="flex items-center gap-1.5 bg-[#e17100] text-white text-[13px] font-semibold rounded-[10px] px-3 h-10 hover:bg-[#bb4d00] transition-colors cursor-pointer shrink-0">
+                <lucide-angular [img]="RefreshCwIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+                Generar
+              </button>
+            </div>
+            @if (mostrarErrores() && errorContrasena) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorContrasena }}</p>
+            }
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ROL DE ACCESO -->
+      <div class="bg-[#f0fdf4] border border-[#7bf1a8] rounded-[12px] p-4">
+        <p class="text-[#008236] text-[11px] font-bold uppercase tracking-wider mb-1">Rol de Acceso</p>
+        <p class="text-[#00a63e] text-[12px] mb-3">Define los permisos del usuario en el sistema</p>
         <div>
-          <p class="text-[#193cb8] text-[13px] font-bold">Credenciales de Acceso</p>
-          <p class="text-[#193cb8] text-[12px] mt-0.5">Se generará automáticamente una contraseña temporal y se enviará al correo electrónico del usuario.</p>
+          <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Rol *</label>
+          <select [ngModel]="rol()" (ngModelChange)="rol.set($event)" name="rol"
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
+            @for (r of roles; track r) {
+              <option [value]="r">{{ r }}</option>
+            }
+          </select>
+          <div class="mt-2.5 flex flex-col gap-1">
+            <p class="text-[#364153] text-[12px]">
+              <strong class="text-[#101828]">Administrador:</strong> Acceso total al sistema, gestión de usuarios y configuración
+            </p>
+            <p class="text-[#364153] text-[12px]">
+              <strong class="text-[#101828]">Staff:</strong> Acceso a operaciones, reservas, clientes y reportes
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- Nombre -->
-      <div>
-        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Nombre Completo *</label>
-        <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre"
-          placeholder="Ingrese el nombre completo..."
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-      </div>
-
-      <!-- Correo -->
-      <div>
-        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Correo Electrónico Corporativo *</label>
-        <div class="relative">
-          <lucide-angular [img]="MailIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-          <input type="email" [ngModel]="correo()" (ngModelChange)="correo.set($event)" name="correo"
-            placeholder="usuario@cranemanager.com"
-            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        </div>
-      </div>
-
-      <!-- Rol -->
-      <div>
-        <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Rol de Usuario *</label>
-        <select [ngModel]="rol()" (ngModelChange)="rol.set($event)" name="rol"
-          class="w-full border border-[#8ec5ff] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
-          @for (r of roles; track r) {
-            <option [value]="r">{{ r }}</option>
-          }
-        </select>
-        <!-- Permisos info -->
-        <div class="bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] px-3 py-2.5 mt-2">
-          <p class="text-[#364153] text-[12px] font-semibold mb-1">Permisos por Rol:</p>
-          <p class="text-[#364153] text-[12px]"><strong>Administrador:</strong> Acceso total al sistema, gestión de usuarios y configuración</p>
-          <p class="text-[#364153] text-[12px] mt-1"><strong>Staff:</strong> Acceso a operaciones, reservas, clientes y reportes</p>
-        </div>
-      </div>
     </div>
 
-    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3 bg-[#f9fafb]">
-      <button type="button" (click)="cerrar.emit()"
-        class="flex-1 bg-[#e5e7eb] text-[#1e2939] text-[14px] font-medium rounded-[10px] h-9 hover:bg-[#d1d5dc] transition-colors cursor-pointer">
+    @if (errorMsg()) {
+      <div class="px-6 pb-2">
+        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-2.5 flex items-center gap-2">
+          <lucide-angular [img]="AlertTriangleIcon" class="size-4 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
+          <p class="text-[#c10007] text-[13px]">{{ errorMsg() }}</p>
+        </div>
+      </div>
+    }
+
+    <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
+      <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"
+        class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] disabled:opacity-50 transition-colors cursor-pointer">
         Cancelar
       </button>
-      <button type="button" (click)="onGuardar()" [disabled]="!esValido"
-        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-9 transition-colors cursor-pointer">
-        Crear Usuario
+      <button type="button" (click)="onGuardar()" [disabled]="guardando()"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
+        @if (guardando()) { Creando... } @else { Crear Usuario }
       </button>
     </div>
   </div>
 </div>
+
+@if (showExito()) {
+  <app-exito-modal
+    titulo="¡Usuario Creado!"
+    mensaje="El usuario y sus credenciales de acceso fueron registrados exitosamente."
+    etiqueta="ID USUARIO"
+    [detalle]="idNuevoFormato"
+    labelCerrar="Aceptar"
+    (cerrar)="guardar.emit()" />
+}

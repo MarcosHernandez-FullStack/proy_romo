@@ -354,9 +354,33 @@ export class AdminService {
     return of(HORARIOS_REGULARES).pipe(delay(200));
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/usuarios')
+  crearUsuario(data: CrearUsuarioRequest): Observable<CrearUsuarioResult> {
+    return this.http.post<CrearUsuarioResult>(`${API}/usuarios`, data);
+  }
+
+  editarUsuario(idUsuario: number, data: EditarUsuarioRequest): Observable<CrearUsuarioResult> {
+    return this.http.put<CrearUsuarioResult>(`${API}/usuarios/${idUsuario}`, data);
+  }
+
   getUsuarios(): Observable<UsuarioAdmin[]> {
-    return of(USUARIOS_ADMIN).pipe(delay(200));
+    return this.http.get<UsuarioApiItem[]>(`${API}/usuarios`).pipe(
+      map(items => items.map(i => this.mapUsuario(i)))
+    );
+  }
+
+  private mapUsuario(item: UsuarioApiItem): UsuarioAdmin {
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const d = new Date(item.fechaCreacion);
+    return {
+      id:            `USR-${String(item.id).padStart(3, '0')}`,
+      nombres:       item.nombres,
+      apellidos:     item.apellidos,
+      correo:        item.correo,
+      telefono:      item.telefono ?? '',
+      rol:           item.rol === 'ADMINISTRADOR' ? 'Administrador' : 'Staff',
+      fechaCreacion: `${d.getUTCDate()} ${meses[d.getUTCMonth()]} ${d.getUTCFullYear()}`,
+      activo:        item.estado === 'ACTIVO',
+    };
   }
 
   // TODO: reemplazar con this.http.get('/api/admin/configuracion/tarifas')
@@ -444,6 +468,24 @@ interface EditarClienteRequest {
   tarifaKm:       number;
 }
 
+interface CrearUsuarioRequest {
+  correo:     string;
+  contrasena: string;
+  nombres:    string;
+  apellidos:  string;
+  telefono?:  string;
+  rol:        'ADMINISTRADOR' | 'STAFF';
+}
+
+interface EditarUsuarioRequest {
+  contrasena?: string;
+  nombres:     string;
+  apellidos:   string;
+  telefono?:   string;
+  correo:      string;
+  rol:         'ADMINISTRADOR' | 'STAFF';
+}
+
 interface ClienteApiItem {
   id:              number;
   empresa:         string;
@@ -516,6 +558,17 @@ interface ProxServApiItem {
   horaFin:        string;
   nomCliente:     string;
   fechaAbreviada: string;
+}
+
+interface UsuarioApiItem {
+  id:            number;
+  nombres:       string;
+  apellidos:     string;
+  correo:        string;
+  telefono:      string | null;
+  rol:           string;
+  estado:        string;
+  fechaCreacion: string;
 }
 
 const OPERADORES: Operador[] = [
@@ -683,10 +736,10 @@ const HORARIOS_REGULARES: HorarioRegular[] = [
 ];
 
 const USUARIOS_ADMIN: UsuarioAdmin[] = [
-  { id: 'USR-001', nombre: 'Carlos Administrador', correo: 'admin@cranemanager.com', rol: 'Administrador', fechaCreacion: '14 ene 2024', activo: true },
-  { id: 'USR-002', nombre: 'María González', correo: 'maria.gonzalez@cranemanager.com', rol: 'Staff', fechaCreacion: '9 feb 2024', activo: true },
-  { id: 'USR-003', nombre: 'Juan Pérez', correo: 'juan.perez@cranemanager.com', rol: 'Staff', fechaCreacion: '4 mar 2024', activo: true },
-  { id: 'USR-004', nombre: 'Laura Martínez', correo: 'laura.martinez@cranemanager.com', rol: 'Staff', fechaCreacion: '10 abr 2024', activo: false },
+  { id: 'USR-001', nombres: 'Carlos',  apellidos: 'Administrador', correo: 'admin@cranemanager.com',              telefono: '+51 999 000 001', rol: 'Administrador', fechaCreacion: '14 ene 2024', activo: true },
+  { id: 'USR-002', nombres: 'María',   apellidos: 'González',      correo: 'maria.gonzalez@cranemanager.com',    telefono: '+51 999 000 002', rol: 'Staff',          fechaCreacion: '9 feb 2024',  activo: true },
+  { id: 'USR-003', nombres: 'Juan',    apellidos: 'Pérez',         correo: 'juan.perez@cranemanager.com',        telefono: '+51 999 000 003', rol: 'Staff',          fechaCreacion: '4 mar 2024',  activo: true },
+  { id: 'USR-004', nombres: 'Laura',   apellidos: 'Martínez',      correo: 'laura.martinez@cranemanager.com',    telefono: '+51 999 000 004', rol: 'Staff',          fechaCreacion: '10 abr 2024', activo: false },
 ];
 
 const TARIFAS_CLIENTES: TarifaCliente[] = [

@@ -159,12 +159,14 @@ export type RolUsuario = 'Administrador' | 'Staff';
 export type EstadoAdminServicio = 'Pendiente' | 'Facturado' | 'Pagado';
 
 export interface UsuarioAdmin {
-  id: string;
-  nombre: string;
-  correo: string;
-  rol: RolUsuario;
+  id:            string;
+  nombres:       string;
+  apellidos:     string;
+  correo:        string;
+  telefono:      string;
+  rol:           RolUsuario;
   fechaCreacion: string;
-  activo: boolean;
+  activo:        boolean;
 }
 
 export interface TarifaCliente {

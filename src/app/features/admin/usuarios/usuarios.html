@@ -17,29 +17,36 @@
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-[#4a5565] text-[13px]">Total Usuarios</p>
-        <p class="text-[#101828] text-[28px] font-bold">{{ totalUsuarios() }}</p>
+        <p class="text-[#6a7282] text-[13px]">Total Usuarios</p>
+        <p class="text-[#101828] text-[32px] font-bold leading-none mt-1">{{ totalUsuarios() }}</p>
       </div>
-      <lucide-angular [img]="UsersIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+      <div class="size-12 bg-[#eff6ff] rounded-[12px] flex items-center justify-center">
+        <lucide-angular [img]="UsersIcon" class="size-6" color="#155dfc" [strokeWidth]="1.5" />
+      </div>
     </div>
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-[#4a5565] text-[13px]">Administradores</p>
-        <p class="text-[#9810fa] text-[28px] font-bold">{{ administradores() }}</p>
+        <p class="text-[#6a7282] text-[13px]">Administradores</p>
+        <p class="text-[#9810fa] text-[32px] font-bold leading-none mt-1">{{ administradores() }}</p>
       </div>
-      <lucide-angular [img]="ShieldIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+      <div class="size-12 bg-[#faf5ff] rounded-[12px] flex items-center justify-center">
+        <lucide-angular [img]="ShieldIcon" class="size-6" color="#9810fa" [strokeWidth]="1.5" />
+      </div>
     </div>
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
-        <p class="text-[#4a5565] text-[13px]">Staff Operativo</p>
-        <p class="text-[#00a63e] text-[28px] font-bold">{{ staffOperativo() }}</p>
+        <p class="text-[#6a7282] text-[13px]">Staff Operativo</p>
+        <p class="text-[#00a63e] text-[32px] font-bold leading-none mt-1">{{ staffOperativo() }}</p>
       </div>
-      <lucide-angular [img]="UserCogIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+      <div class="size-12 bg-[#f0fdf4] rounded-[12px] flex items-center justify-center">
+        <lucide-angular [img]="UserCogIcon" class="size-6" color="#00a63e" [strokeWidth]="1.5" />
+      </div>
     </div>
   </div>
 
   <!-- Table -->
   <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
+
     <!-- Search + Filter -->
     <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
       <div class="flex-1 relative">
@@ -48,84 +55,117 @@
           placeholder="Buscar por nombre, correo o ID..."
           class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
       </div>
-      <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
-        @for (f of filtros; track f) {
-          <button type="button" (click)="filtroEstado.set(f)"
-            class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
-            [class.bg-[#155dfc]]="filtroEstado() === f"
-            [class.text-white]="filtroEstado() === f"
-            [class.text-[#6a7282]]="filtroEstado() !== f">
-            {{ f }}
-          </button>
-        }
-      </div>
-    </div>
-    <p class="px-5 py-2 text-[#4a5565] text-[13px] border-b border-[#f3f4f6]">
-      Mostrando <strong class="text-[#101828]">{{ usuariosFiltrados().length }}</strong> usuario(s)
-    </p>
-
-    <div class="overflow-x-auto">
-    <!-- Table header -->
-    <div class="grid grid-cols-[0.7fr_1.8fr_1fr_1fr_0.7fr] gap-3 bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-2.5 min-w-[580px]">
-      @for (col of ['ID / NOMBRE', 'CORREO ELECTRÓNICO', 'ROL', 'FECHA DE CREACIÓN', 'ACCIONES']; track col) {
-        <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">{{ col }}</span>
-      }
-    </div>
-
-    @if (usuariosFiltrados().length === 0) {
-      <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
-        <lucide-angular [img]="UserCogIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
-        <p class="text-[14px]">No hay usuarios en estado "{{ filtroEstado() }}"</p>
-      </div>
-    }
-
-    @for (u of usuariosFiltrados(); track u.id) {
-      <div class="grid grid-cols-[0.7fr_1.8fr_1fr_1fr_0.7fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[580px]">
-        <div>
-          <p class="text-[#101828] text-[13px] font-bold font-mono">{{ u.id }}</p>
-          <p class="text-[#4a5565] text-[13px] font-medium">{{ u.nombre }}</p>
-        </div>
-        <div class="flex items-center gap-2">
-          <lucide-angular [img]="MailIcon" class="size-4 flex-shrink-0" color="#9ca3af" [strokeWidth]="1.5" />
-          <p class="text-[#364153] text-[13px] truncate">{{ u.correo }}</p>
-        </div>
-        <span class="inline-flex items-center rounded-full px-3 py-1 text-[12px] font-semibold w-fit"
-          [class]="rolClass(u.rol)">
-          {{ u.rol }}
-        </span>
-        <p class="text-[#4a5565] text-[13px]">{{ u.fechaCreacion }}</p>
-        <div class="flex items-center gap-1">
-          @if (u.activo) {
-            <button type="button" (click)="usuarioEditar.set(u)"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer">
-              <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
-            </button>
-            <button type="button" (click)="toggleActivo(u.id)"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer">
-              <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
-            </button>
-          } @else {
-            <button type="button" (click)="toggleActivo(u.id)"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer">
-              <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
+      <div class="flex items-center gap-2">
+        <span class="text-[#6a7282] text-[13px] font-medium">Estado:</span>
+        <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
+          @for (f of filtros; track f) {
+            <button type="button" (click)="filtroEstado.set(f)"
+              class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroEstado() === f"
+              [class.text-white]="filtroEstado() === f"
+              [class.text-[#6a7282]]="filtroEstado() !== f">
+              {{ f }}
             </button>
           }
         </div>
       </div>
-    }
+    </div>
+
+    <!-- Count -->
+    <div class="px-5 py-2 border-b border-[#f3f4f6]">
+      <p class="text-[#6a7282] text-[13px]">Mostrando <strong class="text-[#101828]">{{ usuariosFiltrados().length }}</strong> usuario(s)</p>
+    </div>
+
+    <div class="overflow-x-auto">
+
+      <!-- Table header -->
+      <div class="grid grid-cols-[0.7fr_1.8fr_1fr_1fr_0.7fr] gap-3 bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-2.5 min-w-[580px]">
+        @for (col of ['ID / NOMBRE', 'CORREO ELECTRÓNICO', 'ROL', 'FECHA DE CREACIÓN', 'ACCIONES']; track col) {
+          <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">{{ col }}</span>
+        }
+      </div>
+
+      <!-- Empty state -->
+      @if (usuariosFiltrados().length === 0) {
+        <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
+          <lucide-angular [img]="UserCogIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+          <p class="text-[14px]">No hay usuarios en estado "{{ filtroEstado() }}"</p>
+        </div>
+      }
+
+      <!-- Rows -->
+      @for (u of usuariosFiltrados(); track u.id) {
+        <div class="grid grid-cols-[0.7fr_1.8fr_1fr_1fr_0.7fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[580px]">
+
+          <!-- ID / NOMBRE -->
+          <div>
+            <p class="text-[#101828] text-[13px] font-bold font-mono">{{ u.id }}</p>
+            <p class="text-[#4a5565] text-[13px]">{{ u.nombres }} {{ u.apellidos }}</p>
+          </div>
+
+          <!-- CORREO -->
+          <div class="flex items-center gap-2 min-w-0">
+            <lucide-angular [img]="MailIcon" class="size-4 shrink-0" color="#9ca3af" [strokeWidth]="1.5" />
+            <p class="text-[#364153] text-[13px] truncate">{{ u.correo }}</p>
+          </div>
+
+          <!-- ROL -->
+          <span class="inline-flex items-center rounded-full px-3 py-1 text-[12px] font-semibold w-fit"
+            [class]="rolClass(u.rol)">
+            {{ u.rol }}
+          </span>
+
+          <!-- FECHA CREACIÓN -->
+          <p class="text-[#4a5565] text-[13px]">{{ u.fechaCreacion }}</p>
+
+          <!-- ACCIONES -->
+          <div class="flex items-center gap-1">
+            @if (u.activo) {
+              <button type="button" (click)="usuarioEditar.set(u)"
+                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
+                title="Editar">
+                <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+              </button>
+              <button type="button" (click)="darDeBajaUsuario(u.id)"
+                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+                title="Dar de baja">
+                <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
+              </button>
+            } @else {
+              <button type="button" (click)="reactivarUsuario(u.id)"
+                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer"
+                title="Reactivar">
+                <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
+              </button>
+            }
+          </div>
+
+        </div>
+      }
+
     </div>
   </div>
 </div>
 
 @if (showNuevo()) {
   <app-nuevo-usuario
-    (guardar)="onNuevoUsuario($event)"
+    (guardar)="onNuevoUsuario()"
     (cerrar)="showNuevo.set(false)" />
 }
 
 @if (usuarioEditar()) {
   <app-editar-usuario
     [usuario]="usuarioEditar()!"
-    (guardar)="onEditarUsuario($event)"
+    (guardar)="onEditarUsuario()"
     (cerrar)="usuarioEditar.set(null)" />
+}
+
+@if (exitoEstado()) {
+  <app-exito-modal
+    [titulo]="exitoEstado()!.titulo"
+    mensaje="El estado del usuario fue actualizado correctamente."
+    etiqueta="ID USUARIO"
+    [detalle]="exitoEstado()!.id"
+    labelCerrar="Aceptar"
+    (cerrar)="exitoEstado.set(null)" />
 }
