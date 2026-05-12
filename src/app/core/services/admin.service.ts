@@ -344,9 +344,21 @@ export class AdminService {
     );
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/excepciones')
-  getExcepciones(): Observable<ExcepcionAgenda[]> {
-    return of(EXCEPCIONES).pipe(delay(200));
+  getExcepciones(estado?: string): Observable<ExcepcionAgenda[]> {
+    const params: Record<string, string> = {};
+    if (estado) params['estado'] = estado;
+    return this.http.get<ExcepcionAgenda[]>(`${API}/agenda/excepciones`, { params }).pipe(
+      map(data => data ?? []),
+      catchError(() => of([]))
+    );
+  }
+
+  crearUpdExcepcion(dto: CrearUpdExcepcionDto): Observable<AgendaExcepcionResult> {
+    return this.http.post<AgendaExcepcionResult>(`${API}/agenda/excepciones`, dto);
+  }
+
+  updEstadoExcepcion(id: number, nuevoEstado: string): Observable<{ exitoso: number; mensaje: string }> {
+    return this.http.patch<{ exitoso: number; mensaje: string }>(`${API}/agenda/excepciones/${id}/estado`, { nuevoEstado });
   }
 
   getHorariosRegulares(): Observable<HorarioRegular[]> {
@@ -600,6 +612,21 @@ interface HorarioApiItem {
   horaFinal:  string;
 }
 
+interface CrearUpdExcepcionDto {
+  id:                number;
+  fecha:             string;
+  motivo:            string;
+  horaInicio:        string;
+  horaFin:           string;
+  descripcionMotivo: string;
+}
+
+interface AgendaExcepcionResult {
+  exitoso: number;
+  mensaje: string;
+  idNuevo: number;
+}
+
 const OPERADORES: Operador[] = [
   {
     id: 'OP-001',
@@ -735,24 +762,6 @@ const SERVICIOS_ADMIN: ServicioAdmin[] = [
   },
 ];
 
-const EXCEPCIONES: ExcepcionAgenda[] = [
-  {
-    id: 'EXC-001',
-    fecha: 'jueves, 14 de marzo de 2024',
-    tipo: 'Festivo',
-    alcance: 'Día Completo',
-    motivo: 'Día Nacional',
-  },
-  {
-    id: 'EXC-002',
-    fecha: 'domingo, 24 de marzo de 2024',
-    tipo: 'Mantenimiento',
-    alcance: 'Rango de Horas',
-    horaInicio: '09:00',
-    horaFin: '12:00',
-    motivo: 'Mantenimiento General de Flota',
-  },
-];
 
 const HORARIOS_REGULARES: HorarioRegular[] = [
   { id: 1, dia: 'Lunes',     abre: '07:00', cierra: '20:00', activo: true  },

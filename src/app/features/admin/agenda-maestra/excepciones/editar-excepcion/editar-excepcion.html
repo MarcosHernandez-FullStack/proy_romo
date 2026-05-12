@@ -1,14 +1,14 @@
 <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[520px] overflow-hidden">
 
-    <!-- Purple gradient header -->
+    <!-- Orange gradient header (distinto de Nueva para diferenciarlo visualmente) -->
     <div class="px-6 py-5 flex items-center justify-between"
-      style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%)">
+      style="background: linear-gradient(135deg, #b45309 0%, #d97706 100%)">
       <div class="flex items-center gap-3">
         <lucide-angular [img]="CalendarIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
-          <h2 class="text-white text-[20px] font-bold">Nueva Excepción</h2>
-          <p class="text-[#ddd6fe] text-[13px]">Configure un bloqueo en el calendario del sistema</p>
+          <h2 class="text-white text-[20px] font-bold">Editar Excepción</h2>
+          <p class="text-[#fef3c7] text-[13px]">Modifique los datos del bloqueo en el calendario</p>
         </div>
       </div>
       <button type="button" (click)="cerrar.emit()"
@@ -34,14 +34,14 @@
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Fecha de la Excepción *</label>
         <input type="date" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)" name="fecha"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed]" />
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#d97706]" />
       </div>
 
       <!-- Motivo de Excepción -->
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Motivo de Excepción *</label>
         <select [ngModel]="motivo()" (ngModelChange)="motivo.set($event)" name="motivo"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] bg-white cursor-pointer">
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#d97706] bg-white cursor-pointer">
           @for (t of tiposExcepcion; track t) {
             <option [value]="t">{{ t }}</option>
           }
@@ -53,7 +53,7 @@
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Alcance Temporal *</label>
         <select [ngModel]="alcance()" (ngModelChange)="alcance.set($event); tiempoInicio.set(''); tiempoFinal.set('')" name="alcance"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] bg-white cursor-pointer">
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#d97706] bg-white cursor-pointer">
           <option value="Día Completo">Día Completo (00:00 - 23:59)</option>
           <option value="Rango de Horas Específico">Rango de Horas Específico</option>
         </select>
@@ -61,16 +61,16 @@
 
       <!-- Rango de Horas (conditional) -->
       @if (alcance() === 'Rango de Horas Específico') {
-        <div class="bg-[#f5f3ff] border border-[#ddd6fe] rounded-[10px] p-4 flex flex-col gap-3">
+        <div class="bg-[#fffbeb] border border-[#fde68a] rounded-[10px] p-4 flex flex-col gap-3">
           <div class="flex items-center gap-2">
-            <lucide-angular [img]="ClockIcon" class="size-4" color="#7c3aed" [strokeWidth]="1.5" />
-            <span class="text-[#7c3aed] text-[13px] font-semibold">Rango de Aplicación (Horas)</span>
+            <lucide-angular [img]="ClockIcon" class="size-4" color="#d97706" [strokeWidth]="1.5" />
+            <span class="text-[#d97706] text-[13px] font-semibold">Rango de Aplicación (Horas)</span>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-[#364153] text-[12px] font-medium mb-1.5 block">Desde *</label>
               <select [ngModel]="tiempoInicio()" (ngModelChange)="tiempoInicio.set($event)" name="tiempoInicio"
-                class="w-full border border-[#ddd6fe] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] bg-white cursor-pointer">
+                class="w-full border border-[#fde68a] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#d97706] bg-white cursor-pointer">
                 <option value="">-- Seleccione --</option>
                 @for (h of horas; track h) {
                   <option [value]="h">{{ h }}</option>
@@ -80,7 +80,7 @@
             <div>
               <label class="text-[#364153] text-[12px] font-medium mb-1.5 block">Hasta *</label>
               <select [ngModel]="tiempoFinal()" (ngModelChange)="tiempoFinal.set($event)" name="tiempoFinal"
-                class="w-full border border-[#ddd6fe] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] bg-white cursor-pointer">
+                class="w-full border border-[#fde68a] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#d97706] bg-white cursor-pointer">
                 <option value="">-- Seleccione --</option>
                 @for (h of horas; track h) {
                   <option [value]="h">{{ h }}</option>
@@ -88,7 +88,7 @@
               </select>
             </div>
           </div>
-          <div class="bg-[#fffbeb] border border-[#fde68a] rounded-[8px] px-3 py-2 flex items-start gap-2">
+          <div class="bg-white border border-[#fde68a] rounded-[8px] px-3 py-2 flex items-start gap-2">
             <lucide-angular [img]="AlertTriangleIcon" class="size-3.5 shrink-0 mt-0.5" color="#d97706" [strokeWidth]="1.5" />
             <p class="text-[#92400e] text-[11px]">
               Restricción: Solo se permiten horas completas (bloques de 1 hora) para garantizar compatibilidad con los slots de servicio del sistema.
@@ -103,7 +103,7 @@
         <textarea [ngModel]="descripcionMotivo()" (ngModelChange)="descripcionMotivo.set($event)" name="descripcionMotivo"
           placeholder="Ej: Día feriado nacional - Sin operación de servicios"
           rows="3"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#7c3aed] resize-none"></textarea>
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#d97706] resize-none"></textarea>
         <p class="text-[#9ca3af] text-[11px] mt-1">Describa brevemente el motivo de esta excepción para referencia interna</p>
       </div>
 
@@ -148,12 +148,12 @@
       </button>
       <button type="button" (click)="onGuardar()" [disabled]="!esValido || guardando()"
         class="flex-1 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer flex items-center justify-center gap-2"
-        style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%)">
+        style="background: linear-gradient(135deg, #b45309 0%, #d97706 100%)">
         @if (guardando()) {
           <lucide-angular [img]="LoaderIcon" class="size-4 animate-spin" color="white" [strokeWidth]="1.5" />
           Guardando...
         } @else {
-          Confirmar Excepción
+          Guardar Cambios
         }
       </button>
     </div>

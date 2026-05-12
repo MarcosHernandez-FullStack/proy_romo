@@ -1,6 +1,6 @@
 export type EstadoServicioAdmin = 'Reservado' | 'Asignado' | 'En Curso' | 'Finalizado' | 'Cancelado';
-export type TipoExcepcion = 'Festivo' | 'Mantenimiento' | 'Bloqueo';
-export type AlcanceExcepcion = 'Día Completo' | 'Rango de Horas';
+export type TipoExcepcion = 'Feriado' | 'Mantenimiento' | 'Bloqueo';
+export type AlcanceExcepcion = 'Día Completo' | 'Rango de Horas Específico';
 export type EstadoUnidad = 'Operativa' | 'En Taller' | 'Baja';
 
 export interface ServicioAdmin {
@@ -133,13 +133,14 @@ export interface BitacoraEntry {
 }
 
 export interface ExcepcionAgenda {
-  id: string;
-  fecha: string;
-  tipo: TipoExcepcion;
-  alcance: AlcanceExcepcion;
-  horaInicio?: string;
-  horaFin?: string;
-  motivo: string;
+  id:                number;
+  fecha:             string;  // yyyy-MM-dd
+  motivo:            string;  // Feriado | Mantenimiento | Bloqueo
+  alcance:           string;  // Día Completo | Rango de Horas Específico
+  tiempoInicio:      string;  // HH:mm
+  tiempoFinal:       string;  // HH:mm
+  descripcionMotivo: string;
+  estado:            string;  // ACTIVO | INACTIVO
 }
 
 export interface HorarioRegular {

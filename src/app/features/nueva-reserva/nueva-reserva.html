@@ -1,3 +1,16 @@
+@if (suspendido()) {
+  <div class="p-4 md:p-8 flex items-center justify-center min-h-full bg-[#f9fafb]">
+    <div class="flex flex-col items-center gap-5 text-center max-w-sm">
+      <div class="size-16 bg-[#fef2f2] border border-[#fca5a5] rounded-full flex items-center justify-center">
+        <lucide-angular [img]="BanIcon" class="size-8" color="#c10007" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <p class="text-[#101828] text-[20px] font-bold">Reservas Suspendidas</p>
+        <p class="text-[#4a5565] text-[14px] mt-2 leading-relaxed">El sistema de reservas online está temporalmente fuera de servicio. Para mayor información, contáctenos directamente.</p>
+      </div>
+    </div>
+  </div>
+} @else {
 <div class="p-4 md:p-8 flex flex-col gap-6 bg-[#f9fafb] min-h-full">
 
   <!-- Header -->
@@ -130,4 +143,5 @@
     [titulo]="modal()!.titulo"
     [mensaje]="modal()!.mensaje"
     (cerrar)="modal.set(null)" />
+}
 }

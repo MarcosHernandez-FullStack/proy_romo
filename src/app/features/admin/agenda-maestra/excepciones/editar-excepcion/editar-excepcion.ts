@@ -1,17 +1,18 @@
-import { Component, input, output, signal } from '@angular/core';
+import { Component, OnInit, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Calendar, X, AlertTriangle, Clock, Loader } from 'lucide-angular';
 import { ExcepcionAgenda, TipoExcepcion, AlcanceExcepcion } from '../../../../../models/admin.model';
 
 @Component({
-  selector: 'app-nueva-excepcion',
+  selector: 'app-editar-excepcion',
   standalone: true,
   imports: [FormsModule, LucideAngularModule],
-  templateUrl: './nueva-excepcion.html',
+  templateUrl: './editar-excepcion.html',
 })
-export class NuevaExcepcionComponent {
+export class EditarExcepcionComponent implements OnInit {
+  readonly excepcion = input.required<ExcepcionAgenda>();
   readonly guardando = input<boolean>(false);
-  readonly guardar   = output<Omit<ExcepcionAgenda, 'id'>>();
+  readonly guardar   = output<ExcepcionAgenda>();
   readonly cerrar    = output<void>();
 
   protected readonly CalendarIcon      = Calendar;
@@ -33,6 +34,18 @@ export class NuevaExcepcionComponent {
     `${i.toString().padStart(2, '0')}:00`
   );
 
+  ngOnInit(): void {
+    const exc = this.excepcion();
+    this.fecha.set(exc.fecha);
+    this.motivo.set(exc.motivo as TipoExcepcion);
+    this.alcance.set(
+      exc.alcance === 'Rango de Horas' ? 'Rango de Horas Específico' : exc.alcance as AlcanceExcepcion
+    );
+    this.tiempoInicio.set(exc.tiempoInicio);
+    this.tiempoFinal.set(exc.tiempoFinal);
+    this.descripcionMotivo.set(exc.descripcionMotivo);
+  }
+
   protected get esValido(): boolean {
     if (!this.fecha() || !this.descripcionMotivo()) return false;
     if (this.alcance() === 'Rango de Horas Específico') {
@@ -43,15 +56,15 @@ export class NuevaExcepcionComponent {
 
   protected onGuardar(): void {
     if (!this.esValido) return;
-    const exc: Omit<ExcepcionAgenda, 'id'> = {
+    this.guardar.emit({
+      id:                this.excepcion().id,
       fecha:             this.fecha(),
       motivo:            this.motivo(),
       alcance:           this.alcance(),
       tiempoInicio:      this.alcance() === 'Día Completo' ? '00:00' : this.tiempoInicio(),
       tiempoFinal:       this.alcance() === 'Día Completo' ? '23:59' : this.tiempoFinal(),
       descripcionMotivo: this.descripcionMotivo(),
-      estado:            'ACTIVO',
-    };
-    this.guardar.emit(exc);
+      estado:            this.excepcion().estado,
+    });
   }
 }

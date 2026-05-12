@@ -1,8 +1,9 @@
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { LucideAngularModule, Phone } from 'lucide-angular';
+import { LucideAngularModule, Phone, Ban } from 'lucide-angular';
 import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ConfigService } from '../../core/services/config.service';
 import { ClienteB2B, SlotAdmin } from '../../models/admin.model';
 import { TipoCargaComponent, TipoCarga } from './tipo-carga/tipo-carga';
 import { SeleccionClienteComponent } from './seleccion-cliente/seleccion-cliente';
@@ -31,18 +32,21 @@ const API = environment.apiUrl;
   templateUrl: './nueva-reserva.html',
 })
 export class NuevaReservaComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
-  private readonly authSvc  = inject(AuthService);
-  private readonly http     = inject(HttpClient);
+  private readonly adminSvc  = inject(AdminService);
+  private readonly authSvc   = inject(AuthService);
+  private readonly http      = inject(HttpClient);
+  private readonly configSvc = inject(ConfigService);
 
   /** Sesión activa: cliente vía AuthService, admin vía AdminService */
   private readonly activeSession = () => this.authSvc.session() ?? this.adminSvc.session();
 
   protected readonly PhoneIcon = Phone;
+  protected readonly BanIcon   = Ban;
 
   protected readonly clientes = signal<ClienteB2B[]>([]);
 
   protected readonly modoCliente = computed(() => this.activeSession()?.rol === 'CLIENTE');
+  protected readonly suspendido  = computed(() => this.modoCliente() && !this.configSvc.reservaClienteOn());
 
   protected readonly tipoCarga = signal<TipoCarga>('estandar');
   protected readonly cantidadVehiculos = signal(2);
