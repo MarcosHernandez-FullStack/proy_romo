@@ -63,7 +63,14 @@
     </div>
 
     @if (tab() === 'horarios') {
-      <app-horarios-regulares [horarios]="horarios()" (guardar)="horarios.set($event)" />
+      @if (cargandoHorarios()) {
+        <div class="flex items-center justify-center gap-2 py-14 text-[#6a7282]">
+          <lucide-angular [img]="LoaderIcon" class="size-5 animate-spin" color="#155dfc" [strokeWidth]="1.5" />
+          <span class="text-[14px]">Cargando horarios...</span>
+        </div>
+      } @else {
+        <app-horarios-regulares [horarios]="horarios()" [guardando]="guardando()" (guardar)="onGuardarHorarios($event)" />
+      }
     }
 
     @if (tab() === 'excepciones') {
@@ -75,3 +82,11 @@
   </div>
 
 </div>
+
+@if (showExito()) {
+  <app-exito-modal
+    titulo="¡Horarios Guardados!"
+    [mensaje]="mensajeExito()"
+    labelCerrar="Aceptar"
+    (cerrar)="showExito.set(false)" />
+}

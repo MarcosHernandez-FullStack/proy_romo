@@ -349,9 +349,29 @@ export class AdminService {
     return of(EXCEPCIONES).pipe(delay(200));
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/horarios')
   getHorariosRegulares(): Observable<HorarioRegular[]> {
-    return of(HORARIOS_REGULARES).pipe(delay(200));
+    return this.http.get<HorarioApiItem[]>(`${API}/agenda/horarios`, { params: { rol: 'CLIENTE' } }).pipe(
+      map(items => items.map(i => ({
+        id:     i.id,
+        dia:    i.nombreDia,
+        abre:   i.horaInicio,
+        cierra: i.horaFinal,
+        activo: i.estado === 'ACTIVO',
+      }))),
+      catchError(() => of(HORARIOS_REGULARES))
+    );
+  }
+
+  guardarHorariosRegulares(horarios: HorarioRegular[]): Observable<{ exitoso: number; mensaje: string }> {
+    const body = {
+      horarios: horarios.map(h => ({
+        id:        h.id,
+        estado:    h.activo ? 'ACTIVO' : 'INACTIVO',
+        horaInicio: h.abre,
+        horaFinal:  h.cierra,
+      })),
+    };
+    return this.http.put<{ exitoso: number; mensaje: string }>(`${API}/agenda/horarios`, body);
   }
 
   crearUsuario(data: CrearUsuarioRequest): Observable<CrearUsuarioResult> {
@@ -571,6 +591,15 @@ interface UsuarioApiItem {
   fechaCreacion: string;
 }
 
+interface HorarioApiItem {
+  id:         number;
+  nroDia:     number;
+  nombreDia:  string;
+  estado:     string;
+  horaInicio: string;
+  horaFinal:  string;
+}
+
 const OPERADORES: Operador[] = [
   {
     id: 'OP-001',
@@ -726,13 +755,13 @@ const EXCEPCIONES: ExcepcionAgenda[] = [
 ];
 
 const HORARIOS_REGULARES: HorarioRegular[] = [
-  { dia: 'Lunes', abre: '07:00', cierra: '20:00', activo: true },
-  { dia: 'Martes', abre: '07:00', cierra: '20:00', activo: true },
-  { dia: 'Miércoles', abre: '07:00', cierra: '20:00', activo: true },
-  { dia: 'Jueves', abre: '07:00', cierra: '20:00', activo: true },
-  { dia: 'Viernes', abre: '07:00', cierra: '20:00', activo: true },
-  { dia: 'Sábado', abre: '08:00', cierra: '14:00', activo: true },
-  { dia: 'Domingo', abre: '00:00', cierra: '00:00', activo: false },
+  { id: 1, dia: 'Lunes',     abre: '07:00', cierra: '20:00', activo: true  },
+  { id: 2, dia: 'Martes',    abre: '07:00', cierra: '20:00', activo: true  },
+  { id: 3, dia: 'Miércoles', abre: '07:00', cierra: '20:00', activo: true  },
+  { id: 4, dia: 'Jueves',    abre: '07:00', cierra: '20:00', activo: true  },
+  { id: 5, dia: 'Viernes',   abre: '07:00', cierra: '20:00', activo: true  },
+  { id: 6, dia: 'Sábado',    abre: '08:00', cierra: '14:00', activo: true  },
+  { id: 7, dia: 'Domingo',   abre: '00:00', cierra: '00:00', activo: false },
 ];
 
 const USUARIOS_ADMIN: UsuarioAdmin[] = [

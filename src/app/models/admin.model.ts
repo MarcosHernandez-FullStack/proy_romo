@@ -143,6 +143,7 @@ export interface ExcepcionAgenda {
 }
 
 export interface HorarioRegular {
+  id: number;
   dia: string;
   abre: string;
   cierra: string;

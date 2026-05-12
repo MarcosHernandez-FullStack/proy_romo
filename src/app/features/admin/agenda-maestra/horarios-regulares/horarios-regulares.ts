@@ -1,7 +1,7 @@
 import { Component, OnInit, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, AlertTriangle, Info, Save } from 'lucide-angular';
-import { HorarioRegular } from '../../../../models/admin.model';
+import { LucideAngularModule, AlertTriangle, Info, Save, Loader } from 'lucide-angular';
+import { HORAS_GRID, HorarioRegular } from '../../../../models/admin.model';
 
 @Component({
   selector: 'app-horarios-regulares',
@@ -10,13 +10,16 @@ import { HorarioRegular } from '../../../../models/admin.model';
   templateUrl: './horarios-regulares.html',
 })
 export class HorariosRegularesComponent implements OnInit {
-  readonly horarios = input.required<HorarioRegular[]>();
-  readonly guardar = output<HorarioRegular[]>();
+  readonly horarios  = input.required<HorarioRegular[]>();
+  readonly guardando = input<boolean>(false);
+  readonly guardar   = output<HorarioRegular[]>();
 
   protected readonly AlertTriangleIcon = AlertTriangle;
-  protected readonly InfoIcon = Info;
-  protected readonly SaveIcon = Save;
+  protected readonly InfoIcon          = Info;
+  protected readonly SaveIcon          = Save;
+  protected readonly LoaderIcon        = Loader;
 
+  protected readonly horas    = HORAS_GRID;
   protected readonly editados = signal<HorarioRegular[]>([]);
 
   ngOnInit(): void {
