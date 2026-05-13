@@ -10,6 +10,8 @@ import {
   CrearUsuarioResult,
   EditarOperadorRequest,
   GruaRequest,
+  EstadoAdminServicio,
+  EstadoServicioAdmin,
   EstadoUnidad,
   DIAS_SEMANA,
   DiaSemana,
@@ -429,9 +431,63 @@ export class AdminService {
     return this.http.get<{ tiempoCorte: number }>(`${API}/configuracion/parametro-operativo`);
   }
 
-  // TODO: reemplazar con this.http.get('/api/admin/reportes')
   getReportes(): Observable<ServicioReporte[]> {
-    return of(SERVICIOS_REPORTE).pipe(delay(300));
+    return this.http.get<any[]>(`${API}/reportes`).pipe(
+      map(data => data.map(r => this.mapReporte(r)))
+    );
+  }
+
+  updEstadoAdministrativo(idReserva: number, estado: EstadoAdminServicio): Observable<{ exitoso: number; mensaje: string }> {
+    return this.http.put<{ exitoso: number; mensaje: string }>(
+      `${API}/reportes/${idReserva}/estado-administrativo`,
+      { estadoAdministrativo: estado.toUpperCase() }
+    );
+  }
+
+  private mapReporte(r: any): ServicioReporte {
+    return {
+      id:                   r.id,
+      cliente:              r.cliente,
+      costo:                r.costo,
+      origen:               r.origen,
+      destino:              r.destino,
+      distanciaKm:          r.distanciaKm,
+      fecha:                r.fecha,
+      hora:                 r.hora,
+      tiempoMin:            r.tiempoMin,
+      bloques:              r.bloques,
+      carga:                String(r.cantidadCarga ?? 0),
+      vehiculos:            0,
+      operador:             r.operador ?? null,
+      unidad:               r.unidad ?? null,
+      estado:               this.mapEstadoOper(r.estado),
+      estadoAdministrativo: this.mapEstadoAdmin(r.estadoAdministrativo),
+      fechaCompleta:        r.fechaCompleta,
+      fechaCorta:           r.fechaCorta,
+      grua:                 r.grua,
+      motivoCancelacion:    r.motivoCancelacion ?? null,
+      canceladoPor:         r.canceladoPor ?? null,
+    };
+  }
+
+  private mapEstadoOper(e: string): EstadoServicioAdmin {
+    const tabla: Record<string, EstadoServicioAdmin> = {
+      RESERVADO:  'Reservado',
+      ASIGNADO:   'Asignado',
+      ENCURSO:    'En Curso',
+      FINALIZADO: 'Finalizado',
+      CANCELADO:  'Cancelado',
+    };
+    return tabla[e?.toUpperCase()] ?? 'Finalizado';
+  }
+
+  private mapEstadoAdmin(e: string): EstadoAdminServicio {
+    const tabla: Record<string, EstadoAdminServicio> = {
+      PENDIENTE: 'Pendiente',
+      FACTURADO: 'Facturado',
+      PAGADO:    'Pagado',
+    };
+    return tabla[e?.toUpperCase()] ?? 'Pendiente';
   }
 
 }
@@ -795,11 +851,11 @@ const PARAMETROS_OPERATIVOS: ParametrosOperativos = {
 };
 
 const SERVICIOS_REPORTE: ServicioReporte[] = [
-  { id: 'SRV-001', cliente: 'Transportes XYZ S.A.', costo: 1250, origen: 'CABA', destino: 'Vicente López', distanciaKm: 12.5, fecha: '15/2/2024', hora: '09:30', tiempoMin: 80, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Roberto Sánchez', unidad: 'ABC-123', estado: 'Finalizado', estadoAdministrativo: 'Pagado', fechaCompleta: '15 feb 2024, 09:30', grua: 'ABC-123 (Cap. 2)' },
-  { id: 'SRV-002', cliente: 'Logística ABC Ltda.', costo: 2800, origen: 'CABA', destino: 'Olivos', distanciaKm: 8.3, fecha: '15/2/2024', hora: '14:00', tiempoMin: 60, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Fernando López', unidad: 'DEF-456', estado: 'Finalizado', estadoAdministrativo: 'Facturado', fechaCompleta: '15 feb 2024, 14:00', grua: 'DEF-456 (Cap. 3)' },
-  { id: 'SRV-003', cliente: 'Express Cargo S.R.L.', costo: 950, origen: 'CABA', destino: 'Pilar', distanciaKm: 25, fecha: '14/2/2024', hora: '11:15', tiempoMin: 120, bloques: 3, carga: 'Múltiple', vehiculos: 2, operador: null, unidad: null, estado: 'Finalizado', estadoAdministrativo: 'Pendiente', fechaCompleta: '14 feb 2024, 11:15', grua: 'GHI-789 (Cap. 5)' },
-  { id: 'SRV-004', cliente: 'Distribuidora Sur S.A.', costo: 3200, origen: 'CABA', destino: 'La Plata', distanciaKm: 30, fecha: '14/2/2024', hora: '10:45', tiempoMin: 140, bloques: 3, carga: 'Múltiple', vehiculos: 2, operador: 'Roberto Sánchez', unidad: 'JKL-012', estado: 'Finalizado', estadoAdministrativo: 'Pagado', fechaCompleta: '14 feb 2024, 10:45', grua: 'JKL-012 (Cap. 2)' },
-  { id: 'SRV-005', cliente: 'Transportes XYZ S.A.', costo: 1100, origen: 'Palermo', destino: 'San Isidro', distanciaKm: 9.5, fecha: '13/2/2024', hora: '10:00', tiempoMin: 65, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Martín Gómez', unidad: 'MNO-345', estado: 'Finalizado', estadoAdministrativo: 'Pendiente', fechaCompleta: '13 feb 2024, 10:00', grua: 'MNO-345 (Cap. 3)' },
-  { id: 'SRV-006', cliente: 'Logística ABC Ltda.', costo: 2200, origen: 'Belgrano', destino: 'Tigre', distanciaKm: 18, fecha: '12/2/2024', hora: '08:00', tiempoMin: 95, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Fernando López', unidad: 'PQR-678', estado: 'Cancelado', estadoAdministrativo: 'Pendiente', fechaCompleta: '12 feb 2024, 08:00', grua: '—' },
-  { id: 'SRV-007', cliente: 'Express Cargo S.R.L.', costo: 1800, origen: 'Flores', destino: 'Quilmes', distanciaKm: 14, fecha: '11/2/2024', hora: '13:30', tiempoMin: 75, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: null, unidad: null, estado: 'Cancelado', estadoAdministrativo: 'Pendiente', fechaCompleta: '11 feb 2024, 13:30', grua: '—' },
+  { id: 'SRV-001', cliente: 'Transportes XYZ S.A.', costo: 1250, origen: 'CABA', destino: 'Vicente López', distanciaKm: 12.5, fecha: '15/2/2024', hora: '09:30', tiempoMin: 80, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Roberto Sánchez', unidad: 'ABC-123', estado: 'Finalizado', estadoAdministrativo: 'Pagado', fechaCompleta: '15 feb 2024, 09:30', fechaCorta: '15/02/2024', grua: 'ABC-123 (Cap. 2)' },
+  { id: 'SRV-002', cliente: 'Logística ABC Ltda.', costo: 2800, origen: 'CABA', destino: 'Olivos', distanciaKm: 8.3, fecha: '15/2/2024', hora: '14:00', tiempoMin: 60, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Fernando López', unidad: 'DEF-456', estado: 'Finalizado', estadoAdministrativo: 'Facturado', fechaCompleta: '15 feb 2024, 14:00', fechaCorta: '15/02/2024', grua: 'DEF-456 (Cap. 3)' },
+  { id: 'SRV-003', cliente: 'Express Cargo S.R.L.', costo: 950, origen: 'CABA', destino: 'Pilar', distanciaKm: 25, fecha: '14/2/2024', hora: '11:15', tiempoMin: 120, bloques: 3, carga: 'Múltiple', vehiculos: 2, operador: null, unidad: null, estado: 'Finalizado', estadoAdministrativo: 'Pendiente', fechaCompleta: '14 feb 2024, 11:15', fechaCorta: '14/02/2024', grua: 'GHI-789 (Cap. 5)' },
+  { id: 'SRV-004', cliente: 'Distribuidora Sur S.A.', costo: 3200, origen: 'CABA', destino: 'La Plata', distanciaKm: 30, fecha: '14/2/2024', hora: '10:45', tiempoMin: 140, bloques: 3, carga: 'Múltiple', vehiculos: 2, operador: 'Roberto Sánchez', unidad: 'JKL-012', estado: 'Finalizado', estadoAdministrativo: 'Pagado', fechaCompleta: '14 feb 2024, 10:45', fechaCorta: '14/02/2024', grua: 'JKL-012 (Cap. 2)' },
+  { id: 'SRV-005', cliente: 'Transportes XYZ S.A.', costo: 1100, origen: 'Palermo', destino: 'San Isidro', distanciaKm: 9.5, fecha: '13/2/2024', hora: '10:00', tiempoMin: 65, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Martín Gómez', unidad: 'MNO-345', estado: 'Finalizado', estadoAdministrativo: 'Pendiente', fechaCompleta: '13 feb 2024, 10:00', fechaCorta: '13/02/2024', grua: 'MNO-345 (Cap. 3)' },
+  { id: 'SRV-006', cliente: 'Logística ABC Ltda.', costo: 2200, origen: 'Belgrano', destino: 'Tigre', distanciaKm: 18, fecha: '12/2/2024', hora: '08:00', tiempoMin: 95, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: 'Fernando López', unidad: 'PQR-678', estado: 'Cancelado', estadoAdministrativo: 'Pendiente', fechaCompleta: '12 feb 2024, 08:00', fechaCorta: '12/02/2024', grua: '—' },
+  { id: 'SRV-007', cliente: 'Express Cargo S.R.L.', costo: 1800, origen: 'Flores', destino: 'Quilmes', distanciaKm: 14, fecha: '11/2/2024', hora: '13:30', tiempoMin: 75, bloques: 2, carga: 'Estándar', vehiculos: 1, operador: null, unidad: null, estado: 'Cancelado', estadoAdministrativo: 'Pendiente', fechaCompleta: '11 feb 2024, 13:30', fechaCorta: '11/02/2024', grua: '—' },
 ];

@@ -47,14 +47,21 @@
       </div>
     </div>
 
+    @if (error()) {
+      <div class="px-6 pb-2">
+        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[8px] px-4 py-2.5 text-[#c10007] text-[13px]">
+          {{ error() }}
+        </div>
+      </div>
+    }
     <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
-      <button type="button" (click)="cerrar.emit()"
-        class="flex-1 border border-[#d1d5dc] text-[#374151] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
+      <button type="button" (click)="cerrar.emit()" [disabled]="cargando()"
+        class="flex-1 border border-[#d1d5dc] text-[#374151] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer disabled:opacity-50">
         Cancelar
       </button>
-      <button type="button" (click)="confirmar.emit()"
-        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
-        Confirmar
+      <button type="button" (click)="confirmar.emit()" [disabled]="cargando()"
+        class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+        @if (cargando()) { Procesando... } @else { Confirmar }
       </button>
     </div>
   </div>

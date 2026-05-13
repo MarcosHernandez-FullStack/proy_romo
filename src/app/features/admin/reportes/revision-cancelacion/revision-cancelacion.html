@@ -1,0 +1,65 @@
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-[460px] overflow-hidden">
+
+    <!-- Header -->
+    <div class="bg-[#e7000b] px-6 py-5 flex items-center gap-4">
+      <div class="size-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+        <lucide-angular [img]="XCircleIcon" class="size-5" color="white" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <p class="text-white text-[18px] font-bold leading-tight">Detalle de Cancelación</p>
+        <p class="text-white/75 text-[13px] mt-0.5">Servicio #{{ servicio().id }}</p>
+      </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="p-6 flex flex-col gap-5">
+
+      <!-- Información del servicio -->
+      <div class="flex flex-col gap-2">
+        <p class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Información del Servicio</p>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-3 bg-[#f9fafb] border border-[#e5e7eb] rounded-xl p-4">
+          <div>
+            <p class="text-[#9ca3af] text-[11px]">Cliente</p>
+            <p class="text-[#101828] text-[14px] font-semibold">{{ servicio().cliente }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[11px]">Fecha</p>
+            <p class="text-[#101828] text-[14px] font-semibold">{{ formatFecha(servicio().fecha) }}</p>
+          </div>
+          <div>
+            <p class="text-[#9ca3af] text-[11px]">Monto</p>
+            <p class="text-[#101828] text-[14px] font-semibold">USD {{ servicio().costo.toLocaleString('es-AR') }}</p>
+          </div>
+          <!-- <div>
+            <p class="text-[#9ca3af] text-[11px]">Grúa Asignada</p>
+            <p class="text-[#101828] text-[14px] font-semibold">{{ servicio().grua || 'Sin asignar' }}</p>
+          </div> -->
+        </div>
+      </div>
+
+      <!-- Motivo de cancelación -->
+      <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-xl p-4 flex flex-col gap-2">
+        <p class="text-[#c10007] text-[11px] font-semibold uppercase tracking-wider">Motivo de Cancelación</p>
+        <p class="text-[#364153] text-[14px] leading-relaxed">
+          {{ servicio().motivoCancelacion ?? 'Sin motivo registrado.' }}
+        </p>
+        @if (servicio().canceladoPor) {
+          <p class="text-[#6a7282] text-[12px] mt-1">
+            Cancelado por: <span class="font-semibold text-[#364153]">{{ servicio().canceladoPor }}</span>
+          </p>
+        }
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-[#e5e7eb]">
+      <button type="button" (click)="cerrar.emit()"
+        class="w-full h-10 border border-[#d1d5dc] rounded-[10px] text-[#364153] text-[14px] font-medium hover:bg-[#f9fafb] transition-colors cursor-pointer">
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>

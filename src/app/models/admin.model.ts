@@ -220,23 +220,26 @@ export interface VehiculoReserva {
 }
 
 export interface ReservaOperacion {
-  id:               number;
-  direccionOrigen:  string;
-  direccionDestino: string;
-  cantidadCarga:    number;
-  fechaServicio:    string;
-  horaInicio:       string;
-  horaFin:          string;
-  nroBloques:       number;
-  distanciaKm:      number;
-  tiempoEstimado:   number;
-  tiempoManiobra:   number;
-  estadoOperacion:  string;
-  estado:           string;
-  gruaAsignada?:    string | null;
-  operadorAsignado?: string | null;
-  nombreCliente?:   string | null;
-  vehiculos?:       VehiculoReserva[];
+  id:                   number;
+  direccionOrigen:      string;
+  direccionDestino:     string;
+  cantidadCarga:        number;
+  fechaServicio:        string;
+  horaInicio:           string;
+  horaFin:              string;
+  nroBloques:           number;
+  distanciaKm:          number;
+  tiempoEstimado:       number;
+  tiempoManiobra:       number;
+  estadoOperacion:      string;
+  estado:               string;
+  gruaAsignada?:        string | null;
+  operadorAsignado?:    string | null;
+  nombreCliente?:       string | null;
+  vehiculos?:           VehiculoReserva[];
+  costoTotal?:          number | null;
+  motivoCancelacion?:   string | null;
+  canceladoPor?:        string | null;
 }
 
 export interface ReservaALiberar {
@@ -250,7 +253,10 @@ export interface ReservaALiberar {
 export interface ServicioReporte extends ServicioAdmin {
   estadoAdministrativo: EstadoAdminServicio;
   fechaCompleta: string;
+  fechaCorta:    string;
   grua: string;
+  motivoCancelacion?: string | null;
+  canceladoPor?:      string | null;
 }
 
 

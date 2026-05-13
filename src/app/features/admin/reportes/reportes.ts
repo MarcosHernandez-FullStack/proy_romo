@@ -13,11 +13,15 @@ import {
   Truck,
   Calendar,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
 } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
 import { EstadoAdminServicio, EstadoServicioAdmin, ServicioReporte } from '../../../models/admin.model';
 import { AccionFacturarComponent } from './accion-facturar/accion-facturar';
 import { AccionRegistrarPagoComponent } from './accion-registrar-pago/accion-registrar-pago';
+import { RevisionCancelacionComponent } from './revision-cancelacion/revision-cancelacion';
 
 type FiltroOperativo = 'Todos' | 'Finalizado' | 'Cancelado';
 type FiltroAdmin = 'Todos' | 'Pendiente' | 'Facturado' | 'Pagado';
@@ -25,7 +29,7 @@ type FiltroAdmin = 'Todos' | 'Pendiente' | 'Facturado' | 'Pagado';
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, AccionFacturarComponent, AccionRegistrarPagoComponent],
+  imports: [FormsModule, LucideAngularModule, AccionFacturarComponent, AccionRegistrarPagoComponent, RevisionCancelacionComponent],
   templateUrl: './reportes.html',
 })
 export class ReportesComponent implements OnInit {
@@ -41,7 +45,12 @@ export class ReportesComponent implements OnInit {
   protected readonly Building2Icon = Building2;
   protected readonly TruckIcon = Truck;
   protected readonly CalendarIcon = Calendar;
-  protected readonly ChevronDownIcon = ChevronDown;
+  protected readonly ChevronDownIcon  = ChevronDown;
+  protected readonly ChevronLeftIcon  = ChevronLeft;
+  protected readonly ChevronRightIcon = ChevronRight;
+  protected readonly EyeIcon          = Eye;
+
+  readonly ITEMS_POR_PAGINA = 10;
 
   protected readonly servicios = signal<ServicioReporte[]>([]);
   protected readonly busqueda = signal('');
@@ -50,12 +59,18 @@ export class ReportesComponent implements OnInit {
   protected readonly fechaHasta = signal('');
   protected readonly filtroOperativo = signal<FiltroOperativo>('Todos');
   protected readonly filtroAdmin = signal<FiltroAdmin>('Todos');
+  protected readonly paginaActual = signal(1);
 
   protected readonly filtrosOperativos: FiltroOperativo[] = ['Todos', 'Finalizado', 'Cancelado'];
   protected readonly filtrosAdmin: FiltroAdmin[] = ['Todos', 'Pendiente', 'Facturado', 'Pagado'];
 
-  protected readonly servicioFacturar = signal<ServicioReporte | null>(null);
-  protected readonly servicioPago = signal<ServicioReporte | null>(null);
+  protected readonly servicioFacturar    = signal<ServicioReporte | null>(null);
+  protected readonly servicioPago        = signal<ServicioReporte | null>(null);
+  protected readonly servicioRevision    = signal<ServicioReporte | null>(null);
+
+  protected readonly guardandoFactura = signal(false);
+  protected readonly guardandoPago    = signal(false);
+  protected readonly errorAccion      = signal<string | null>(null);
 
   protected readonly clientesUnicos = computed(() => [...new Set(this.servicios().map((s) => s.cliente))].sort());
 
@@ -64,9 +79,9 @@ export class ReportesComponent implements OnInit {
   protected readonly cancelados = computed(() => this.servicios().filter((s) => s.estado === 'Cancelado').length);
   protected readonly montoTotal = computed(() => this.servicios().filter((s) => s.estado === 'Finalizado').reduce((sum, s) => sum + s.costo, 0));
 
-  protected readonly pendientes = computed(() => this.servicios().filter((s) => s.estadoAdministrativo === 'Pendiente' && s.estado === 'Finalizado').length);
-  protected readonly facturados = computed(() => this.servicios().filter((s) => s.estadoAdministrativo === 'Facturado').length);
-  protected readonly pagados = computed(() => this.servicios().filter((s) => s.estadoAdministrativo === 'Pagado').length);
+  protected readonly pendientes = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'Pendiente' && s.estado === 'Finalizado').length);
+  protected readonly facturados = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'Facturado').length);
+  protected readonly pagados = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'Pagado').length);
 
   protected readonly serviciosFiltrados = computed(() => {
     const busq = this.busqueda().toLowerCase();
@@ -86,6 +101,23 @@ export class ReportesComponent implements OnInit {
     });
   });
 
+  protected readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.serviciosFiltrados().length / this.ITEMS_POR_PAGINA))
+  );
+
+  protected readonly serviciosPaginados = computed(() => {
+    const inicio = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA;
+    return this.serviciosFiltrados().slice(inicio, inicio + this.ITEMS_POR_PAGINA);
+  });
+
+  protected readonly paginas = computed(() => {
+    const total  = this.totalPaginas();
+    const actual = this.paginaActual();
+    const inicio = Math.max(1, actual - 2);
+    const fin    = Math.min(total, actual + 2);
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  });
+
   ngOnInit(): void {
     this.adminSvc.getReportes().subscribe((data) => this.servicios.set(data));
   }
@@ -93,16 +125,80 @@ export class ReportesComponent implements OnInit {
   protected onFacturar(): void {
     const s = this.servicioFacturar();
     if (!s) return;
-    this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Facturado' as EstadoAdminServicio } : srv));
-    this.servicioFacturar.set(null);
+    this.guardandoFactura.set(true);
+    this.errorAccion.set(null);
+    this.adminSvc.updEstadoAdministrativo(parseInt(s.id.replace(/\D/g, ''), 10), 'Facturado').subscribe({
+      next: (res) => {
+        if (res.exitoso === 1) {
+          this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Facturado' as EstadoAdminServicio } : srv));
+          this.servicioFacturar.set(null);
+        } else {
+          this.errorAccion.set(res.mensaje);
+        }
+        this.guardandoFactura.set(false);
+      },
+      error: () => {
+        this.errorAccion.set('Error al procesar la solicitud. Intente nuevamente.');
+        this.guardandoFactura.set(false);
+      },
+    });
   }
 
   protected onRegistrarPago(): void {
     const s = this.servicioPago();
     if (!s) return;
-    this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Pagado' as EstadoAdminServicio } : srv));
-    this.servicioPago.set(null);
+    this.guardandoPago.set(true);
+    this.errorAccion.set(null);
+    this.adminSvc.updEstadoAdministrativo(parseInt(s.id.replace(/\D/g, ''), 10), 'Pagado').subscribe({
+      next: (res) => {
+        if (res.exitoso === 1) {
+          this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Pagado' as EstadoAdminServicio } : srv));
+          this.servicioPago.set(null);
+        } else {
+          this.errorAccion.set(res.mensaje);
+        }
+        this.guardandoPago.set(false);
+      },
+      error: () => {
+        this.errorAccion.set('Error al procesar la solicitud. Intente nuevamente.');
+        this.guardandoPago.set(false);
+      },
+    });
   }
+
+  protected cerrarFacturar(): void {
+    this.servicioFacturar.set(null);
+    this.errorAccion.set(null);
+  }
+
+  protected cerrarPago(): void {
+    this.servicioPago.set(null);
+    this.errorAccion.set(null);
+  }
+
+  protected abrirRevisionCancelacion(s: ServicioReporte): void {
+    this.servicioRevision.set(s);
+  }
+
+  protected cambiarPagina(n: number): void {
+    if (n < 1 || n > this.totalPaginas()) return;
+    this.paginaActual.set(n);
+  }
+
+  protected rangoMostrado(): string {
+    const total = this.serviciosFiltrados().length;
+    if (total === 0) return '0';
+    const desde = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA + 1;
+    const hasta  = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
+    return `${desde} - ${hasta}`;
+  }
+
+  protected setBusqueda(v: string): void        { this.busqueda.set(v);        this.paginaActual.set(1); }
+  protected setFiltroCliente(v: string): void   { this.filtroCliente.set(v);   this.paginaActual.set(1); }
+  protected setFechaDesde(v: string): void      { this.fechaDesde.set(v);      this.paginaActual.set(1); }
+  protected setFechaHasta(v: string): void      { this.fechaHasta.set(v);      this.paginaActual.set(1); }
+  protected setFiltroOp(f: FiltroOperativo): void { this.filtroOperativo.set(f); this.paginaActual.set(1); }
+  protected setFiltroAdm(f: FiltroAdmin): void    { this.filtroAdmin.set(f);     this.paginaActual.set(1); }
 
   protected estadoOperClass(estado: string): string {
     switch (estado) {

@@ -9,9 +9,11 @@ import { ServicioReporte } from '../../../../models/admin.model';
   templateUrl: './accion-registrar-pago.html',
 })
 export class AccionRegistrarPagoComponent {
-  readonly servicio = input.required<ServicioReporte>();
+  readonly servicio  = input.required<ServicioReporte>();
+  readonly cargando  = input<boolean>(false);
+  readonly error     = input<string | null>(null);
   readonly confirmar = output<void>();
-  readonly cerrar = output<void>();
+  readonly cerrar    = output<void>();
 
   protected readonly CreditCardIcon = CreditCard;
   protected readonly XIcon = X;
