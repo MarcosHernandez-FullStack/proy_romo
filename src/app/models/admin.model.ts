@@ -179,12 +179,27 @@ export interface TarifaCliente {
   vigenciaHasta: string | null;
 }
 
+export interface TarifaGlobal {
+  id:         number;
+  tarifaBase: number;
+  tarifaKm:   number;
+  estado:     string;
+}
+
 export interface ParametrosOperativos {
-  umbralLargaDistanciaKm: number;
-  margenManiobraMin: number;
-  umbralToleranciaMin: number;
-  tiempoRetornoBaseMin: number;
+  umbralLargaDistancia: number;
+  tiempoMargenManiobra: number;
+  tiempoTolerancia: number;
+  tiempoRetornoBase: number;
   tiempoCorte: number;
+  timerAdministrativo: number;
+  timerCliente: number;
+  zonaHoraria: string;
+  minutosCerca: number;
+  minutosMedio: number;
+  coordLatMaps: string;
+  coordLonMaps: string;
+  metrosCercania: number;
 }
 
 export interface GruaSugerida {
@@ -250,7 +265,8 @@ export interface ReservaALiberar {
   estadoOperacion: string;
 }
 
-export interface ServicioReporte extends ServicioAdmin {
+export interface ServicioReporte extends Omit<ServicioAdmin, 'id'> {
+  id: number;
   estadoAdministrativo: EstadoAdminServicio;
   fechaCompleta: string;
   fechaCorta:    string;

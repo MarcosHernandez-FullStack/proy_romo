@@ -2,12 +2,14 @@ import { Component, OnInit, computed, inject, input, output, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, DollarSign, Plus, Pencil, Trash2, Search, Save, X } from 'lucide-angular';
 import { AdminService } from '../../../../core/services/admin.service';
-import { ClienteB2B, TarifaCliente } from '../../../../models/admin.model';
+import { ClienteB2B, TarifaCliente, TarifaGlobal } from '../../../../models/admin.model';
+import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
 @Component({
   selector: 'app-tarifas',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, MensajeModalComponent],
   templateUrl: './tarifas.html',
 })
 export class TarifasComponent implements OnInit {
@@ -38,9 +40,15 @@ export class TarifasComponent implements OnInit {
   protected readonly formVigenciaHasta = signal('');
   protected readonly formVigenciaIndefinida = signal(false);
 
-  // Tarifa global
-  protected readonly tarifaBaseGlobal = signal(150);
-  protected readonly tarifaKmGlobal = signal(50);
+  protected readonly tarifaGlobal = signal<TarifaGlobal | null>(null);
+  protected readonly tarifaBaseGlobal = signal(0);
+  protected readonly tarifaKmGlobal = signal(0);
+
+  protected readonly guardandoGlobal    = signal(false);
+  protected readonly showConfirmGuardar = signal(false);
+  protected readonly showExitoGlobal    = signal(false);
+  protected readonly showErrorGlobal    = signal(false);
+  protected readonly mensajeResultadoGlobal = signal('');
 
   protected readonly tarifasFiltradas = computed(() => {
     const busq = this.busqueda().toLowerCase();
@@ -53,6 +61,13 @@ export class TarifasComponent implements OnInit {
 
   ngOnInit(): void {
     this.adminSvc.getTarifasCliente().subscribe((data) => this.tarifas.set(data));
+    this.adminSvc.getTarifarioGlobal().subscribe((data) => {
+      if (data) {
+        this.tarifaGlobal.set(data);
+        this.tarifaBaseGlobal.set(data.tarifaBase);
+        this.tarifaKmGlobal.set(data.tarifaKm);
+      }
+    });
   }
 
   protected getNombreCliente(clienteId: string): string {
@@ -121,5 +136,33 @@ export class TarifasComponent implements OnInit {
 
   protected get formEsValido(): boolean {
     return !!this.formClienteId() && this.formTarifaBase() > 0 && this.formTarifaKm() > 0 && !!this.formVigenciaDesde();
+  }
+
+  protected onSolicitarGuardarGlobal(): void {
+    this.showConfirmGuardar.set(true);
+  }
+
+  protected onConfirmarGuardarGlobal(): void {
+    this.showConfirmGuardar.set(false);
+    const tarifa = this.tarifaGlobal();
+    if (!tarifa || this.guardandoGlobal()) return;
+
+    this.guardandoGlobal.set(true);
+    this.adminSvc.actualizarTarifarioGlobal(tarifa.id, this.tarifaBaseGlobal(), this.tarifaKmGlobal()).subscribe({
+      next: result => {
+        this.guardandoGlobal.set(false);
+        this.mensajeResultadoGlobal.set(result.mensaje);
+        if (result.exitoso === 1) {
+          this.showExitoGlobal.set(true);
+        } else {
+          this.showErrorGlobal.set(true);
+        }
+      },
+      error: err => {
+        this.guardandoGlobal.set(false);
+        this.mensajeResultadoGlobal.set(err?.error?.mensaje ?? 'Error al actualizar el tarifario.');
+        this.showErrorGlobal.set(true);
+      },
+    });
   }
 }

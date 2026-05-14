@@ -13,6 +13,8 @@ import {
   Mail,
   CheckCircle,
   Ban,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-angular';
 import { AdminService } from '../../../core/services/admin.service';
 import { RolUsuario, UsuarioAdmin } from '../../../models/admin.model';
@@ -31,22 +33,27 @@ type FiltroEstado = 'Activos' | 'Bajas';
 export class UsuariosComponent implements OnInit {
   private readonly adminSvc = inject(AdminService);
 
-  protected readonly UserCogIcon    = UserCog;
-  protected readonly PlusIcon       = Plus;
-  protected readonly SearchIcon     = Search;
-  protected readonly PencilIcon     = Pencil;
-  protected readonly RotateCcwIcon  = RotateCcw;
-  protected readonly Trash2Icon     = Trash2;
-  protected readonly ShieldIcon     = Shield;
-  protected readonly UsersIcon      = Users;
-  protected readonly MailIcon       = Mail;
+  protected readonly UserCogIcon     = UserCog;
+  protected readonly PlusIcon        = Plus;
+  protected readonly SearchIcon      = Search;
+  protected readonly PencilIcon      = Pencil;
+  protected readonly RotateCcwIcon   = RotateCcw;
+  protected readonly Trash2Icon      = Trash2;
+  protected readonly ShieldIcon      = Shield;
+  protected readonly UsersIcon       = Users;
+  protected readonly MailIcon        = Mail;
   protected readonly CheckCircleIcon = CheckCircle;
-  protected readonly BanIcon        = Ban;
+  protected readonly BanIcon         = Ban;
+  protected readonly ChevronLeftIcon = ChevronLeft;
+  protected readonly ChevronRightIcon = ChevronRight;
+
+  readonly ITEMS_POR_PAGINA = 10;
 
   protected readonly usuarios       = signal<UsuarioAdmin[]>([]);
   protected readonly filtroEstado   = signal<FiltroEstado>('Activos');
   protected readonly filtros: FiltroEstado[] = ['Activos', 'Bajas'];
   protected readonly busqueda       = signal('');
+  protected readonly paginaActual   = signal(1);
 
   protected readonly showNuevo      = signal(false);
   protected readonly usuarioEditar  = signal<UsuarioAdmin | null>(null);
@@ -66,12 +73,52 @@ export class UsuariosComponent implements OnInit {
     );
   });
 
+  protected readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.usuariosFiltrados().length / this.ITEMS_POR_PAGINA))
+  );
+
+  protected readonly usuariosPaginados = computed(() => {
+    const inicio = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA;
+    return this.usuariosFiltrados().slice(inicio, inicio + this.ITEMS_POR_PAGINA);
+  });
+
+  protected readonly paginas = computed(() => {
+    const total  = this.totalPaginas();
+    const actual = this.paginaActual();
+    const inicio = Math.max(1, actual - 2);
+    const fin    = Math.min(total, actual + 2);
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  });
+
   ngOnInit(): void {
     this.cargarUsuarios();
   }
 
   private cargarUsuarios(): void {
     this.adminSvc.getUsuarios().subscribe(data => this.usuarios.set(data));
+  }
+
+  protected setBusqueda(v: string): void {
+    this.busqueda.set(v);
+    this.paginaActual.set(1);
+  }
+
+  protected setFiltroEstado(f: FiltroEstado): void {
+    this.filtroEstado.set(f);
+    this.paginaActual.set(1);
+  }
+
+  protected cambiarPagina(n: number): void {
+    if (n < 1 || n > this.totalPaginas()) return;
+    this.paginaActual.set(n);
+  }
+
+  protected rangoMostrado(): string {
+    const total = this.usuariosFiltrados().length;
+    if (total === 0) return '0';
+    const desde = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA + 1;
+    const hasta = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
+    return `${desde} - ${hasta}`;
   }
 
   protected onNuevoUsuario(): void {

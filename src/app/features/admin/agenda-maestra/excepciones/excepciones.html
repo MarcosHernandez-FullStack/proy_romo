@@ -119,32 +119,31 @@
   </div>
 
   <!-- Paginación -->
-  @if (excepcionesFiltradas().length > 0) {
-    <div class="flex items-center justify-between mt-4 px-1">
+  @if (totalPaginas() > 1) {
+    <div class="flex items-center justify-between mt-4 px-1 pt-4 border-t border-[#e5e7eb]">
       <span class="text-[#6a7282] text-[13px]">{{ infoRango() }}</span>
       <div class="flex items-center gap-1">
         <button type="button" (click)="irPagina(paginaActual() - 1)" [disabled]="paginaActual() <= 1"
-          class="size-8 flex items-center justify-center rounded-lg border border-[#e5e7eb] hover:bg-[#f1f5f9] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-default">
-          <lucide-angular [img]="ChevronLeftIcon" class="size-4" color="#4a5565" [strokeWidth]="1.5" />
+          class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] hover:bg-[#f3f4f6] disabled:opacity-40 transition-colors cursor-pointer">
+          <lucide-angular [img]="ChevronLeftIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
         </button>
         @for (p of paginas(); track p; let i = $index) {
           @if (i > 0 && p - paginas()[i - 1] > 1) {
             <span class="text-[#9ca3af] text-[13px] px-1 select-none">...</span>
           }
           <button type="button" (click)="irPagina(p)"
-            class="size-8 flex items-center justify-center rounded-lg text-[13px] font-medium transition-colors cursor-pointer"
-            [class.bg-\[#155dfc\]]="paginaActual() === p"
+            class="size-8 flex items-center justify-center rounded-[8px] text-[13px] font-semibold border transition-colors cursor-pointer"
+            [class.bg-[#155dfc]]="paginaActual() === p"
             [class.text-white]="paginaActual() === p"
-            [class.text-\[#4a5565\]]="paginaActual() !== p"
-            [class.hover\:bg-\[#f1f5f9\]]="paginaActual() !== p"
-            [class.border]="paginaActual() !== p"
-            [class.border-\[#e5e7eb\]]="paginaActual() !== p">
+            [class.border-[#155dfc]]="paginaActual() === p"
+            [class.border-[#e5e7eb]]="paginaActual() !== p"
+            [class.text-[#364153]]="paginaActual() !== p">
             {{ p }}
           </button>
         }
         <button type="button" (click)="irPagina(paginaActual() + 1)" [disabled]="paginaActual() >= totalPaginas()"
-          class="size-8 flex items-center justify-center rounded-lg border border-[#e5e7eb] hover:bg-[#f1f5f9] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-default">
-          <lucide-angular [img]="ChevronRightIcon" class="size-4" color="#4a5565" [strokeWidth]="1.5" />
+          class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] hover:bg-[#f3f4f6] disabled:opacity-40 transition-colors cursor-pointer">
+          <lucide-angular [img]="ChevronRightIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
         </button>
       </div>
     </div>

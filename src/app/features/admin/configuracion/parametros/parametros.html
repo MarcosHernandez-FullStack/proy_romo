@@ -4,58 +4,219 @@
     <p class="text-[#4a5565] text-[13px] mt-0.5">Configure los parámetros que afectan a todos los servicios</p>
   </div>
 
-  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-6">
-    <!-- 2x2 grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+  <!-- Sección 1: Horario Operativo -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
+    <div class="flex items-center gap-3 pb-4 border-b border-[#f3f4f6]">
+      <div class="size-9 rounded-[10px] bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+        <lucide-angular [img]="ClockIcon" class="size-5" color="#155dfc" [strokeWidth]="1.5" />
+      </div>
       <div>
-        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Umbral de Larga Distancia (Km)</label>
-        <input type="number" [ngModel]="umbralLargaDistanciaKm()" (ngModelChange)="umbralLargaDistanciaKm.set(+$event)" name="umbralLargaDist"
+        <h3 class="text-[#101828] text-[15px] font-semibold">Horario Operativo</h3>
+        <p class="text-[#6a7282] text-[12px]">Zona horaria y anticipación mínima de reserva</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Zona Horaria</label>
+        <input type="text" [ngModel]="zonaHoraria()" (ngModelChange)="zonaHoraria.set($event)" name="zonaHoraria"
+          placeholder="America/Lima"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3 text-[15px] font-semibold text-[#101828] placeholder:font-normal placeholder:text-[#9ca3af] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Identificador IANA (ej. America/Lima, America/Bogota)</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tiempo de Corte (horas)</label>
+        <input type="number" [ngModel]="tiempoCorte()" (ngModelChange)="tiempoCorte.set(+$event)" name="tiempoCorte"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Anticipación mínima para realizar una reserva</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 2: Temporizadores de Servicio -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
+    <div class="flex items-center gap-3 pb-4 border-b border-[#f3f4f6]">
+      <div class="size-9 rounded-[10px] bg-[#fff7ed] flex items-center justify-center flex-shrink-0">
+        <lucide-angular [img]="TimerIcon" class="size-5" color="#c2410c" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <h3 class="text-[#101828] text-[15px] font-semibold">Temporizadores de Servicio</h3>
+        <p class="text-[#6a7282] text-[12px]">Tiempos máximos de atención y tolerancia para gestión y clientes</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Timer Administrativo (min)</label>
+        <input type="number" [ngModel]="timerAdministrativo()" (ngModelChange)="timerAdministrativo.set(+$event)" name="timerAdministrativo"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo máximo para gestión interna del servicio</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Timer Cliente (min)</label>
+        <input type="number" [ngModel]="timerCliente()" (ngModelChange)="timerCliente.set(+$event)" name="timerCliente"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo máximo de espera visible para el cliente</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tolerancia (min)</label>
+        <input type="number" [ngModel]="tiempoTolerancia()" (ngModelChange)="tiempoTolerancia.set(+$event)" name="tiempoTolerancia"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Margen de minutos para redondeo de horarios</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección 3: Duración y Distancia de Servicios -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
+    <div class="flex items-center gap-3 pb-4 border-b border-[#f3f4f6]">
+      <div class="size-9 rounded-[10px] bg-[#f0fdf4] flex items-center justify-center flex-shrink-0">
+        <lucide-angular [img]="RouteIcon" class="size-5" color="#15803d" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <h3 class="text-[#101828] text-[15px] font-semibold">Duración y Distancia de Servicios</h3>
+        <p class="text-[#6a7282] text-[12px]">Parámetros para el cálculo del tiempo operativo por servicio</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Umbral Larga Distancia (km)</label>
+        <input type="number" [ngModel]="umbralLargaDistancia()" (ngModelChange)="umbralLargaDistancia.set(+$event)" name="umbralLargaDistancia"
           class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
         <p class="text-[#6a7282] text-[12px] mt-1">A partir de este valor se aplica tiempo de retorno</p>
       </div>
       <div>
-        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Margen de Maniobra (minutos)</label>
-        <input type="number" [ngModel]="margenManiobraMin()" (ngModelChange)="margenManiobraMin.set(+$event)" name="margenManiobra"
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Margen de Maniobra (min)</label>
+        <input type="number" [ngModel]="tiempoMargenManiobra()" (ngModelChange)="tiempoMargenManiobra.set(+$event)" name="tiempoMargenManiobra"
           class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
         <p class="text-[#6a7282] text-[12px] mt-1">Minutos adicionales para carga y descarga</p>
       </div>
       <div>
-        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Umbral de Tolerancia (minutos)</label>
-        <input type="number" [ngModel]="umbralToleranciaMin()" (ngModelChange)="umbralToleranciaMin.set(+$event)" name="umbralTolerancia"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Margen de minutos para redondeo de horarios</p>
-      </div>
-      <div>
-        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tiempo de Retorno Base (minutos)</label>
-        <input type="number" [ngModel]="tiempoRetornoBaseMin()" (ngModelChange)="tiempoRetornoBaseMin.set(+$event)" name="tiempoRetorno"
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tiempo de Retorno Base (min)</label>
+        <input type="number" [ngModel]="tiempoRetornoBase()" (ngModelChange)="tiempoRetornoBase.set(+$event)" name="tiempoRetornoBase"
           class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
         <p class="text-[#6a7282] text-[12px] mt-1">Minutos de reposicionamiento en viajes cortos</p>
       </div>
     </div>
+  </div>
 
-    <!-- Info box -->
-    <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[12px] p-5">
-      <div class="flex items-start gap-3">
-        <lucide-angular [img]="InfoIcon" class="size-5 flex-shrink-0 mt-0.5" color="#193cb8" [strokeWidth]="1.5" />
-        <div>
-          <p class="text-[#1c398e] text-[15px] font-semibold mb-2">Información de Parámetros</p>
-          <ul class="flex flex-col gap-1.5">
-            <li class="text-[#193cb8] text-[13px]"><strong>Umbral Larga Distancia:</strong> A partir de {{ umbralLargaDistanciaKm() }} km se suma el tiempo de retorno</li>
-            <li class="text-[#193cb8] text-[13px]"><strong>Margen de Maniobra:</strong> Se agregan {{ margenManiobraMin() }} minutos para carga/descarga</li>
-            <li class="text-[#193cb8] text-[13px]"><strong>Umbral Tolerancia:</strong> Margen de {{ umbralToleranciaMin() }} minutos para redondeo</li>
-            <li class="text-[#193cb8] text-[13px]"><strong>Tiempo Retorno:</strong> {{ tiempoRetornoBaseMin() }} minutos de reposicionamiento en viajes cortos</li>
-          </ul>
-        </div>
+  <!-- Sección 4: Proximidad de Unidades -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
+    <div class="flex items-center gap-3 pb-4 border-b border-[#f3f4f6]">
+      <div class="size-9 rounded-[10px] bg-[#faf5ff] flex items-center justify-center flex-shrink-0">
+        <lucide-angular [img]="NavigationIcon" class="size-5" color="#7e22ce" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <h3 class="text-[#101828] text-[15px] font-semibold">Proximidad de Unidades</h3>
+        <p class="text-[#6a7282] text-[12px]">Umbrales para clasificar la cercanía de grúas al punto de atención</p>
       </div>
     </div>
-
-    <!-- Save -->
-    <div class="flex justify-end">
-      <button type="button"
-        class="flex items-center gap-2 bg-[#155dfc] hover:bg-[#1447e6] text-white text-[14px] font-semibold rounded-[10px] px-5 h-10 transition-colors cursor-pointer">
-        <lucide-angular [img]="SaveIcon" class="size-4" color="white" [strokeWidth]="1.5" />
-        Guardar Parámetros
-      </button>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Minutos Cerca</label>
+        <input type="number" [ngModel]="minutosCerca()" (ngModelChange)="minutosCerca.set(+$event)" name="minutosCerca"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo para clasificar una grúa como "Cerca"</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Minutos Medio</label>
+        <input type="number" [ngModel]="minutosMedio()" (ngModelChange)="minutosMedio.set(+$event)" name="minutosMedio"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo para clasificar una grúa como "Medio"</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Metros de Cercanía</label>
+        <input type="number" [ngModel]="metrosCercania()" (ngModelChange)="metrosCercania.set(+$event)" name="metrosCercania"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Radio en metros de cercanía al punto destino de la grúa</p>
+      </div>
     </div>
   </div>
+
+  <!-- Sección 5: Ubicación de Referencia -->
+  <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-6 flex flex-col gap-5">
+    <div class="flex items-center gap-3 pb-4 border-b border-[#f3f4f6]">
+      <div class="size-9 rounded-[10px] bg-[#fff1f2] flex items-center justify-center flex-shrink-0">
+        <lucide-angular [img]="MapPinIcon" class="size-5" color="#be123c" [strokeWidth]="1.5" />
+      </div>
+      <div>
+        <h3 class="text-[#101828] text-[15px] font-semibold">Ubicación de Referencia</h3>
+        <p class="text-[#6a7282] text-[12px]">Coordenadas del centro de operaciones para el cálculo de distancias</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Latitud</label>
+        <input type="text" [ngModel]="coordLatMaps()" (ngModelChange)="coordLatMaps.set($event)" name="coordLatMaps"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Coordenada de latitud en grados decimales</p>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Longitud</label>
+        <input type="text" [ngModel]="coordLonMaps()" (ngModelChange)="coordLonMaps.set($event)" name="coordLonMaps"
+          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <p class="text-[#6a7282] text-[12px] mt-1">Coordenada de longitud en grados decimales</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen dinámico -->
+  <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[12px] p-5">
+    <div class="flex items-start gap-3">
+      <lucide-angular [img]="InfoIcon" class="size-5 flex-shrink-0 mt-0.5" color="#193cb8" [strokeWidth]="1.5" />
+      <div class="flex flex-col gap-1.5 min-w-0">
+        <p class="text-[#1c398e] text-[15px] font-semibold mb-0.5">Resumen de Configuración Activa</p>
+        <p class="text-[#193cb8] text-[13px]">
+          <strong>Horario:</strong> Sistema en zona <em>{{ zonaHoraria() || '—' }}</em>. Reservas habilitadas hasta {{ tiempoCorte() }} minutos desde medianoche.
+        </p>
+        <p class="text-[#193cb8] text-[13px]">
+          <strong>Temporizadores:</strong> Admin {{ timerAdministrativo() }} min &nbsp;·&nbsp; Cliente {{ timerCliente() }} min &nbsp;·&nbsp; Tolerancia {{ tiempoTolerancia() }} min.
+        </p>
+        <p class="text-[#193cb8] text-[13px]">
+          <strong>Duración:</strong> Servicios &gt; {{ umbralLargaDistancia() }} km aplican retorno. Maniobra +{{ tiempoMargenManiobra() }} min · Retorno base +{{ tiempoRetornoBase() }} min.
+        </p>
+        <p class="text-[#193cb8] text-[13px]">
+          <strong>Proximidad:</strong> Cerca ≤ {{ minutosCerca() }} min &nbsp;·&nbsp; Medio ≤ {{ minutosMedio() }} min &nbsp;·&nbsp; Radio {{ metrosCercania() }} m.
+        </p>
+        <p class="text-[#193cb8] text-[13px]">
+          <strong>Centro de operaciones:</strong> {{ coordLatMaps() }}, {{ coordLonMaps() }}.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guardar -->
+  <div class="flex justify-end">
+    <button type="button" (click)="onGuardar()" [disabled]="guardando()"
+      class="flex items-center gap-2 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] px-5 h-10 transition-colors cursor-pointer">
+      <lucide-angular [img]="SaveIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      {{ guardando() ? 'Guardando...' : 'Guardar Parámetros' }}
+    </button>
+  </div>
 </div>
+
+@if (showConfirm()) {
+  <app-mensaje-modal
+    tipo="advertencia"
+    titulo="Confirmar actualización"
+    mensaje="¿Desea guardar los cambios en los Parámetros Operativos? Esta acción afectará a todos los servicios del sistema."
+    [confirmable]="true"
+    labelCancelar="Cancelar"
+    labelConfirmar="Sí, guardar"
+    (cerrar)="showConfirm.set(false)"
+    (confirmar)="onConfirmarGuardar()" />
+}
+
+@if (showExito()) {
+  <app-exito-modal
+    titulo="¡Parámetros Actualizados!"
+    [mensaje]="mensajeResultado()"
+    labelCerrar="Aceptar"
+    (cerrar)="showExito.set(false)" />
+}
+
+@if (showError()) {
+  <app-mensaje-modal
+    tipo="error"
+    titulo="Error al Actualizar"
+    [mensaje]="mensajeResultado()"
+    (cerrar)="showError.set(false)" />
+}

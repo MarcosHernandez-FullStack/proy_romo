@@ -22,6 +22,8 @@ import { EstadoAdminServicio, EstadoServicioAdmin, ServicioReporte } from '../..
 import { AccionFacturarComponent } from './accion-facturar/accion-facturar';
 import { AccionRegistrarPagoComponent } from './accion-registrar-pago/accion-registrar-pago';
 import { RevisionCancelacionComponent } from './revision-cancelacion/revision-cancelacion';
+import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
+import { MensajeModalComponent } from '../../../shared/components/mensaje-modal/mensaje-modal';
 
 type FiltroOperativo = 'Todos' | 'Finalizado' | 'Cancelado';
 type FiltroAdmin = 'Todos' | 'Pendiente' | 'Facturado' | 'Pagado';
@@ -29,7 +31,7 @@ type FiltroAdmin = 'Todos' | 'Pendiente' | 'Facturado' | 'Pagado';
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, AccionFacturarComponent, AccionRegistrarPagoComponent, RevisionCancelacionComponent],
+  imports: [FormsModule, LucideAngularModule, AccionFacturarComponent, AccionRegistrarPagoComponent, RevisionCancelacionComponent, ExitoModalComponent, MensajeModalComponent],
   templateUrl: './reportes.html',
 })
 export class ReportesComponent implements OnInit {
@@ -72,6 +74,13 @@ export class ReportesComponent implements OnInit {
   protected readonly guardandoPago    = signal(false);
   protected readonly errorAccion      = signal<string | null>(null);
 
+  protected readonly showExitoFactura  = signal(false);
+  protected readonly showExitoPago     = signal(false);
+  protected readonly showErrorFactura  = signal(false);
+  protected readonly showErrorPago     = signal(false);
+  protected readonly mensajeResultado  = signal('');
+  protected readonly servicioResultado = signal<ServicioReporte | null>(null);
+
   protected readonly clientesUnicos = computed(() => [...new Set(this.servicios().map((s) => s.cliente))].sort());
 
   protected readonly totalServicios = computed(() => this.servicios().length);
@@ -91,7 +100,7 @@ export class ReportesComponent implements OnInit {
     const opFiltro = this.filtroOperativo();
     const admFiltro = this.filtroAdmin();
     return this.servicios().filter((s) => {
-      const matchBusq = !busq || s.id.toLowerCase().includes(busq) || (s.unidad ?? '').toLowerCase().includes(busq);
+      const matchBusq = !busq || String(s.id).includes(busq) || (s.unidad ?? '').toLowerCase().includes(busq);
       const matchCliente = !cliente || s.cliente === cliente;
       const matchDesde = !desde || s.fecha >= desde;
       const matchHasta = !hasta || s.fecha <= hasta;
@@ -127,19 +136,24 @@ export class ReportesComponent implements OnInit {
     if (!s) return;
     this.guardandoFactura.set(true);
     this.errorAccion.set(null);
-    this.adminSvc.updEstadoAdministrativo(parseInt(s.id.replace(/\D/g, ''), 10), 'Facturado').subscribe({
+    this.adminSvc.updEstadoAdministrativo(s.id, 'Facturado').subscribe({
       next: (res) => {
+        this.guardandoFactura.set(false);
+        this.servicioFacturar.set(null);
+        this.mensajeResultado.set(res.mensaje);
         if (res.exitoso === 1) {
           this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Facturado' as EstadoAdminServicio } : srv));
-          this.servicioFacturar.set(null);
+          this.servicioResultado.set(s);
+          this.showExitoFactura.set(true);
         } else {
-          this.errorAccion.set(res.mensaje);
+          this.showErrorFactura.set(true);
         }
-        this.guardandoFactura.set(false);
       },
-      error: () => {
-        this.errorAccion.set('Error al procesar la solicitud. Intente nuevamente.');
+      error: (err) => {
         this.guardandoFactura.set(false);
+        this.servicioFacturar.set(null);
+        this.mensajeResultado.set(err?.error?.mensaje ?? 'Error al procesar la solicitud. Intente nuevamente.');
+        this.showErrorFactura.set(true);
       },
     });
   }
@@ -149,19 +163,24 @@ export class ReportesComponent implements OnInit {
     if (!s) return;
     this.guardandoPago.set(true);
     this.errorAccion.set(null);
-    this.adminSvc.updEstadoAdministrativo(parseInt(s.id.replace(/\D/g, ''), 10), 'Pagado').subscribe({
+    this.adminSvc.updEstadoAdministrativo(s.id, 'Pagado').subscribe({
       next: (res) => {
+        this.guardandoPago.set(false);
+        this.servicioPago.set(null);
+        this.mensajeResultado.set(res.mensaje);
         if (res.exitoso === 1) {
           this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Pagado' as EstadoAdminServicio } : srv));
-          this.servicioPago.set(null);
+          this.servicioResultado.set(s);
+          this.showExitoPago.set(true);
         } else {
-          this.errorAccion.set(res.mensaje);
+          this.showErrorPago.set(true);
         }
-        this.guardandoPago.set(false);
       },
-      error: () => {
-        this.errorAccion.set('Error al procesar la solicitud. Intente nuevamente.');
+      error: (err) => {
         this.guardandoPago.set(false);
+        this.servicioPago.set(null);
+        this.mensajeResultado.set(err?.error?.mensaje ?? 'Error al procesar la solicitud. Intente nuevamente.');
+        this.showErrorPago.set(true);
       },
     });
   }
