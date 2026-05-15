@@ -21,6 +21,13 @@ export interface TrazabilidadItem {
   color: 'green' | 'blue' | 'orange';
 }
 
+export interface VehiculoDetalle {
+  tipo: string;
+  placa: string;
+  modelo: string;
+  observacion: string;
+}
+
 export interface DetalleServicio extends Servicio {
   operadorNombre: string;
   operadorTelefono: string;
@@ -28,9 +35,6 @@ export interface DetalleServicio extends Servicio {
   horaInicio: string;
   horaFin: string;
   duracionHoras: number;
-  tipoVehiculo: string;
-  placa: string;
-  descripcionVehiculo: string;
-  observaciones: string;
+  vehiculosDetalle: VehiculoDetalle[];
   trazabilidad: TrazabilidadItem[];
 }

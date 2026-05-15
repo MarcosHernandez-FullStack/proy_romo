@@ -8,35 +8,37 @@ import {
   Car,
   ChevronDown,
   ChevronUp,
-  X,
-  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   DollarSign,
 } from 'lucide-angular';
 import { ServicioService } from '../../../core/services/servicio.service';
 import { DetalleServicio, EstadoAdmin, EstadoOperativo, Servicio } from '../../../models/servicio.model';
+import { DetalleServicioComponent } from './detalle-servicio/detalle-servicio';
 
 @Component({
   selector: 'app-mis-servicios',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, DetalleServicioComponent],
   templateUrl: './mis-servicios.html',
 })
 export class MisServiciosComponent implements OnInit {
   private readonly servicioSvc = inject(ServicioService);
 
-  protected readonly SearchIcon = Search;
-  protected readonly DownloadIcon = Download;
-  protected readonly EyeIcon = Eye;
-  protected readonly CarIcon = Car;
-  protected readonly ChevronDownIcon = ChevronDown;
-  protected readonly ChevronUpIcon = ChevronUp;
-  protected readonly XIcon = X;
-  protected readonly CheckCircleIcon = CheckCircle;
-  protected readonly FileTextIcon = FileText;
-  protected readonly DollarSignIcon = DollarSign;
+  protected readonly SearchIcon     = Search;
+  protected readonly DownloadIcon   = Download;
+  protected readonly EyeIcon        = Eye;
+  protected readonly CarIcon        = Car;
+  protected readonly ChevronDownIcon  = ChevronDown;
+  protected readonly ChevronUpIcon    = ChevronUp;
+  protected readonly ChevronLeftIcon  = ChevronLeft;
+  protected readonly ChevronRightIcon = ChevronRight;
+  protected readonly FileTextIcon     = FileText;
+  protected readonly DollarSignIcon   = DollarSign;
 
   protected readonly servicios = signal<Servicio[]>([]);
+  protected readonly cargando  = signal(false);
   protected readonly searchQuery = signal('');
   protected readonly fechaDesde = signal('');
   protected readonly fechaHasta = signal('');
@@ -44,6 +46,9 @@ export class MisServiciosComponent implements OnInit {
   protected readonly detalle = signal<DetalleServicio | null>(null);
   protected readonly showDetalle = signal(false);
   protected readonly detalleLoading = signal(false);
+
+  readonly ITEMS_POR_PAGINA = 10;
+  protected readonly paginaActual = signal(1);
 
   // Dropdowns de filtro
   protected readonly filtroOpOpen = signal(false);
@@ -66,7 +71,24 @@ export class MisServiciosComponent implements OnInit {
     });
   });
 
-  // KPIs
+  protected readonly totalPaginas = computed(() =>
+    Math.max(1, Math.ceil(this.filtered().length / this.ITEMS_POR_PAGINA))
+  );
+
+  protected readonly paginadas = computed(() => {
+    const inicio = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA;
+    return this.filtered().slice(inicio, inicio + this.ITEMS_POR_PAGINA);
+  });
+
+  protected readonly paginas = computed(() => {
+    const total  = this.totalPaginas();
+    const actual = this.paginaActual();
+    const inicio = Math.max(1, actual - 2);
+    const fin    = Math.min(total, actual + 2);
+    return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
+  });
+
+  // KPIs (globales — siempre sobre el total sin filtro)
   protected readonly totalServicios = computed(() => this.servicios().length);
   protected readonly enOperacion = computed(
     () => this.servicios().filter((s) => s.estadoOperativo === 'Asignado' || s.estadoOperativo === 'En Curso').length
@@ -82,15 +104,39 @@ export class MisServiciosComponent implements OnInit {
       .reduce((sum, s) => sum + s.costo, 0)
   );
 
+  // Totales del footer — reflejan la vista filtrada actual
+  protected readonly montoLiquidadoFiltrado = computed(() =>
+    this.filtered()
+      .filter((s) => s.estadoAdmin === 'Pagado')
+      .reduce((sum, s) => sum + s.costo, 0)
+  );
+  protected readonly countLiquidadoFiltrado = computed(() =>
+    this.filtered().filter((s) => s.estadoAdmin === 'Pagado').length
+  );
+  protected readonly montoPendienteFiltrado = computed(() =>
+    this.filtered()
+      .filter((s) => s.estadoAdmin === 'Pendiente' || s.estadoAdmin === 'Facturado')
+      .reduce((sum, s) => sum + s.costo, 0)
+  );
+  protected readonly countPendienteFiltrado = computed(() =>
+    this.filtered().filter((s) => s.estadoAdmin === 'Pendiente' || s.estadoAdmin === 'Facturado').length
+  );
+
   ngOnInit(): void {
-    // TODO: reemplazar con this.servicioSvc.getServicios().subscribe(...)
-    this.servicioSvc.getServicios().subscribe((data) => this.servicios.set(data));
+    this.cargar();
+  }
+
+  protected cargar(): void {
+    this.cargando.set(true);
+    this.servicioSvc.getServicios(this.fechaDesde() || undefined, this.fechaHasta() || undefined).subscribe({
+      next: data => { this.servicios.set(data); this.cargando.set(false); },
+      error: ()   => this.cargando.set(false),
+    });
   }
 
   protected verDetalle(id: string): void {
     this.detalleLoading.set(true);
     this.showDetalle.set(true);
-    // TODO: reemplazar con this.servicioSvc.getDetalle(id).subscribe(...)
     this.servicioSvc.getDetalle(id).subscribe((data) => {
       this.detalle.set(data);
       this.detalleLoading.set(false);
@@ -100,6 +146,36 @@ export class MisServiciosComponent implements OnInit {
   protected cerrarDetalle(): void {
     this.showDetalle.set(false);
     this.detalle.set(null);
+  }
+
+  protected setSearch(v: string): void {
+    this.searchQuery.set(v);
+    this.paginaActual.set(1);
+  }
+
+  protected setFechaDesde(v: string): void {
+    this.fechaDesde.set(v);
+    this.paginaActual.set(1);
+    this.cargar();
+  }
+
+  protected setFechaHasta(v: string): void {
+    this.fechaHasta.set(v);
+    this.paginaActual.set(1);
+    this.cargar();
+  }
+
+  protected cambiarPagina(n: number): void {
+    if (n < 1 || n > this.totalPaginas()) return;
+    this.paginaActual.set(n);
+  }
+
+  protected rangoMostrado(): string {
+    const total = this.filtered().length;
+    if (total === 0) return '0';
+    const desde = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA + 1;
+    const hasta = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
+    return `${desde} - ${hasta}`;
   }
 
   protected vehiculosLabel(n: number): string {
@@ -138,20 +214,13 @@ export class MisServiciosComponent implements OnInit {
     return '$' + n.toLocaleString('es-AR');
   }
 
-  protected trazabilidadColor(color: 'green' | 'blue' | 'orange'): string {
-    switch (color) {
-      case 'green': return '#00a63e';
-      case 'blue': return '#155dfc';
-      case 'orange': return '#ff6900';
-    }
-  }
-
   protected toggleFiltroOp(estado: EstadoOperativo): void {
     this.filtroOp.update((set) => {
       const next = new Set(set);
       next.has(estado) ? next.delete(estado) : next.add(estado);
       return next;
     });
+    this.paginaActual.set(1);
   }
 
   protected toggleFiltroAdmin(estado: EstadoAdmin): void {
@@ -160,5 +229,6 @@ export class MisServiciosComponent implements OnInit {
       next.has(estado) ? next.delete(estado) : next.add(estado);
       return next;
     });
+    this.paginaActual.set(1);
   }
 }

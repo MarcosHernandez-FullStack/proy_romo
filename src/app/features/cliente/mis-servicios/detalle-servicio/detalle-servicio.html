@@ -1,0 +1,175 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="cerrar.emit()"></div>
+
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[600px] max-h-[85vh] overflow-y-auto mx-4">
+
+    <!-- Header -->
+    <div class="sticky top-0 bg-white border-b border-[#e5e7eb] px-6 py-5 rounded-t-2xl z-10">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-[20px] font-bold text-[#101828]">Detalle del Servicio</h2>
+          @if (detalle()) {
+            <p class="text-[13px] text-[#6a7282] font-mono mt-0.5">{{ detalle()!.id }}</p>
+          }
+        </div>
+        <button (click)="cerrar.emit()" class="text-[#6a7282] hover:text-[#101828] mt-1 cursor-pointer">
+          <lucide-angular [img]="XIcon" class="size-5" color="currentColor" [strokeWidth]="2" />
+        </button>
+      </div>
+
+      @if (detalle()) {
+        <div class="flex items-center gap-3 mt-3">
+          @let dot = estadoOpDotColor(detalle()!.estadoOperativo);
+          <div class="flex items-center gap-2 bg-[#f9fafb] border border-[#e5e7eb] rounded-full px-3 h-7">
+            <div class="rounded-full size-2 shrink-0" [style.background-color]="dot"></div>
+            <span class="text-[13px] font-medium" [class]="estadoOpClass(detalle()!.estadoOperativo)">{{ detalle()!.estadoOperativo }}</span>
+          </div>
+          @let sa = estadoAdminClass(detalle()!.estadoAdmin);
+          <div
+            class="flex items-center rounded-full px-3 h-7 border text-[13px] font-semibold"
+            [style.background-color]="sa.bg"
+            [style.border-color]="sa.border"
+            [style.color]="sa.text"
+          >{{ detalle()!.estadoAdmin }}</div>
+        </div>
+      }
+    </div>
+
+    @if (cargando()) {
+      <div class="flex items-center justify-center py-16">
+        <p class="text-[#6a7282]">Cargando...</p>
+      </div>
+    }
+
+    @if (detalle() && !cargando()) {
+      <div class="px-6 py-6 flex flex-col gap-6">
+
+        <!-- Trayecto -->
+        <div class="bg-[#f9fafb] border border-[#e5e7eb] rounded-xl p-4">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="bg-[#00c950] rounded-full size-3 shrink-0"></div>
+              <span class="text-[14px] text-[#364153]">{{ detalle()!.origen }}</span>
+            </div>
+            <div class="w-px h-4 bg-[#e5e7eb] ml-[5px]"></div>
+            <div class="flex items-center gap-3">
+              <div class="bg-[#fb2c36] rounded-full size-3 shrink-0"></div>
+              <span class="text-[14px] text-[#364153]">{{ detalle()!.destino }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloque horario -->
+        <div class="bg-[#eff6ff] border border-[#bedbff] rounded-xl p-4">
+          <p class="text-[11px] font-semibold text-[#1447e6] uppercase tracking-wider mb-2">Bloque Horario</p>
+          <div class="flex items-center gap-3">
+            <lucide-angular [img]="CheckCircleIcon" class="size-5 shrink-0" color="#155dfc" [strokeWidth]="2" />
+            <span class="text-[18px] font-bold text-[#1447e6]">{{ detalle()!.horaInicio }} – {{ detalle()!.horaFin }}</span>
+            <span class="text-[14px] text-[#155dfc]">{{ detalle()!.duracionHoras }} h</span>
+          </div>
+          <p class="text-[12px] text-[#4a7bcc] mt-1">{{ detalle()!.fecha }} · {{ detalle()!.hora }}</p>
+        </div>
+
+        <!-- Vehículos trasladados -->
+        <div>
+          <p class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider mb-3">
+            Vehículos Trasladados ({{ detalle()!.vehiculos }})
+          </p>
+          <div class="border border-[#e5e7eb] rounded-xl overflow-hidden">
+            <!-- Cabecera -->
+            <div class="grid bg-[#f9fafb] border-b border-[#e5e7eb]" style="grid-template-columns: 36px 1fr 1fr 1fr 1.4fr">
+              <div class="px-3 py-2"></div>
+              @for (col of ['Tipo', 'Placa', 'Modelo', 'Observación']; track col) {
+                <div class="px-3 py-2">
+                  <span class="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">{{ col }}</span>
+                </div>
+              }
+            </div>
+            <!-- Filas con scroll interno -->
+            <div class="overflow-y-auto" style="max-height: 240px">
+              @for (v of detalle()!.vehiculosDetalle; track v.placa; let i = $index) {
+                <div
+                  class="grid items-center border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors"
+                  style="grid-template-columns: 36px 1fr 1fr 1fr 1.4fr; min-height: 48px"
+                >
+                  <div class="flex items-center justify-center px-2">
+                    <span class="bg-[#155dfc] text-white text-[10px] font-bold size-5 rounded-md flex items-center justify-center shrink-0">{{ i + 1 }}</span>
+                  </div>
+                  <p class="px-3 text-[12px] font-semibold text-[#364153] capitalize">{{ v.tipo || '—' }}</p>
+                  <p class="px-3 text-[12px] font-semibold text-[#364153] font-mono">{{ v.placa || '—' }}</p>
+                  <p class="px-3 text-[12px] text-[#364153]">{{ v.modelo || '—' }}</p>
+                  <p class="px-3 text-[12px] text-[#6a7282] truncate" [title]="v.observacion">{{ v.observacion || '—' }}</p>
+                </div>
+              } @empty {
+                <div class="py-6 text-[13px] text-[#9ca3af] text-center">
+                  Sin vehículos registrados
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Trazabilidad administrativa -->
+        <div>
+          <p class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider mb-3">Trazabilidad Administrativa</p>
+          <div class="flex flex-col gap-3">
+            @for (item of detalle()!.trazabilidad; track item.estado) {
+              <div class="flex items-start gap-4">
+                <div
+                  class="size-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                  [style.background-color]="trazabilidadColor(item.color) + '20'"
+                >
+                  <lucide-angular [img]="CheckCircleIcon" class="size-4" [color]="trazabilidadColor(item.color)" [strokeWidth]="2" />
+                </div>
+                <div class="flex-1">
+                  <p class="text-[14px] font-semibold text-[#101828]">{{ item.estado }}</p>
+                  <p class="text-[12px] text-[#6a7282]">{{ item.descripcion }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Resumen de Cobro -->
+        <div class="bg-[#155dfc] rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <lucide-angular [img]="DollarSignIcon" class="size-4 shrink-0" color="white" [strokeWidth]="2" />
+            <p class="text-[11px] font-semibold text-white uppercase tracking-wider">Resumen de Cobro</p>
+          </div>
+          <div class="flex flex-col gap-2 mb-4">
+            <div class="flex items-center justify-between">
+              <span class="text-[13px] text-[#bedbff]">Vehículos trasladados</span>
+              <span class="text-[13px] text-white font-medium">{{ detalle()!.vehiculos }} unidad</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[13px] text-[#bedbff]">Bloque de servicio</span>
+              <span class="text-[13px] text-white font-medium">{{ detalle()!.horaInicio }} – {{ detalle()!.horaFin }} ({{ detalle()!.duracionHoras }} h)</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[13px] text-[#bedbff]">Estado de pago</span>
+              <span class="text-[13px] text-white font-medium">{{ detalle()!.estadoAdmin }}</span>
+            </div>
+          </div>
+          <div class="border-t border-white/20 pt-4 flex items-center justify-between">
+            <span class="text-[15px] font-bold text-white">Costo Final del Servicio</span>
+            <span class="text-[22px] font-bold text-white">{{ formatCosto(detalle()!.costo) }} <span class="text-[#bedbff] text-[13px] font-normal">USD</span></span>
+          </div>
+        </div>
+
+        <!-- Fecha -->
+        <div class="flex items-center gap-2 text-[12px] text-[#9ca3af]">
+          <lucide-angular [img]="CheckCircleIcon" class="size-4" color="#9ca3af" [strokeWidth]="2" />
+          <span>{{ detalle()!.fecha }}</span>
+        </div>
+
+        <!-- Botón cerrar -->
+        <button
+          (click)="cerrar.emit()"
+          class="w-full h-[44px] border border-[#d1d5dc] rounded-[10px] text-[#364153] text-[15px] font-medium hover:bg-[#f9fafb] transition-colors cursor-pointer"
+        >Cerrar</button>
+
+      </div>
+    }
+
+  </div>
+</div>

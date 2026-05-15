@@ -1,45 +1,149 @@
-import { Injectable } from '@angular/core';
-import { delay, of } from 'rxjs';
-import { DetalleServicio, Servicio } from '../../models/servicio.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { DetalleServicio, EstadoAdmin, EstadoOperativo, Servicio, TrazabilidadItem, VehiculoDetalle } from '../../models/servicio.model';
+import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
-const SERVICIOS_FAKE: Servicio[] = [
-  { id: 'SRV-001', fecha: '12/02/2026', hora: '09:00', origen: 'Av. Corrientes 1234, CABA', destino: 'Av. Santa Fe 5678, CABA', vehiculos: 1, costo: 8500, estadoOperativo: 'Finalizado', estadoAdmin: 'Pagado' },
-  { id: 'SRV-002', fecha: '17/02/2026', hora: '14:00', origen: 'Av. 9 de Julio 567, CABA', destino: 'Calle Florida 890, CABA', vehiculos: 2, costo: 17200, estadoOperativo: 'Finalizado', estadoAdmin: 'Facturado' },
-  { id: 'SRV-003', fecha: '22/02/2026', hora: '11:00', origen: 'Av. Callao 1234, CABA', destino: 'Av. Las Heras 2890, CABA', vehiculos: 1, costo: 15000, estadoOperativo: 'En Curso', estadoAdmin: 'Pendiente' },
-  { id: 'SRV-004', fecha: '24/02/2026', hora: '16:00', origen: 'Av. Rivadavia 4567, CABA', destino: 'Av. Córdoba 3456, CABA', vehiculos: 1, costo: 9500, estadoOperativo: 'Asignado', estadoAdmin: 'Pendiente' },
-  { id: 'SRV-005', fecha: '25/02/2026', hora: '10:00', origen: 'Av. Libertador 8900, CABA', destino: 'Puerto Madero, CABA', vehiculos: 3, costo: 28500, estadoOperativo: 'Reservado', estadoAdmin: 'Pendiente' },
-  { id: 'SRV-006', fecha: '04/02/2026', hora: '08:00', origen: 'Microcentro, CABA', destino: 'Palermo Hollywood, CABA', vehiculos: 2, costo: 11800, estadoOperativo: 'Finalizado', estadoAdmin: 'Pendiente' },
-  { id: 'SRV-007', fecha: '25/01/2026', hora: '13:00', origen: 'Av. Belgrano 2100, CABA', destino: 'Constitución, CABA', vehiculos: 1, costo: 7200, estadoOperativo: 'Finalizado', estadoAdmin: 'Pagado' },
-];
-
-const DETALLE_FAKE: DetalleServicio = {
-  ...SERVICIOS_FAKE[0],
-  operadorNombre: 'Juan Pérez',
-  operadorTelefono: '+54 9 11 1234-5678',
-  unidadPlaca: 'GRU-001',
-  horaInicio: '09:00',
-  horaFin: '11:00',
-  duracionHoras: 2,
-  tipoVehiculo: 'Sedán',
-  placa: 'AB 123 CD',
-  descripcionVehiculo: 'Toyota Corolla 2020 - Blanco',
-  observaciones: '',
-  trazabilidad: [
-    { estado: 'Servicio Finalizado', descripcion: 'Confirmado por el operador en campo', fecha: '12/02/26', hora: '11:00 hs', color: 'green' },
-    { estado: 'Facturación', descripcion: 'Registrada por administración', fecha: '14/02/26', hora: '10:00 hs', color: 'blue' },
-    { estado: 'Pago Confirmado', descripcion: 'Validado por administración', fecha: '16/02/26', hora: '15:00 hs', color: 'orange' },
-  ],
-};
+const API = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class ServicioService {
-  getServicios() {
-    // TODO: reemplazar con this.http.get<Servicio[]>('/api/servicios')
-    return of(SERVICIOS_FAKE).pipe(delay(300));
+  private readonly http    = inject(HttpClient);
+  private readonly authSvc = inject(AuthService);
+
+  getServicios(fechaInicio?: string, fechaFin?: string): Observable<Servicio[]> {
+    const params: Record<string, string> = {};
+    const idCliente = this.authSvc.session()?.idCliente;
+    if (idCliente)    params['idCliente']           = String(idCliente);
+    if (fechaInicio)  params['fechaServicioInicio']  = fechaInicio;
+    if (fechaFin)     params['fechaServicioFin']     = fechaFin;
+
+    return this.http.get<ReservaApiItem[]>(`${API}/operaciones`, { params }).pipe(
+      map(data => (data ?? []).map(r => this.mapServicio(r)))
+    );
   }
 
-  getDetalle(id: string) {
-    // TODO: reemplazar con this.http.get<DetalleServicio>(`/api/servicios/${id}`)
-    return of({ ...DETALLE_FAKE, id }).pipe(delay(300));
+  getDetalle(id: string): Observable<DetalleServicio> {
+    return this.http.get<ReservaApiItem[]>(`${API}/operaciones`, {
+      params: { id },
+    }).pipe(
+      map(data => this.mapDetalle(data[0]))
+    );
   }
+
+  private mapServicio(r: ReservaApiItem): Servicio {
+    const partes = r.fechaHoraFormateada?.split(' · ') ?? [];
+    return {
+      id:              String(r.id),
+      fecha:           partes[0] ?? '',
+      hora:            partes[1] ?? '',
+      origen:          r.direccionOrigen,
+      destino:         r.direccionDestino,
+      vehiculos:       r.cantidadVehiculos,
+      costo:           r.costo,
+      estadoOperativo: this.mapEstadoOp(r.estadoOperacion),
+      estadoAdmin:     this.mapEstadoAdmin(r.estadoAdministrativo),
+    };
+  }
+
+  private mapDetalle(r: ReservaApiItem): DetalleServicio {
+    return {
+      ...this.mapServicio(r),
+      operadorNombre:   r.operadorAsignado ?? '',
+      operadorTelefono: '',
+      unidadPlaca:      r.gruaAsignada?.split(' - ')[0] ?? '',
+      horaInicio:       r.horaInicio?.substring(0, 5) ?? '',
+      horaFin:          r.horaFin?.substring(0, 5)    ?? '',
+      duracionHoras:    r.nroBloques,
+      vehiculosDetalle: (r.vehiculos ?? []).map<VehiculoDetalle>(v => ({
+        tipo:       v.tipo        ?? '',
+        placa:      v.placa       ?? '',
+        modelo:     v.modelo      ?? '',
+        observacion: v.observacion ?? '',
+      })),
+      trazabilidad: this.buildTrazabilidad(r),
+    };
+  }
+
+  private buildTrazabilidad(r: ReservaApiItem): TrazabilidadItem[] {
+    const items: TrazabilidadItem[] = [];
+    const estadoOp    = this.mapEstadoOp(r.estadoOperacion);
+    const estadoAdmin = this.mapEstadoAdmin(r.estadoAdministrativo);
+
+    const estadoLabel: Record<EstadoOperativo, string> = {
+      'Reservado':  'Servicio Reservado',
+      'Asignado':   'Servicio Asignado',
+      'En Curso':   'Servicio En Curso',
+      'Finalizado': 'Servicio Finalizado',
+    };
+    const estadoColor: Record<EstadoOperativo, 'green' | 'blue' | 'orange'> = {
+      'Reservado':  'orange',
+      'Asignado':   'blue',
+      'En Curso':   'orange',
+      'Finalizado': 'green',
+    };
+
+    items.push({
+      estado:      estadoLabel[estadoOp],
+      descripcion: estadoOp === 'Finalizado' ? 'Confirmado por el operador en campo' : `En estado ${estadoOp}`,
+      fecha:       '',
+      hora:        '',
+      color:       estadoColor[estadoOp],
+    });
+
+    if (estadoAdmin === 'Facturado' || estadoAdmin === 'Pagado') {
+      items.push({ estado: 'Facturación', descripcion: 'Registrada por administración', fecha: '', hora: '', color: 'blue' });
+    }
+    if (estadoAdmin === 'Pagado') {
+      items.push({ estado: 'Pago Confirmado', descripcion: 'Validado por administración', fecha: '', hora: '', color: 'orange' });
+    }
+
+    return items;
+  }
+
+  private mapEstadoOp(e: string): EstadoOperativo {
+    const tabla: Record<string, EstadoOperativo> = {
+      RESERVADO:  'Reservado',
+      ASIGNADO:   'Asignado',
+      ENCURSO:    'En Curso',
+      FINALIZADO: 'Finalizado',
+    };
+    return tabla[e?.toUpperCase()] ?? 'Reservado';
+  }
+
+  private mapEstadoAdmin(e: string): EstadoAdmin {
+    const tabla: Record<string, EstadoAdmin> = {
+      PENDIENTE: 'Pendiente',
+      FACTURADO: 'Facturado',
+      PAGADO:    'Pagado',
+    };
+    return tabla[e?.toUpperCase()] ?? 'Pendiente';
+  }
+}
+
+interface ReservaApiItem {
+  id:                   number;
+  direccionOrigen:      string;
+  direccionDestino:     string;
+  cantidadCarga:        number;
+  horaInicio:           string;
+  horaFin:              string;
+  nroBloques:           number;
+  estadoOperacion:      string;
+  estadoAdministrativo: string;
+  nombreCliente?:       string | null;
+  gruaAsignada?:        string | null;
+  operadorAsignado?:    string | null;
+  vehiculos?:           VehiculoApiItem[];
+  fechaHoraFormateada:  string;
+  cantidadVehiculos:    number;
+  costo:                number;
+}
+
+interface VehiculoApiItem {
+  placa?:       string | null;
+  modelo?:      string | null;
+  tipo?:        string | null;
+  observacion?: string | null;
 }
