@@ -23,17 +23,17 @@ export class EditarUsuarioComponent implements OnInit {
   protected readonly RefreshCwIcon     = RefreshCw;
   protected readonly AlertTriangleIcon = AlertTriangle;
 
-  readonly roles: RolUsuario[] = ['Administrador', 'Staff'];
+  readonly roles: RolUsuario[] = ['ADMINISTRADOR', 'STAFF'];
 
   protected readonly contrasena = signal('');
   protected readonly nombres    = signal('');
   protected readonly apellidos  = signal('');
   protected readonly telefono   = signal('');
-  protected readonly rol        = signal<RolUsuario>('Staff');
+  protected readonly rol        = signal<RolUsuario>('STAFF');
 
   protected readonly guardando      = signal(false);
   protected readonly errorMsg       = signal('');
-  protected readonly showExito      = signal(false);
+  protected readonly exitoModal     = signal<{ titulo: string; mensaje: string; detalle: string } | null>(null);
   protected readonly mostrarErrores = signal(false);
 
   ngOnInit(): void {
@@ -86,20 +86,18 @@ export class EditarUsuarioComponent implements OnInit {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    const idNumerico = parseInt(this.usuario().id.replace('USR-', ''), 10);
-
-    this.adminSvc.editarUsuario(idNumerico, {
+    this.adminSvc.editarUsuario(this.usuario().id, {
       contrasena: this.contrasena() || undefined,
       nombres:    this.nombres(),
       apellidos:  this.apellidos(),
       telefono:   this.telefono() || undefined,
       correo:     this.usuario().correo,
-      rol:        this.rol() === 'Administrador' ? 'ADMINISTRADOR' : 'STAFF',
+      rol:        this.rol(),
     }).subscribe({
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 1) {
-          this.showExito.set(true);
+          this.exitoModal.set({ titulo: '¡Usuario Actualizado!', mensaje: result.mensaje, detalle: String(this.usuario().id) });
         } else {
           this.errorMsg.set(result.mensaje || 'Error al actualizar el usuario.');
         }

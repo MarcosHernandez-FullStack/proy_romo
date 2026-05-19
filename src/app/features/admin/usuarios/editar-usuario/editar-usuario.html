@@ -187,12 +187,12 @@
   </div>
 </div>
 
-@if (showExito()) {
+@if (exitoModal()) {
   <app-exito-modal
-    titulo="¡Usuario Actualizado!"
-    mensaje="Los datos del usuario fueron actualizados exitosamente."
+    [titulo]="exitoModal()!.titulo"
+    [mensaje]="exitoModal()!.mensaje"
     etiqueta="ID USUARIO"
-    [detalle]="usuario().id"
+    [detalle]="exitoModal()!.detalle"
     labelCerrar="Aceptar"
     (cerrar)="guardar.emit()" />
 }

@@ -28,6 +28,7 @@ import {
   ParametrosOperativos,
   ReservaALiberar,
   ReservaOperacion,
+  RolUsuario,
   ServicioAdmin,
   ServicioProximo,
   ServicioReporte,
@@ -397,24 +398,43 @@ export class AdminService {
     return this.http.put<CrearUsuarioResult>(`${API}/usuarios/${idUsuario}`, data);
   }
 
-  getUsuarios(): Observable<UsuarioAdmin[]> {
-    return this.http.get<UsuarioApiItem[]>(`${API}/usuarios`).pipe(
-      map(items => items.map(i => this.mapUsuario(i)))
+  actualizarEstadoUsuario(idUsuario: number, nuevoEstado: 'ACTIVO' | 'INACTIVO'): Observable<CrearUsuarioResult> {
+    return this.http.patch<CrearUsuarioResult>(`${API}/usuarios/${idUsuario}/estado`, { nuevoEstado });
+  }
+
+  getUsuarios(params: GetUsuariosParams = {}): Observable<{ total: number; totalAdministradores: number; totalStaff: number; datos: UsuarioAdmin[] }> {
+    const p: Record<string, string> = {};
+    if (params.estado != null) p['estado'] = params.estado;
+    if (params.id     != null) p['id']     = String(params.id);
+    if (params.nombre != null) p['nombre'] = params.nombre;
+    if (params.correo != null) p['correo'] = params.correo;
+    if (params.rol    != null) p['rol']    = params.rol;
+    if (params.pagina != null) p['pagina'] = String(params.pagina);
+    if (params.tamano != null) p['tamano'] = String(params.tamano);
+
+    return this.http.get<UsuarioPagedApiResponse | null>(`${API}/usuarios`, { params: p }).pipe(
+      map(res => res
+        ? {
+            total:                res.total,
+            totalAdministradores: res.totalAdministradores,
+            totalStaff:           res.totalStaff,
+            datos:                res.datos.map(i => this.mapUsuario(i)),
+          }
+        : { total: 0, totalAdministradores: 0, totalStaff: 0, datos: [] }
+      )
     );
   }
 
   private mapUsuario(item: UsuarioApiItem): UsuarioAdmin {
-    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    const d = new Date(item.fechaCreacion);
     return {
-      id:            `USR-${String(item.id).padStart(3, '0')}`,
+      id:            item.id,
       nombres:       item.nombres,
       apellidos:     item.apellidos,
       correo:        item.correo,
-      telefono:      item.telefono ?? '',
-      rol:           item.rol === 'ADMINISTRADOR' ? 'Administrador' : 'Staff',
-      fechaCreacion: `${d.getUTCDate()} ${meses[d.getUTCMonth()]} ${d.getUTCFullYear()}`,
-      activo:        item.estado === 'ACTIVO',
+      telefono:      item.telefono,
+      rol:           item.rol as RolUsuario,
+      fechaCreacion: item.fechaCreacionFormat,
+      activo:        item.estado,
     };
   }
 
@@ -660,15 +680,33 @@ interface ProxServApiItem {
   fechaAbreviada: string;
 }
 
+interface GetUsuariosParams {
+  estado?:  string;
+  id?:      number;
+  nombre?:  string;
+  correo?:  string;
+  rol?:     string;
+  pagina?:  number;
+  tamano?:  number;
+}
+
 interface UsuarioApiItem {
-  id:            number;
-  nombres:       string;
-  apellidos:     string;
-  correo:        string;
-  telefono:      string | null;
-  rol:           string;
-  estado:        string;
-  fechaCreacion: string;
+  id:                  number;
+  nombres:             string;
+  apellidos:           string;
+  correo:              string;
+  telefono:            string;
+  rol:                 string;
+  estado:              string;
+  fechaCreacion:       string;
+  fechaCreacionFormat: string;
+}
+
+interface UsuarioPagedApiResponse {
+  total:                number;
+  totalAdministradores: number;
+  totalStaff:           number;
+  datos:                UsuarioApiItem[];
 }
 
 interface HorarioApiItem {
@@ -839,13 +877,6 @@ const HORARIOS_REGULARES: HorarioRegular[] = [
   { id: 5, dia: 'Viernes',   abre: '07:00', cierra: '20:00', activo: true  },
   { id: 6, dia: 'Sábado',    abre: '08:00', cierra: '14:00', activo: true  },
   { id: 7, dia: 'Domingo',   abre: '00:00', cierra: '00:00', activo: false },
-];
-
-const USUARIOS_ADMIN: UsuarioAdmin[] = [
-  { id: 'USR-001', nombres: 'Carlos',  apellidos: 'Administrador', correo: 'admin@cranemanager.com',              telefono: '+51 999 000 001', rol: 'Administrador', fechaCreacion: '14 ene 2024', activo: true },
-  { id: 'USR-002', nombres: 'María',   apellidos: 'González',      correo: 'maria.gonzalez@cranemanager.com',    telefono: '+51 999 000 002', rol: 'Staff',          fechaCreacion: '9 feb 2024',  activo: true },
-  { id: 'USR-003', nombres: 'Juan',    apellidos: 'Pérez',         correo: 'juan.perez@cranemanager.com',        telefono: '+51 999 000 003', rol: 'Staff',          fechaCreacion: '4 mar 2024',  activo: true },
-  { id: 'USR-004', nombres: 'Laura',   apellidos: 'Martínez',      correo: 'laura.martinez@cranemanager.com',    telefono: '+51 999 000 004', rol: 'Staff',          fechaCreacion: '10 abr 2024', activo: false },
 ];
 
 const TARIFAS_CLIENTES: TarifaCliente[] = [

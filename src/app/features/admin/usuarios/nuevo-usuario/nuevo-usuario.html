@@ -199,12 +199,12 @@
   </div>
 </div>
 
-@if (showExito()) {
+@if (exitoModal()) {
   <app-exito-modal
-    titulo="¡Usuario Creado!"
-    mensaje="El usuario y sus credenciales de acceso fueron registrados exitosamente."
+    [titulo]="exitoModal()!.titulo"
+    [mensaje]="exitoModal()!.mensaje"
     etiqueta="ID USUARIO"
-    [detalle]="idNuevoFormato"
+    [detalle]="exitoModal()!.detalle"
     labelCerrar="Aceptar"
     (cerrar)="guardar.emit()" />
 }

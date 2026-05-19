@@ -157,18 +157,18 @@ export interface SlotAdmin {
   estadoOriginal?: 'libre' | 'excepcion';
 }
 
-export type RolUsuario = 'Administrador' | 'Staff';
+export type RolUsuario = 'ADMINISTRADOR' | 'STAFF';
 export type EstadoAdminServicio = 'Pendiente' | 'Facturado' | 'Pagado';
 
 export interface UsuarioAdmin {
-  id:            string;
+  id:            number;
   nombres:       string;
   apellidos:     string;
   correo:        string;
   telefono:      string;
   rol:           RolUsuario;
   fechaCreacion: string;
-  activo:        boolean;
+  activo:        string;
 }
 
 export interface TarifaCliente {

@@ -22,24 +22,19 @@ export class NuevoUsuarioComponent {
   protected readonly RefreshCwIcon     = RefreshCw;
   protected readonly AlertTriangleIcon = AlertTriangle;
 
-  readonly roles: RolUsuario[] = ['Administrador', 'Staff'];
+  readonly roles: RolUsuario[] = ['ADMINISTRADOR', 'STAFF'];
 
   protected readonly correo     = signal('');
   protected readonly contrasena = signal('');
   protected readonly nombres    = signal('');
   protected readonly apellidos  = signal('');
   protected readonly telefono   = signal('');
-  protected readonly rol        = signal<RolUsuario>('Staff');
+  protected readonly rol        = signal<RolUsuario>('STAFF');
 
   protected readonly guardando      = signal(false);
   protected readonly errorMsg       = signal('');
-  protected readonly showExito      = signal(false);
-  protected readonly idNuevo        = signal(0);
+  protected readonly exitoModal     = signal<{ titulo: string; mensaje: string; detalle: string } | null>(null);
   protected readonly mostrarErrores = signal(false);
-
-  protected get idNuevoFormato(): string {
-    return `USR-${String(this.idNuevo()).padStart(3, '0')}`;
-  }
 
   // ── Validaciones ─────────────────────────────────────────
   protected get errorCorreo(): string {
@@ -97,13 +92,12 @@ export class NuevoUsuarioComponent {
       nombres:    this.nombres(),
       apellidos:  this.apellidos(),
       telefono:   this.telefono() || undefined,
-      rol:        this.rol() === 'Administrador' ? 'ADMINISTRADOR' : 'STAFF',
+      rol:        this.rol(),
     }).subscribe({
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 1) {
-          this.idNuevo.set(result.idNuevo ?? 0);
-          this.showExito.set(true);
+          this.exitoModal.set({ titulo: '¡Usuario Creado!', mensaje: result.mensaje, detalle: String(result.idNuevo ?? 0) });
         } else {
           this.errorMsg.set(result.mensaje || 'Error al crear el usuario.');
         }
