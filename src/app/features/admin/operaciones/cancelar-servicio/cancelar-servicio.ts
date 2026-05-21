@@ -1,8 +1,8 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, XCircle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { ReservaOperacion } from '../../../../models/admin.model';
+import { OperacionesService } from '../../../../core/services/operaciones.service';
+import { ReservaOperacion } from '../../../../models/operaciones.model';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
 @Component({
@@ -12,7 +12,7 @@ import { MensajeModalComponent } from '../../../../shared/components/mensaje-mod
   templateUrl: './cancelar-servicio.html',
 })
 export class CancelarServicioComponent {
-  private readonly adminSvc = inject(AdminService);
+  private readonly operacionesSvc = inject(OperacionesService);
 
   readonly reserva   = input.required<ReservaOperacion>();
   readonly confirmar = output<number>();
@@ -29,7 +29,7 @@ export class CancelarServicioComponent {
     this.guardando.set(true);
     this.error.set(null);
 
-    this.adminSvc.cancelarReserva(this.reserva().id, this.motivo()).subscribe({
+    this.operacionesSvc.cancelarReserva(this.reserva().id, this.motivo()).subscribe({
       next: () => { this.guardando.set(false); this.confirmar.emit(this.reserva().id); },
       error: (err)   => {
         this.guardando.set(false);

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Save, Info, Clock, Timer, Route, Navigation, MapPin } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
+import { ConfiguracionService } from '../../../../core/services/configuracion.service';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
@@ -12,7 +12,7 @@ import { ExitoModalComponent } from '../../../../shared/components/exito-modal/e
   templateUrl: './parametros.html',
 })
 export class ParametrosComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly configuracionSvc = inject(ConfiguracionService);
 
   protected readonly SaveIcon       = Save;
   protected readonly InfoIcon       = Info;
@@ -53,7 +53,7 @@ export class ParametrosComponent implements OnInit {
   protected readonly mensajeResultado = signal('');
 
   ngOnInit(): void {
-    this.adminSvc.getParametrosOperativos().subscribe((p) => {
+    this.configuracionSvc.getParametroOperativo().subscribe((p) => {
       this.zonaHoraria.set(p.zonaHoraria);
       this.tiempoCorte.set(p.tiempoCorte);
       this.timerAdministrativo.set(p.timerAdministrativo);
@@ -80,7 +80,7 @@ export class ParametrosComponent implements OnInit {
     if (this.guardando()) return;
 
     this.guardando.set(true);
-    this.adminSvc.actualizarParametroOperativo({
+    this.configuracionSvc.actualizarParametroOperativo({
       tiempoMargenManiobra: this.tiempoMargenManiobra(),
       tiempoRetornoBase:    this.tiempoRetornoBase(),
       umbralLargaDistancia: this.umbralLargaDistancia(),

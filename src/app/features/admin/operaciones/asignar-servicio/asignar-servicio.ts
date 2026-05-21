@@ -12,8 +12,8 @@ import {
   Search,
   Eye,
 } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { ReservaOperacion, Sugerencias } from '../../../../models/admin.model';
+import { OperacionesService } from '../../../../core/services/operaciones.service';
+import { ReservaOperacion, Sugerencias } from '../../../../models/operaciones.model';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
 @Component({
@@ -23,7 +23,7 @@ import { MensajeModalComponent } from '../../../../shared/components/mensaje-mod
   templateUrl: './asignar-servicio.html',
 })
 export class AsignarServicioComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly operacionesSvc = inject(OperacionesService);
 
   readonly reserva     = input.required<ReservaOperacion>();
   readonly soloDetalle = input<boolean>(false);
@@ -105,7 +105,7 @@ export class AsignarServicioComponent implements OnInit {
       return;
     }
 
-    this.adminSvc.getSugerencias(this.reserva().id).subscribe({
+    this.operacionesSvc.getSugerencias(this.reserva().id).subscribe({
       next: data => { this.sugerencias.set(data); this.cargando.set(false); },
       error: ()   => { this.cargando.set(false); this.error.set('No se pudieron cargar las sugerencias.'); },
     });
@@ -141,7 +141,7 @@ export class AsignarServicioComponent implements OnInit {
     this.guardando.set(true);
     this.error.set(null);
 
-    this.adminSvc.asignarServicio(this.reserva().id, idGrua, idOperador).subscribe({
+    this.operacionesSvc.asignarServicio(this.reserva().id, idGrua, idOperador).subscribe({
       next: () => { this.guardando.set(false); this.confirmar.emit(this.reserva().id); },
       error: (err)   => {
         this.guardando.set(false);

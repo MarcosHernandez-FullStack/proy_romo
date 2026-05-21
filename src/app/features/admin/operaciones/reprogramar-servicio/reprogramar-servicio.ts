@@ -11,8 +11,9 @@ import {
   RefreshCw,
   OctagonAlert,
 } from 'lucide-angular';
-import { ReservaOperacion } from '../../../../models/admin.model';
-import { AdminService } from '../../../../core/services/admin.service';
+import { ReservaOperacion } from '../../../../models/operaciones.model';
+import { ReservasService } from '../../../../core/services/reservas.service';
+import { OperacionesService } from '../../../../core/services/operaciones.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
@@ -35,8 +36,9 @@ export interface ReprogramacionData {
   templateUrl: './reprogramar-servicio.html',
 })
 export class ReprogramarServicioComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
-  private readonly authSvc  = inject(AuthService);
+  private readonly reservasSvc    = inject(ReservasService);
+  private readonly operacionesSvc = inject(OperacionesService);
+  private readonly authSvc        = inject(AuthService);
 
   readonly reserva   = input.required<ReservaOperacion>();
   readonly confirmar = output<number>();
@@ -110,7 +112,7 @@ export class ReprogramarServicioComponent implements OnInit {
     this.cargandoSlots.set(true);
     this.slots.set([]);
 
-    this.adminSvc.getHorariosReprogramacion(fecha, rol, r.cantidadCarga, r.id).subscribe({
+    this.reservasSvc.getHorariosReprogramacion(fecha, rol, r.cantidadCarga, r.id).subscribe({
       next: data => {
         this.slots.set(
           (data ?? []).map(h => {
@@ -217,7 +219,7 @@ export class ReprogramarServicioComponent implements OnInit {
     if (!slot) return;
 
     this.guardando.set(true);
-    this.adminSvc.reprogramarReserva(
+    this.operacionesSvc.reprogramarReserva(
       this.reserva().id,
       this.nuevaFecha(),
       slot.hora,

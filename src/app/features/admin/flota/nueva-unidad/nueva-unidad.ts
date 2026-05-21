@@ -1,7 +1,7 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Truck, X, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
+import { FlotaService } from '../../../../core/services/flota.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
 @Component({
@@ -11,7 +11,7 @@ import { ExitoModalComponent } from '../../../../shared/components/exito-modal/e
   templateUrl: './nueva-unidad.html',
 })
 export class NuevaUnidadComponent {
-  private readonly adminSvc = inject(AdminService);
+  private readonly flotaSvc = inject(FlotaService);
 
   readonly guardar = output<void>();
   readonly cerrar  = output<void>();
@@ -87,7 +87,7 @@ export class NuevaUnidadComponent {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    this.adminSvc.crearGrua({
+    this.flotaSvc.crearGrua({
       placa:          this.placa(),
       marca:          this.marca(),
       modelo:         this.modelo(),

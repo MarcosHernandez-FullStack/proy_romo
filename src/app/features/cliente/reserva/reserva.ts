@@ -16,7 +16,7 @@ import {
   Lock,
   Calendar,
 } from 'lucide-angular';
-import { TipoCarga } from '../../../models/reserva.model';
+import { TipoCarga } from '../../../models/reservas.model';
 
 interface SlotHorario {
   hora: string;

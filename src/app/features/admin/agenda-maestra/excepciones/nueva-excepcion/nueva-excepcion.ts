@@ -1,7 +1,7 @@
 import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Calendar, X, AlertTriangle, Clock, Loader } from 'lucide-angular';
-import { ExcepcionAgenda, TipoExcepcion, AlcanceExcepcion } from '../../../../../models/admin.model';
+import { AlcanceExcepcion, ExcepcionAgenda, TipoExcepcion } from '../../../../../models/agenda.model';
 
 @Component({
   selector: 'app-nueva-excepcion',

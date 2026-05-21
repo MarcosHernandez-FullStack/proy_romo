@@ -1,16 +1,8 @@
 import { Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import {
-  DIAS_SEMANA,
-  DiaSemana,
-  DispRango,
-  GridDisponibilidad,
-  HoraGrid,
-  HORAS_GRID,
-  Operador,
-  TipoDisponibilidad,
-} from '../../../../models/admin.model';
-import { AdminService } from '../../../../core/services/admin.service';
+import { DIAS_SEMANA, DiaSemana, GridDisponibilidad, HoraGrid, HORAS_GRID } from '../../../../models/agenda.model';
+import { DispRango, Operador, TipoDisponibilidad } from '../../../../models/operadores.model';
+import { OperadoresService } from '../../../../core/services/operadores.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
@@ -38,7 +30,7 @@ const HORAS_NEGOCIO: HoraGrid[] = [
   templateUrl: './gestion-disponibilidad.html',
 })
 export class GestionDisponibilidadComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly operadoresSvc = inject(OperadoresService);
 
   readonly operador = input.required<Operador>();
   readonly guardar  = output<GridDisponibilidad>();
@@ -126,7 +118,7 @@ export class GestionDisponibilidadComponent implements OnInit {
     if (!id) return;
 
     this.cargando.set(true);
-    this.adminSvc.getDispOperador(id).subscribe({
+    this.operadoresSvc.getDispOperador(id).subscribe({
       next: resp => {
         const grid = this.emptyGrid();
         for (const slot of resp.slots) {
@@ -199,7 +191,7 @@ export class GestionDisponibilidadComponent implements OnInit {
 
     const rangos = this.gridARangos();
     this.guardando.set(true);
-    this.adminSvc.guardarDispOperador(id, rangos, false).subscribe({
+    this.operadoresSvc.guardarDispOperador(id, rangos, false).subscribe({
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 1) {
@@ -226,7 +218,7 @@ export class GestionDisponibilidadComponent implements OnInit {
 
     this.limpiarConflicto();
     this.guardando.set(true);
-    this.adminSvc.guardarDispOperador(id, rangos, true).subscribe({
+    this.operadoresSvc.guardarDispOperador(id, rangos, true).subscribe({
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 1) {

@@ -1,8 +1,8 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserPlus, X, RefreshCw, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { RolUsuario } from '../../../../models/admin.model';
+import { UsuarioService } from '../../../../core/services/usuario.service';
+import { RolUsuario } from '../../../../models/usuario.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
 @Component({
@@ -12,7 +12,7 @@ import { ExitoModalComponent } from '../../../../shared/components/exito-modal/e
   templateUrl: './nuevo-usuario.html',
 })
 export class NuevoUsuarioComponent {
-  private readonly adminSvc = inject(AdminService);
+  private readonly usuarioSvc = inject(UsuarioService);
 
   readonly guardar = output<void>();
   readonly cerrar  = output<void>();
@@ -86,7 +86,7 @@ export class NuevoUsuarioComponent {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    this.adminSvc.crearUsuario({
+    this.usuarioSvc.crearUsuario({
       correo:     this.correo(),
       contrasena: this.contrasena(),
       nombres:    this.nombres(),

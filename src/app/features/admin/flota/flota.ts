@@ -18,8 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { EstadoUnidad, UnidadFlota } from '../../../models/admin.model';
+import { FlotaService } from '../../../core/services/flota.service';
+import { EstadoUnidad, UnidadFlota } from '../../../models/flota.model';
 import { NuevaUnidadComponent } from './nueva-unidad/nueva-unidad';
 import { EditarUnidadComponent } from './editar-unidad/editar-unidad';
 import { DetalleUnidadComponent } from './detalle-unidad/detalle-unidad';
@@ -36,7 +36,7 @@ type FiltroFlota = 'Activas' | 'En Taller' | 'Bajas';
   templateUrl: './flota.html',
 })
 export class FlotaComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly flotaSvc = inject(FlotaService);
 
   protected readonly TruckIcon = Truck;
   protected readonly PlusIcon = Plus;
@@ -143,7 +143,7 @@ export class FlotaComponent implements OnInit {
   }
 
   private cargarFlota(): void {
-    this.adminSvc.getFlota().subscribe((gruas) => this.flota.set(gruas));
+    this.flotaSvc.getFlota().subscribe((gruas) => this.flota.set(gruas));
   }
 
   protected onEstadoClick(u: UnidadFlota): void {
@@ -189,7 +189,7 @@ export class FlotaComponent implements OnInit {
     const idNumerico = parseInt(id.split('-')[1], 10);
     this.guardando.set(true);
     this.errorGuardar.set(null);
-    this.adminSvc.actualizarEstadoGrua(idNumerico, 'INACTIVO').subscribe({
+    this.flotaSvc.actualizarEstadoGrua(idNumerico, 'INACTIVO').subscribe({
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
@@ -202,7 +202,7 @@ export class FlotaComponent implements OnInit {
 
   protected reactivar(id: string): void {
     const idNumerico = parseInt(id.split('-')[1], 10);
-    this.adminSvc.actualizarEstadoGrua(idNumerico, 'ACTIVO').subscribe({
+    this.flotaSvc.actualizarEstadoGrua(idNumerico, 'ACTIVO').subscribe({
       next: result => {
         if (result.exitoso === 1) {
           this.cargarFlota();

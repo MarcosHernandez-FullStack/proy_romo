@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { LucideAngularModule, LucideIconData, Truck, X, Info, BookOpen, Wrench, ArrowUpCircle, CheckCircle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { BitacoraEntry, UnidadFlota } from '../../../../models/admin.model';
+import { FlotaService } from '../../../../core/services/flota.service';
+import { BitacoraEntry, UnidadFlota } from '../../../../models/flota.model';
 
 type TabDetalle = 'info' | 'bitacora';
 
@@ -12,7 +12,7 @@ type TabDetalle = 'info' | 'bitacora';
   templateUrl: './detalle-unidad.html',
 })
 export class DetalleUnidadComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly flotaSvc = inject(FlotaService);
 
   readonly unidad = input.required<UnidadFlota>();
   readonly cerrar = output<void>();
@@ -29,7 +29,7 @@ export class DetalleUnidadComponent implements OnInit {
   protected readonly bitacora = signal<BitacoraEntry[]>([]);
 
   ngOnInit(): void {
-    this.adminSvc.getBitacora(this.unidad().id).subscribe((data) => this.bitacora.set(data));
+    this.flotaSvc.getBitacora(this.unidad().id).subscribe((data) => this.bitacora.set(data));
   }
 
   protected estadoClass(estado: string): string {

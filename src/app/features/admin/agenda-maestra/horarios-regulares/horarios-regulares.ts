@@ -1,7 +1,7 @@
 import { Component, OnInit, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, AlertTriangle, Info, Save, Loader } from 'lucide-angular';
-import { HORAS_GRID, HorarioRegular } from '../../../../models/admin.model';
+import { HORAS_GRID, HorarioRegular } from '../../../../models/agenda.model';
 
 @Component({
   selector: 'app-horarios-regulares',

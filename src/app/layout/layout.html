@@ -1,7 +1,7 @@
 <div class="flex h-screen overflow-hidden bg-[#f9fafb]">
   <app-sidebar />
   <main class="flex-1 overflow-y-auto flex flex-col">
-    @if (!configSvc.reservaClienteOn()) {
+    @if (!configuracionSvc.reservaClienteOn()) {
       <div class="flex items-center gap-3 bg-[#fef2f2] border-b border-[#fca5a5] px-6 py-3 shrink-0">
         <lucide-angular [img]="AlertTriangleIcon" class="size-4 shrink-0" color="#c10007" [strokeWidth]="1.5" />
         <span class="text-[#c10007] text-[13px] font-medium">Las reservas online están temporalmente suspendidas.</span>

@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserCog, X, RefreshCw, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { RolUsuario, UsuarioAdmin } from '../../../../models/admin.model';
+import { UsuarioService } from '../../../../core/services/usuario.service';
+import { RolUsuario, UsuarioAdmin } from '../../../../models/usuario.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
 @Component({
@@ -12,7 +12,7 @@ import { ExitoModalComponent } from '../../../../shared/components/exito-modal/e
   templateUrl: './editar-usuario.html',
 })
 export class EditarUsuarioComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly usuarioSvc = inject(UsuarioService);
 
   readonly usuario = input.required<UsuarioAdmin>();
   readonly guardar = output<void>();
@@ -86,7 +86,7 @@ export class EditarUsuarioComponent implements OnInit {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    this.adminSvc.editarUsuario(this.usuario().id, {
+    this.usuarioSvc.editarUsuario(this.usuario().id, {
       contrasena: this.contrasena() || undefined,
       nombres:    this.nombres(),
       apellidos:  this.apellidos(),

@@ -13,8 +13,8 @@ import {
   FileText,
   DollarSign,
 } from 'lucide-angular';
-import { ServicioService } from '../../../core/services/servicio.service';
-import { DetalleServicio, EstadoAdmin, EstadoOperativo, Servicio } from '../../../models/servicio.model';
+import { ReservasService } from '../../../core/services/reservas.service';
+import { DetalleServicio, EstadoAdminServicio, EstadoOperativo, Servicio } from '../../../models/operaciones.model';
 import { DetalleServicioComponent } from './detalle-servicio/detalle-servicio';
 
 @Component({
@@ -24,7 +24,7 @@ import { DetalleServicioComponent } from './detalle-servicio/detalle-servicio';
   templateUrl: './mis-servicios.html',
 })
 export class MisServiciosComponent implements OnInit {
-  private readonly servicioSvc = inject(ServicioService);
+  private readonly reservasSvc = inject(ReservasService);
 
   protected readonly SearchIcon     = Search;
   protected readonly DownloadIcon   = Download;
@@ -54,10 +54,10 @@ export class MisServiciosComponent implements OnInit {
   protected readonly filtroOpOpen = signal(false);
   protected readonly filtroAdminOpen = signal(false);
   protected readonly filtroOp = signal<Set<EstadoOperativo>>(new Set());
-  protected readonly filtroAdmin = signal<Set<EstadoAdmin>>(new Set());
+  protected readonly filtroAdmin = signal<Set<EstadoAdminServicio>>(new Set());
 
   protected readonly estadosOp: EstadoOperativo[] = ['Reservado', 'Asignado', 'En Curso', 'Finalizado'];
-  protected readonly estadosAdmin: EstadoAdmin[] = ['Pendiente', 'Facturado', 'Pagado'];
+  protected readonly estadosAdmin: EstadoAdminServicio[] = ['Pendiente', 'Facturado', 'Pagado'];
 
   protected readonly filtered = computed(() => {
     const q = this.searchQuery().toLowerCase();
@@ -128,7 +128,7 @@ export class MisServiciosComponent implements OnInit {
 
   protected cargar(): void {
     this.cargando.set(true);
-    this.servicioSvc.getServicios(this.fechaDesde() || undefined, this.fechaHasta() || undefined).subscribe({
+    this.reservasSvc.getServicios(this.fechaDesde() || undefined, this.fechaHasta() || undefined).subscribe({
       next: data => { this.servicios.set(data); this.cargando.set(false); },
       error: ()   => this.cargando.set(false),
     });
@@ -137,7 +137,7 @@ export class MisServiciosComponent implements OnInit {
   protected verDetalle(id: string): void {
     this.detalleLoading.set(true);
     this.showDetalle.set(true);
-    this.servicioSvc.getDetalle(id).subscribe((data) => {
+    this.reservasSvc.getDetalle(id).subscribe((data) => {
       this.detalle.set(data);
       this.detalleLoading.set(false);
     });
@@ -202,7 +202,7 @@ export class MisServiciosComponent implements OnInit {
     }
   }
 
-  protected estadoAdminClass(estado: EstadoAdmin): { bg: string; border: string; text: string } {
+  protected estadoAdminClass(estado: EstadoAdminServicio): { bg: string; border: string; text: string } {
     switch (estado) {
       case 'Pagado': return { bg: '#f0fdf4', border: '#b9f8cf', text: '#008236' };
       case 'Facturado': return { bg: '#eff6ff', border: '#bedbff', text: '#1447e6' };
@@ -223,7 +223,7 @@ export class MisServiciosComponent implements OnInit {
     this.paginaActual.set(1);
   }
 
-  protected toggleFiltroAdmin(estado: EstadoAdmin): void {
+  protected toggleFiltroAdmin(estado: EstadoAdminServicio): void {
     this.filtroAdmin.update((set) => {
       const next = new Set(set);
       next.has(estado) ? next.delete(estado) : next.add(estado);

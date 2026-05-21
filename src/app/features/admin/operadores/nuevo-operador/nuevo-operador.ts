@@ -1,7 +1,7 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserCog, X, RefreshCw, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
+import { OperadoresService } from '../../../../core/services/operadores.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
 @Component({
@@ -19,7 +19,7 @@ export class NuevoOperadorComponent {
   protected readonly RefreshCwIcon     = RefreshCw;
   protected readonly AlertTriangleIcon = AlertTriangle;
 
-  private readonly adminSvc = inject(AdminService);
+  private readonly operadoresSvc = inject(OperadoresService);
 
   protected readonly alias       = signal('');
   protected readonly contrasena  = signal('');
@@ -114,7 +114,7 @@ export class NuevoOperadorComponent {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    this.adminSvc.crearOperador({
+    this.operadoresSvc.crearOperador({
       alias:       this.alias(),
       contrasena:  this.contrasena(),
       nombres:     this.nombres(),

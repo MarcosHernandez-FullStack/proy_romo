@@ -17,8 +17,9 @@ import {
   ChevronRight,
   Eye,
 } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { EstadoAdminServicio, EstadoServicioAdmin, ServicioReporte } from '../../../models/admin.model';
+import { ReportesService } from '../../../core/services/reportes.service';
+import { EstadoAdminServicio, EstadoServicioAdmin } from '../../../models/operaciones.model';
+import { ServicioReporte } from '../../../models/reportes.model';
 import { AccionFacturarComponent } from './accion-facturar/accion-facturar';
 import { AccionRegistrarPagoComponent } from './accion-registrar-pago/accion-registrar-pago';
 import { RevisionCancelacionComponent } from './revision-cancelacion/revision-cancelacion';
@@ -35,7 +36,7 @@ type FiltroAdmin = 'Todos' | 'Pendiente' | 'Facturado' | 'Pagado';
   templateUrl: './reportes.html',
 })
 export class ReportesComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly reportesSvc = inject(ReportesService);
 
   protected readonly FileBarChart2Icon = FileBarChart2;
   protected readonly DownloadIcon = Download;
@@ -128,7 +129,7 @@ export class ReportesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.adminSvc.getReportes().subscribe((data) => this.servicios.set(data));
+    this.reportesSvc.getReportes().subscribe((data) => this.servicios.set(data));
   }
 
   protected onFacturar(): void {
@@ -136,7 +137,7 @@ export class ReportesComponent implements OnInit {
     if (!s) return;
     this.guardandoFactura.set(true);
     this.errorAccion.set(null);
-    this.adminSvc.updEstadoAdministrativo(s.id, 'Facturado').subscribe({
+    this.reportesSvc.updEstadoAdministrativo(s.id, 'Facturado').subscribe({
       next: (res) => {
         this.guardandoFactura.set(false);
         this.servicioFacturar.set(null);
@@ -163,7 +164,7 @@ export class ReportesComponent implements OnInit {
     if (!s) return;
     this.guardandoPago.set(true);
     this.errorAccion.set(null);
-    this.adminSvc.updEstadoAdministrativo(s.id, 'Pagado').subscribe({
+    this.reportesSvc.updEstadoAdministrativo(s.id, 'Pagado').subscribe({
       next: (res) => {
         this.guardandoPago.set(false);
         this.servicioPago.set(null);

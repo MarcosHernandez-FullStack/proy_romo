@@ -15,8 +15,8 @@ import {
   Mail,
   Phone,
 } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { ClienteB2B } from '../../../models/admin.model';
+import { ClientesService } from '../../../core/services/clientes.service';
+import { ClienteB2B } from '../../../models/clientes.model';
 import { NuevoClienteComponent } from './nuevo-cliente/nuevo-cliente';
 import { EditarClienteComponent } from './editar-cliente/editar-cliente';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
@@ -30,7 +30,7 @@ type FiltroEstado = 'Activos' | 'Bajas';
   templateUrl: './clientes.html',
 })
 export class ClientesComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly clientesSvc = inject(ClientesService);
 
   protected readonly UsersIcon       = Users;
   protected readonly PlusIcon        = Plus;
@@ -68,17 +68,17 @@ export class ClientesComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 
   protected onNuevoCliente(): void {
     this.showNuevo.set(false);
-    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 
   protected onEditarCliente(): void {
     this.clienteEditar.set(null);
-    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 
   protected darDeBajaCliente(id: string): void {

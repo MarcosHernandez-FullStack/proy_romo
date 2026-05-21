@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { LucideAngularModule, Clock, Calendar, Loader } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
+import { AgendaService } from '../../../core/services/agenda.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { ConfigService } from '../../../core/services/config.service';
-import { ExcepcionAgenda, HorarioRegular } from '../../../models/admin.model';
+import { ConfiguracionService } from '../../../core/services/configuracion.service';
+import { ExcepcionAgenda, HorarioRegular } from '../../../models/agenda.model';
 import { HorariosRegularesComponent } from './horarios-regulares/horarios-regulares';
 import { ExcepcionesComponent } from './excepciones/excepciones';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
@@ -17,9 +17,9 @@ type Tab = 'horarios' | 'excepciones';
   templateUrl: './agenda-maestra.html',
 })
 export class AgendaMaestraComponent implements OnInit {
-  private readonly adminSvc   = inject(AdminService);
-  private readonly notifSvc   = inject(NotificationService);
-  private readonly configSvc  = inject(ConfigService);
+  private readonly agendaSvc        = inject(AgendaService);
+  private readonly notifSvc         = inject(NotificationService);
+  private readonly configuracionSvc = inject(ConfiguracionService);
 
   protected readonly ClockIcon    = Clock;
   protected readonly CalendarIcon = Calendar;
@@ -40,12 +40,12 @@ export class AgendaMaestraComponent implements OnInit {
   protected readonly detalleExito   = signal('');
 
   ngOnInit(): void {
-    this.reservasActivo.set(this.configSvc.reservaClienteOn());
-    this.adminSvc.getHorariosRegulares().subscribe({
+    this.reservasActivo.set(this.configuracionSvc.reservaClienteOn());
+    this.agendaSvc.getHorariosRegulares().subscribe({
       next:  (data) => { this.horarios.set(data); this.cargandoHorarios.set(false); },
       error: ()     => this.cargandoHorarios.set(false),
     });
-    this.adminSvc.getExcepciones().subscribe({
+    this.agendaSvc.getExcepciones().subscribe({
       next:  (data) => { this.excepciones.set(data); this.cargandoExcepciones.set(false); },
       error: ()     => this.cargandoExcepciones.set(false),
     });
@@ -55,7 +55,7 @@ export class AgendaMaestraComponent implements OnInit {
     if (this.guardandoToggle()) return;
     const newValue = !this.reservasActivo();
     this.guardandoToggle.set(true);
-    this.configSvc.actualizarReservaClienteOn(newValue).subscribe({
+    this.configuracionSvc.actualizarReservaClienteOn(newValue).subscribe({
       next: (res) => {
         this.guardandoToggle.set(false);
         if (res.exitoso === 1) {
@@ -102,7 +102,7 @@ export class AgendaMaestraComponent implements OnInit {
   protected onGuardarHorarios(horarios: HorarioRegular[]): void {
     if (this.guardando()) return;
     this.guardando.set(true);
-    this.adminSvc.guardarHorariosRegulares(horarios).subscribe({
+    this.agendaSvc.guardarHorariosRegulares(horarios).subscribe({
       next: (res) => {
         this.guardando.set(false);
         if (res.exitoso === 2) {

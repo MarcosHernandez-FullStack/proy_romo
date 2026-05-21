@@ -1,12 +1,10 @@
 import { Component, ElementRef, ViewChild, AfterViewInit, computed, effect, inject, input, output, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Building2, MapPin, Navigation, Clock, DollarSign } from 'lucide-angular';
-import { ClienteB2B } from '../../../models/admin.model';
+import { ClienteB2B } from '../../../models/clientes.model';
+import { TarifaGlobal, ParametrosOperativos } from '../../../models/configuracion.model';
 import { AuthService } from '../../../core/services/auth.service';
-import { environment } from '../../../../environments/environment';
-
-const API = environment.apiUrl;
+import { ConfiguracionService } from '../../../core/services/configuracion.service';
 
 declare var google: any;
 
@@ -15,20 +13,6 @@ interface RutaOptima {
   tiempoMin:      number;
   distanciaTexto: string;
   tiempoTexto:    string;
-}
-
-interface TarifaGlobal {
-  tarifaBase: number;
-  tarifaKm:   number;
-}
-
-interface ParametroOperativo {
-  tiempoMargenManiobra: number;
-  tiempoRetornoBase:    number;
-  timerAdministrativo: number;
-  timerCliente:        number;
-  coordLatMaps:        string;
-  coordLonMaps:        string;
 }
 
 @Component({
@@ -42,8 +26,8 @@ export class SeleccionClienteComponent implements AfterViewInit {
   @ViewChild('origenInput')   origenInput!:   ElementRef<HTMLInputElement>;
   @ViewChild('destinoInput')  destinoInput!:  ElementRef<HTMLInputElement>;
 
-  private readonly http     = inject(HttpClient);
-  private readonly authSvc  = inject(AuthService);
+  private readonly authSvc          = inject(AuthService);
+  private readonly configuracionSvc = inject(ConfiguracionService);
 
   constructor() {
     // Auto-calcular ruta
@@ -67,7 +51,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
       const modoCliente = this.modoCliente();
       if (!cliente && !modoCliente) return;
       if (this.tarifaGlobal() === null) {
-        this.http.get<TarifaGlobal>(`${API}/configuracion/tarifario-global`)
+        this.configuracionSvc.getTarifarioGlobal()
           .subscribe({ next: t => this.tarifaGlobal.set(t) });
       }
     });
@@ -79,8 +63,8 @@ export class SeleccionClienteComponent implements AfterViewInit {
     });
 
     // Cargar parámetro operativo al inicializar
-    this.http.get<ParametroOperativo>(`${API}/configuracion/parametro-operativo`)
-      .subscribe({ next: p => {
+    this.configuracionSvc.getParametroOperativo()
+      .subscribe({ next: (p: ParametrosOperativos) => {
         this.parametroOperativo.set(p);
         this.parametroChange.emit(p);
         const lat = parseFloat(p.coordLatMaps);
@@ -100,7 +84,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
   readonly destinoChange    = output<string>();
   readonly rutaChange       = output<{ distanciaKm: number; tiempoMin: number; coordLatOrigen: string; coordLonOrigen: string; coordLatDestino: string; coordLonDestino: string } | null>();
   readonly tarifaChange     = output<{ tarifaKm: number; tarifaBase: number } | null>();
-  readonly parametroChange  = output<ParametroOperativo | null>();
+  readonly parametroChange  = output<ParametrosOperativos | null>();
   readonly anterior         = output<void>();
   readonly siguiente        = output<void>();
 
@@ -118,7 +102,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
   protected readonly error               = signal<string | null>(null);
   protected readonly ruta                = signal<RutaOptima | null>(null);
   protected readonly tarifaGlobal        = signal<TarifaGlobal | null>(null);
-  protected readonly parametroOperativo  = signal<ParametroOperativo | null>(null);
+  protected readonly parametroOperativo  = signal<ParametrosOperativos | null>(null);
 
   // Override de tarifa por cliente: almacena el id del cliente y el tipo elegido
   protected readonly tarifaOverride = signal<{ id: string; tipo: 'personalizada' | 'global' } | null>(null);

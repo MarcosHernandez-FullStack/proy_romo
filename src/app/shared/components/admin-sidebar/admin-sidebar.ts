@@ -16,7 +16,7 @@ import {
   Shield,
   GanttChart,
 } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-sidebar',
@@ -25,7 +25,7 @@ import { AdminService } from '../../../core/services/admin.service';
   templateUrl: './admin-sidebar.html',
 })
 export class AdminSidebarComponent {
-  protected readonly adminSvc = inject(AdminService);
+  protected readonly authSvc = inject(AuthService);
 
   protected readonly ShieldIcon   = Shield;
   protected readonly LogOutIcon   = LogOut;

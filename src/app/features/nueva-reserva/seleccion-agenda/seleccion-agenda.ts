@@ -1,6 +1,6 @@
 import { Component, input, output, signal } from '@angular/core';
 import { LucideAngularModule, CircleCheck, Clock, Lock, Calendar, TriangleAlert } from 'lucide-angular';
-import { SlotAdmin } from '../../../models/admin.model';
+import { SlotAdmin } from '../../../models/agenda.model';
 import { MensajeModalComponent } from '../../../shared/components/mensaje-modal/mensaje-modal';
 
 export interface FechaItem {

@@ -1,10 +1,11 @@
 import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule, Phone, Ban } from 'lucide-angular';
-import { AdminService } from '../../core/services/admin.service';
 import { AuthService } from '../../core/services/auth.service';
-import { ConfigService } from '../../core/services/config.service';
-import { ClienteB2B, SlotAdmin } from '../../models/admin.model';
+import { ClientesService } from '../../core/services/clientes.service';
+import { ConfiguracionService } from '../../core/services/configuracion.service';
+import { ReservasService } from '../../core/services/reservas.service';
+import { SlotAdmin } from '../../models/agenda.model';
+import { ClienteB2B } from '../../models/clientes.model';
 import { TipoCargaComponent, TipoCarga } from './tipo-carga/tipo-carga';
 import { SeleccionClienteComponent } from './seleccion-cliente/seleccion-cliente';
 import { SeleccionAgendaComponent, FechaItem } from './seleccion-agenda/seleccion-agenda';
@@ -12,9 +13,6 @@ import { DetallesVehiculoComponent, VehiculoDetalle } from './detalles-vehiculo/
 import { ConfirmacionReservaComponent, DatosReserva } from './confirmacion-reserva/confirmacion-reserva';
 import { ReservaExitosaComponent } from './reserva-exitosa/reserva-exitosa';
 import { MensajeModalComponent, MensajeModalTipo } from '../../shared/components/mensaje-modal/mensaje-modal';
-import { environment } from '../../../environments/environment';
-
-const API = environment.apiUrl;
 
 @Component({
   selector: 'app-nueva-reserva',
@@ -32,13 +30,12 @@ const API = environment.apiUrl;
   templateUrl: './nueva-reserva.html',
 })
 export class NuevaReservaComponent implements OnInit {
-  private readonly adminSvc  = inject(AdminService);
-  private readonly authSvc   = inject(AuthService);
-  private readonly http      = inject(HttpClient);
-  private readonly configSvc = inject(ConfigService);
+  private readonly authSvc          = inject(AuthService);
+  private readonly clientesSvc      = inject(ClientesService);
+  private readonly configuracionSvc = inject(ConfiguracionService);
+  private readonly reservasSvc      = inject(ReservasService);
 
-  /** Sesión activa: cliente vía AuthService, admin vía AdminService */
-  private readonly activeSession = () => this.authSvc.session() ?? this.adminSvc.session();
+  private readonly activeSession = () => this.authSvc.session() ?? this.authSvc.adminSession();
 
   protected readonly PhoneIcon = Phone;
   protected readonly BanIcon   = Ban;
@@ -46,7 +43,7 @@ export class NuevaReservaComponent implements OnInit {
   protected readonly clientes = signal<ClienteB2B[]>([]);
 
   protected readonly modoCliente = computed(() => this.activeSession()?.rol === 'CLIENTE');
-  protected readonly suspendido  = computed(() => this.modoCliente() && !this.configSvc.reservaClienteOn());
+  protected readonly suspendido  = computed(() => this.modoCliente() && !this.configuracionSvc.reservaClienteOn());
 
   protected readonly tipoCarga = signal<TipoCarga>('estandar');
   protected readonly cantidadVehiculos = signal(2);
@@ -247,10 +244,7 @@ export class NuevaReservaComponent implements OnInit {
       fechaCreacion:        new Date().toISOString(),
     };
 
-    this.http.post<{ exitoso: number; mensaje: string; horasConflicto: string | null; id: number | null }>(
-      `${API}/reservas/validar-horario`,
-      dto
-    ).subscribe({
+    this.reservasSvc.validarHorario(dto).subscribe({
       next: result => {
         this.validando.set(false);
         if (result.exitoso === 1) {
@@ -277,7 +271,7 @@ export class NuevaReservaComponent implements OnInit {
 
   private cargarHorarios(fecha: Date, capacidad: number): void {
     const rol = this.activeSession()?.rol ?? 'ADMINISTRADOR';
-    this.adminSvc.getHorarios(fecha, rol, capacidad).subscribe({
+    this.reservasSvc.getHorarios(fecha, rol, capacidad).subscribe({
       next: (horas) => this.slots.set(
         (horas ?? []).map(h => {
           const esExcepcion = h.estado?.toUpperCase() === 'EXCEPCION';
@@ -310,7 +304,7 @@ export class NuevaReservaComponent implements OnInit {
     if (session?.rol === 'CLIENTE' && session.idCliente) {
       this.clienteId.set(String(session.idCliente));
     } else {
-      this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+      this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
     }
   }
 
@@ -393,7 +387,7 @@ export class NuevaReservaComponent implements OnInit {
   protected onEditar(): void {
     const timerId = this.idTimerReserva();
     if (timerId) {
-      this.adminSvc.deleteTimer(timerId).subscribe({
+      this.reservasSvc.deleteTimer(timerId).subscribe({
         next: () => {
           this.horarioValidado.set(false);
           this.idTimerReserva.set(null);
@@ -432,10 +426,7 @@ export class NuevaReservaComponent implements OnInit {
       })),
     };
 
-    this.http.post<{ exitoso: number; mensaje: string; horasConflicto: string | null; id: number | null }>(
-      `${API}/reservas/crear-reserva`,
-      dto
-    ).subscribe({
+    this.reservasSvc.crearReserva(dto).subscribe({
       next: result => {
         if (result.exitoso === 1) {
           this.servicioCreado.set(`SRV-${result.id ?? ''}`);

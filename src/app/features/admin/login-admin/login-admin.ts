@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule, Shield, Mail, Lock, LogIn } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login-admin',
@@ -11,8 +11,8 @@ import { AdminService } from '../../../core/services/admin.service';
   templateUrl: './login-admin.html',
 })
 export class LoginAdminComponent {
-  private readonly adminSvc = inject(AdminService);
-  private readonly router   = inject(Router);
+  private readonly authSvc = inject(AuthService);
+  private readonly router  = inject(Router);
 
   protected readonly ShieldIcon = Shield;
   protected readonly MailIcon = Mail;
@@ -31,10 +31,10 @@ export class LoginAdminComponent {
       return;
     }
     this.loading.set(true);
-    this.adminSvc.loginAdmin(this.email(), this.password()).subscribe({
+    this.authSvc.loginAdmin(this.email(), this.password()).subscribe({
       next: (res) => {
         if (res.rol !== 'ADMINISTRADOR') {
-          this.adminSvc.logoutAdmin();
+          this.authSvc.logoutAdmin();
           this.loading.set(false);
           this.error.set('Acceso solo para administradores.');
           return;

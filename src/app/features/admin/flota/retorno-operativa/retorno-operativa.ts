@@ -1,8 +1,8 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, CheckCircle, X, Truck, AlertTriangle } from 'lucide-angular';
-import { UnidadFlota } from '../../../../models/admin.model';
-import { AdminService } from '../../../../core/services/admin.service';
+import { UnidadFlota } from '../../../../models/flota.model';
+import { FlotaService } from '../../../../core/services/flota.service';
 
 @Component({
   selector: 'app-retorno-operativa',
@@ -11,7 +11,7 @@ import { AdminService } from '../../../../core/services/admin.service';
   templateUrl: './retorno-operativa.html',
 })
 export class RetornoOperativaComponent {
-  private readonly adminSvc = inject(AdminService);
+  private readonly flotaSvc = inject(FlotaService);
 
   readonly unidad    = input.required<UnidadFlota>();
   readonly confirmar = output<void>();
@@ -60,7 +60,7 @@ export class RetornoOperativaComponent {
 
     const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
 
-    this.adminSvc.retornoOperativa(idNumerico, {
+    this.flotaSvc.retornoOperativa(idNumerico, {
       nombreResponsable: this.nombreResponsable().trim(),
       kilometraje:       this.kilometraje()!,
       nota:              this.nota().trim(),

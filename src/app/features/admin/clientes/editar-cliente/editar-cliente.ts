@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Users, X, RefreshCw, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { ClienteB2B } from '../../../../models/admin.model';
+import { ClientesService } from '../../../../core/services/clientes.service';
+import { ClienteB2B } from '../../../../models/clientes.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
 @Component({
@@ -12,7 +12,7 @@ import { ExitoModalComponent } from '../../../../shared/components/exito-modal/e
   templateUrl: './editar-cliente.html',
 })
 export class EditarClienteComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly clientesSvc = inject(ClientesService);
 
   readonly cliente = input.required<ClienteB2B>();
   readonly guardar = output<void>();
@@ -112,7 +112,7 @@ export class EditarClienteComponent implements OnInit {
 
     const idNumerico = parseInt(this.cliente().id.replace('CLI-', ''), 10);
 
-    this.adminSvc.editarCliente(idNumerico, {
+    this.clientesSvc.editarCliente(idNumerico, {
       contrasena:     this.password() || undefined,
       empresa:        this.empresa(),
       nomContacto:    this.contacto(),

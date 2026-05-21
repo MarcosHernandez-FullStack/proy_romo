@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { LucideAngularModule, AlertTriangle } from 'lucide-angular';
 import { SidebarComponent } from '../shared/components/sidebar/sidebar';
-import { ConfigService } from '../core/services/config.service';
+import { ConfiguracionService } from '../core/services/configuracion.service';
 
 @Component({
   selector: 'app-layout',
@@ -11,6 +11,6 @@ import { ConfigService } from '../core/services/config.service';
   templateUrl: './layout.html',
 })
 export class LayoutComponent {
-  protected readonly configSvc         = inject(ConfigService);
+  protected readonly configuracionSvc  = inject(ConfiguracionService);
   protected readonly AlertTriangleIcon = AlertTriangle;
 }

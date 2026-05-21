@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { LucideAngularModule, X, CheckCircle, DollarSign } from 'lucide-angular';
-import { DetalleServicio, EstadoAdmin, EstadoOperativo } from '../../../../models/servicio.model';
+import { DetalleServicio, EstadoAdminServicio, EstadoOperativo } from '../../../../models/operaciones.model';
 
 @Component({
   selector: 'app-detalle-servicio',
@@ -35,7 +35,7 @@ export class DetalleServicioComponent {
     }
   }
 
-  protected estadoAdminClass(estado: EstadoAdmin): { bg: string; border: string; text: string } {
+  protected estadoAdminClass(estado: EstadoAdminServicio): { bg: string; border: string; text: string } {
     switch (estado) {
       case 'Pagado':    return { bg: '#f0fdf4', border: '#b9f8cf', text: '#008236' };
       case 'Facturado': return { bg: '#eff6ff', border: '#bedbff', text: '#1447e6' };

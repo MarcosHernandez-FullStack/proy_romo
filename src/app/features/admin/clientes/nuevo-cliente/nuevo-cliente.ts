@@ -1,7 +1,7 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Users, X, RefreshCw, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
+import { ClientesService } from '../../../../core/services/clientes.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
 @Component({
@@ -11,7 +11,7 @@ import { ExitoModalComponent } from '../../../../shared/components/exito-modal/e
   templateUrl: './nuevo-cliente.html',
 })
 export class NuevoClienteComponent {
-  private readonly adminSvc = inject(AdminService);
+  private readonly clientesSvc = inject(ClientesService);
 
   readonly guardar = output<void>();
   readonly cerrar  = output<void>();
@@ -109,7 +109,7 @@ export class NuevoClienteComponent {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    this.adminSvc.crearCliente({
+    this.clientesSvc.crearCliente({
       alias:          this.loginId(),
       contrasena:     this.password(),
       empresa:        this.empresa(),

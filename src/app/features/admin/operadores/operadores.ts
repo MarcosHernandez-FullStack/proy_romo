@@ -1,8 +1,9 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserCog, Plus, Search, Pencil, RotateCcw, Trash2, Phone, Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { DIAS_SEMANA, DiaSemana, GridDisponibilidad, HoraGrid, HORAS_GRID, Operador, TipoDisponibilidad } from '../../../models/admin.model';
+import { OperadoresService } from '../../../core/services/operadores.service';
+import { DIAS_SEMANA, DiaSemana, GridDisponibilidad, HoraGrid, HORAS_GRID } from '../../../models/agenda.model';
+import { Operador, TipoDisponibilidad } from '../../../models/operadores.model';
 import { NuevoOperadorComponent } from './nuevo-operador/nuevo-operador';
 import { EditarOperadorComponent } from './editar-operador/editar-operador';
 import { ProximosServiciosComponent } from './proximos-servicios/proximos-servicios';
@@ -28,7 +29,7 @@ type FiltroEstado = 'Activos' | 'Bajas';
   templateUrl: './operadores.html',
 })
 export class OperadoresComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly operadoresSvc = inject(OperadoresService);
 
   protected readonly UserCogIcon    = UserCog;
   protected readonly PlusIcon       = Plus;
@@ -104,7 +105,7 @@ export class OperadoresComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.adminSvc.getOperadores().subscribe(data => this.operadores.set(data));
+    this.operadoresSvc.getOperadores().subscribe(data => this.operadores.set(data));
   }
 
   protected cambiarFiltro(f: FiltroEstado): void {
@@ -133,7 +134,7 @@ export class OperadoresComponent implements OnInit {
   protected abrirServicios(o: Operador): void {
     this.loadingServicios.set(true);
     const idNum = parseInt(o.id.replace('OP-', ''), 10);
-    this.adminSvc.getServiciosOperador(idNum).subscribe({
+    this.operadoresSvc.getServiciosOperador(idNum).subscribe({
       next: servicios => {
         this.operadorServicios.set({ ...o, serviciosAsignados: servicios });
         this.loadingServicios.set(false);
@@ -147,12 +148,12 @@ export class OperadoresComponent implements OnInit {
 
   protected onNuevoOperador(): void {
     this.showNuevo.set(false);
-    this.adminSvc.getOperadores().subscribe(data => this.operadores.set(data));
+    this.operadoresSvc.getOperadores().subscribe(data => this.operadores.set(data));
   }
 
   protected onEditarOperador(): void {
     this.operadorEditar.set(null);
-    this.adminSvc.getOperadores().subscribe(data => this.operadores.set(data));
+    this.operadoresSvc.getOperadores().subscribe(data => this.operadores.set(data));
   }
 
   protected onGuardarDisponibilidad(grid: GridDisponibilidad): void {
@@ -199,12 +200,12 @@ export class OperadoresComponent implements OnInit {
     const idNum      = parseInt(op.id.replace('OP-', ''), 10);
     const nuevoEstado = op.activo ? 'INACTIVO' : 'ACTIVO';
 
-    this.adminSvc.actualizarEstadoOperador(idNum, nuevoEstado).subscribe({
+    this.operadoresSvc.actualizarEstadoOperador(idNum, nuevoEstado).subscribe({
       next: result => {
         this.loadingEstado.set(false);
         this.operadorEnConfirmacion.set(null);
         if (result.exitoso === 1) {
-          this.adminSvc.getOperadores().subscribe(data => this.operadores.set(data));
+          this.operadoresSvc.getOperadores().subscribe(data => this.operadores.set(data));
           const titulo = op.activo ? '¡Operador Dado de Baja!' : '¡Operador Reactivado!';
           this.exitoEstado.set({ titulo, id: op.id });
         } else {

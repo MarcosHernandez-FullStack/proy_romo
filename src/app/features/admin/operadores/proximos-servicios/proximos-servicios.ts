@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { Operador } from '../../../../models/admin.model';
+import { Operador } from '../../../../models/operadores.model';
 
 @Component({
   selector: 'app-proximos-servicios',

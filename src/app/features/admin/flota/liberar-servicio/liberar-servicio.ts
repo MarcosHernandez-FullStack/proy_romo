@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, AlertTriangle, X, FileText, Info } from 'lucide-angular';
-import { UnidadFlota, ReservaALiberar } from '../../../../models/admin.model';
-import { AdminService } from '../../../../core/services/admin.service';
+import { UnidadFlota } from '../../../../models/flota.model';
+import { ReservaALiberar } from '../../../../models/operaciones.model';
+import { FlotaService } from '../../../../core/services/flota.service';
 
 @Component({
   selector: 'app-liberar-servicio',
@@ -11,7 +12,7 @@ import { AdminService } from '../../../../core/services/admin.service';
   templateUrl: './liberar-servicio.html',
 })
 export class LiberarServicioComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly flotaSvc = inject(FlotaService);
 
   readonly unidad    = input.required<UnidadFlota>();
   readonly confirmar = output<void>();
@@ -58,7 +59,7 @@ export class LiberarServicioComponent implements OnInit {
 
     const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
 
-    this.adminSvc.ingresoTaller(idNumerico, {
+    this.flotaSvc.ingresoTaller(idNumerico, {
       nombreResponsable: this.nombreResponsable().trim(),
       kilometraje:       this.kilometraje()!,
       nota:              this.nota().trim(),
@@ -83,7 +84,7 @@ export class LiberarServicioComponent implements OnInit {
     if (!idNumerico) return;
 
     this.cargando.set(true);
-    this.adminSvc.getReservasALiberar(idNumerico).subscribe({
+    this.flotaSvc.getReservasALiberar(idNumerico).subscribe({
       next: data => {
         this.reservas.set(data);
         this.cargando.set(false);

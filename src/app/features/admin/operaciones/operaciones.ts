@@ -17,8 +17,9 @@ import {
   RotateCcw,
   Eye,
 } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { ReservaOperacion } from '../../../models/admin.model';
+import { OperacionesService } from '../../../core/services/operaciones.service';
+import { ConfiguracionService } from '../../../core/services/configuracion.service';
+import { ReservaOperacion } from '../../../models/operaciones.model';
 import { AsignarServicioComponent } from './asignar-servicio/asignar-servicio';
 import { CancelarServicioComponent } from './cancelar-servicio/cancelar-servicio';
 import { ReprogramarServicioComponent } from './reprogramar-servicio/reprogramar-servicio';
@@ -40,7 +41,8 @@ type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELA
   templateUrl: './operaciones.html',
 })
 export class OperacionesComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly operacionesSvc    = inject(OperacionesService);
+  private readonly configuracionSvc = inject(ConfiguracionService);
 
   protected readonly AlertTriangleIcon  = TriangleAlert;
   protected readonly CheckCircle2Icon   = CircleCheck;
@@ -125,7 +127,7 @@ export class OperacionesComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
-    this.adminSvc.getParametroOperativo().subscribe({
+    this.configuracionSvc.getParametroOperativo().subscribe({
       next: p => this.tiempoCorte.set(p.tiempoCorte),
       error: () => this.tiempoCorte.set(60), // fallback
     });
@@ -133,7 +135,7 @@ export class OperacionesComponent implements OnInit {
 
   protected cargar(): void {
     this.cargando.set(true);
-    this.adminSvc.getReservas(this.fechaFiltro() || undefined).subscribe({
+    this.operacionesSvc.getReservas(this.fechaFiltro() || undefined).subscribe({
       next: data => { this.reservas.set(data); this.cargando.set(false); },
       error: ()   => this.cargando.set(false),
     });

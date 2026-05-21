@@ -1,8 +1,10 @@
 import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, DollarSign, Plus, Pencil, Trash2, Search, Save, X } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { ClienteB2B, TarifaCliente, TarifaGlobal } from '../../../../models/admin.model';
+import { ConfiguracionService } from '../../../../core/services/configuracion.service';
+import { ClientesService } from '../../../../core/services/clientes.service';
+import { ClienteB2B, TarifaCliente } from '../../../../models/clientes.model';
+import { TarifaGlobal } from '../../../../models/configuracion.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
@@ -13,7 +15,8 @@ import { MensajeModalComponent } from '../../../../shared/components/mensaje-mod
   templateUrl: './tarifas.html',
 })
 export class TarifasComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly configuracionSvc = inject(ConfiguracionService);
+  private readonly clientesSvc      = inject(ClientesService);
 
   readonly clientes = input.required<ClienteB2B[]>();
 
@@ -60,8 +63,8 @@ export class TarifasComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.adminSvc.getTarifasCliente().subscribe((data) => this.tarifas.set(data));
-    this.adminSvc.getTarifarioGlobal().subscribe((data) => {
+    this.clientesSvc.getTarifasCliente().subscribe((data) => this.tarifas.set(data));
+    this.configuracionSvc.getTarifarioGlobal().subscribe((data) => {
       if (data) {
         this.tarifaGlobal.set(data);
         this.tarifaBaseGlobal.set(data.tarifaBase);
@@ -148,7 +151,7 @@ export class TarifasComponent implements OnInit {
     if (!tarifa || this.guardandoGlobal()) return;
 
     this.guardandoGlobal.set(true);
-    this.adminSvc.actualizarTarifarioGlobal(tarifa.id, this.tarifaBaseGlobal(), this.tarifaKmGlobal()).subscribe({
+    this.configuracionSvc.actualizarTarifarioGlobal(tarifa.id, this.tarifaBaseGlobal(), this.tarifaKmGlobal()).subscribe({
       next: result => {
         this.guardandoGlobal.set(false);
         this.mensajeResultadoGlobal.set(result.mensaje);

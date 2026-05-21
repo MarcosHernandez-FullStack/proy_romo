@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { LucideAngularModule, DollarSign, Clock, TrendingDown, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
+import { OperadoresService } from '../../../core/services/operadores.service';
 import { BalanceOperativoComponent } from './balance-operativo/balance-operativo';
 import { AlertasSistemaComponent } from './alertas-sistema/alertas-sistema';
 import { AccionesRapidasComponent } from './acciones-rapidas/acciones-rapidas';
 import { ProximosHitosComponent, ProximoHito } from './proximos-hitos/proximos-hitos';
-import { Operador } from '../../../models/admin.model';
+import { Operador } from '../../../models/operadores.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,7 +20,7 @@ import { Operador } from '../../../models/admin.model';
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly operadoresSvc = inject(OperadoresService);
 
   protected readonly DollarSignIcon = DollarSign;
   protected readonly ClockIcon = Clock;
@@ -48,6 +48,6 @@ export class DashboardComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.adminSvc.getOperadores().subscribe((data) => this.operadores.set(data));
+    this.operadoresSvc.getOperadores().subscribe((data) => this.operadores.set(data));
   }
 }

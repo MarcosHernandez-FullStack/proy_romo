@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Pencil, X, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { UnidadFlota } from '../../../../models/admin.model';
+import { FlotaService } from '../../../../core/services/flota.service';
+import { UnidadFlota } from '../../../../models/flota.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 
 @Component({
@@ -12,7 +12,7 @@ import { ExitoModalComponent } from '../../../../shared/components/exito-modal/e
   templateUrl: './editar-unidad.html',
 })
 export class EditarUnidadComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly flotaSvc = inject(FlotaService);
 
   readonly unidad = input.required<UnidadFlota>();
   readonly guardar = output<void>();
@@ -96,7 +96,7 @@ export class EditarUnidadComponent implements OnInit {
 
     const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
 
-    this.adminSvc.editarGrua(idNumerico, {
+    this.flotaSvc.editarGrua(idNumerico, {
       placa:          this.placa(),
       marca:          this.marca(),
       modelo:         this.modelo(),

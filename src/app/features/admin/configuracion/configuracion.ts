@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { LucideAngularModule, DollarSign, SlidersHorizontal, Settings } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { ClienteB2B } from '../../../models/admin.model';
+import { ClientesService } from '../../../core/services/clientes.service';
+import { ClienteB2B } from '../../../models/clientes.model';
 import { TarifasComponent } from './tarifas/tarifas';
 import { ParametrosComponent } from './parametros/parametros';
 
@@ -14,7 +14,7 @@ type TabConfig = 'tarifas' | 'parametros';
   templateUrl: './configuracion.html',
 })
 export class ConfiguracionComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly clientesSvc = inject(ClientesService);
 
   protected readonly SettingsIcon = Settings;
   protected readonly DollarSignIcon = DollarSign;
@@ -24,6 +24,6 @@ export class ConfiguracionComponent implements OnInit {
   protected readonly clientes = signal<ClienteB2B[]>([]);
 
   ngOnInit(): void {
-    this.adminSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 }

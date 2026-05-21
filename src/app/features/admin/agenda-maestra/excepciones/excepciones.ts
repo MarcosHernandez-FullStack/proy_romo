@@ -1,7 +1,7 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { LucideAngularModule, AlertTriangle, Plus, Pencil, Trash2, Check, X, Loader, Search, ChevronLeft, ChevronRight } from 'lucide-angular';
-import { ExcepcionAgenda } from '../../../../models/admin.model';
-import { AdminService } from '../../../../core/services/admin.service';
+import { ExcepcionAgenda } from '../../../../models/agenda.model';
+import { AgendaService } from '../../../../core/services/agenda.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { NuevaExcepcionComponent } from './nueva-excepcion/nueva-excepcion';
 import { EditarExcepcionComponent } from './editar-excepcion/editar-excepcion';
@@ -13,7 +13,7 @@ import { EditarExcepcionComponent } from './editar-excepcion/editar-excepcion';
   templateUrl: './excepciones.html',
 })
 export class ExcepcionesComponent {
-  private readonly adminSvc = inject(AdminService);
+  private readonly agendaSvc = inject(AgendaService);
   private readonly notifSvc = inject(NotificationService);
 
   readonly excepciones = input.required<ExcepcionAgenda[]>();
@@ -122,7 +122,7 @@ export class ExcepcionesComponent {
 
   protected onConfirmarEliminar(id: number): void {
     this.procesandoId.set(id);
-    this.adminSvc.updEstadoExcepcion(id, 'INACTIVO').subscribe({
+    this.agendaSvc.updEstadoExcepcion(id, 'INACTIVO').subscribe({
       next: (res) => {
         this.procesandoId.set(null);
         this.eliminandoId.set(null);
@@ -149,7 +149,7 @@ export class ExcepcionesComponent {
   protected onGuardarNueva(data: Omit<ExcepcionAgenda, 'id'>): void {
     if (this.guardando()) return;
     this.guardando.set(true);
-    this.adminSvc.crearUpdExcepcion({
+    this.agendaSvc.crearUpdExcepcion({
       id:                0,
       fecha:             data.fecha,
       motivo:            data.motivo,
@@ -180,7 +180,7 @@ export class ExcepcionesComponent {
   protected onGuardarEdicion(data: ExcepcionAgenda): void {
     if (this.guardando()) return;
     this.guardando.set(true);
-    this.adminSvc.crearUpdExcepcion({
+    this.agendaSvc.crearUpdExcepcion({
       id:                data.id,
       fecha:             data.fecha,
       motivo:            data.motivo,

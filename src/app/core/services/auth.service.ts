@@ -6,15 +6,21 @@ import { LoginRequest, LoginResponse } from '../../models/auth.model';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
-const STORAGE_KEY = 'crane_user';
+const STORAGE_KEY       = 'crane_user';
+const ADMIN_STORAGE_KEY = 'crane_admin';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http   = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly _session = signal<LoginResponse | null>(this.loadSession());
 
-  readonly session = this._session.asReadonly();
+  private readonly _session      = signal<LoginResponse | null>(this.loadFromStorage(STORAGE_KEY));
+  private readonly _adminSession = signal<LoginResponse | null>(this.loadFromStorage(ADMIN_STORAGE_KEY));
+
+  readonly session      = this._session.asReadonly();
+  readonly adminSession = this._adminSession.asReadonly();
+
+  // ── Cliente ───────────────────────────────────────────────────────────────
 
   login(alias: string, password: string): Observable<LoginResponse> {
     const body: LoginRequest = { identificador: alias, contrasena: password };
@@ -40,13 +46,41 @@ export class AuthService {
     return this._session()?.token ?? null;
   }
 
-  private loadSession(): LoginResponse | null {
+  // ── Admin ─────────────────────────────────────────────────────────────────
+
+  loginAdmin(email: string, password: string): Observable<LoginResponse> {
+    const body: LoginRequest = { identificador: email, contrasena: password };
+    return this.http.post<LoginResponse>(`${API}/auth/login`, body).pipe(
+      tap(res => {
+        localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(res));
+        this._adminSession.set(res);
+      })
+    );
+  }
+
+  logoutAdmin(): void {
+    localStorage.removeItem(ADMIN_STORAGE_KEY);
+    this._adminSession.set(null);
+    this.router.navigate(['/admin/login']);
+  }
+
+  isAdminLoggedIn(): boolean {
+    return this._adminSession() !== null;
+  }
+
+  getAdminToken(): string | null {
+    return this._adminSession()?.token ?? null;
+  }
+
+  // ── Shared ────────────────────────────────────────────────────────────────
+
+  private loadFromStorage(key: string): LoginResponse | null {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(key);
       if (!stored) return null;
       const session: LoginResponse = JSON.parse(stored);
       if (session.expiresAt && new Date(session.expiresAt) <= new Date()) {
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(key);
         return null;
       }
       return session;

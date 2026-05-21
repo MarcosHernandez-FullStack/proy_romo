@@ -1,8 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Truck, Search, RefreshCw, Calendar } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { DisponibilidadGrua } from '../../../models/admin.model';
+import { FlotaService } from '../../../core/services/flota.service';
+import { DisponibilidadGrua } from '../../../models/flota.model';
 
 @Component({
   selector: 'app-disponibilidad-gruas',
@@ -11,7 +11,7 @@ import { DisponibilidadGrua } from '../../../models/admin.model';
   templateUrl: './disponibilidad-gruas.html',
 })
 export class DisponibilidadGruasComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly flotaSvc = inject(FlotaService);
 
   protected readonly TruckIcon    = Truck;
   protected readonly SearchIcon   = Search;
@@ -50,7 +50,7 @@ export class DisponibilidadGruasComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.adminSvc.getCapacidadesGruas().subscribe({
+    this.flotaSvc.getCapacidadesGruas().subscribe({
       next: caps => this.capacidades.set(caps),
     });
     this.cargar();
@@ -60,7 +60,7 @@ export class DisponibilidadGruasComponent implements OnInit {
     const fecha = this.fechaFiltro();
     if (!fecha) return;
     this.cargando.set(true);
-    this.adminSvc.getDisponibilidadGruas(fecha, this.capFiltro()).subscribe({
+    this.flotaSvc.getDisponibilidadGruas(fecha, this.capFiltro()).subscribe({
       next: data  => { this.datos.set(data ?? []); this.cargando.set(false); },
       error: ()   => this.cargando.set(false),
     });

@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserCog, X, RefreshCw, AlertTriangle } from 'lucide-angular';
-import { AdminService } from '../../../../core/services/admin.service';
-import { Operador } from '../../../../models/admin.model';
+import { OperadoresService } from '../../../../core/services/operadores.service';
+import { Operador } from '../../../../models/operadores.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
@@ -13,7 +13,7 @@ import { MensajeModalComponent } from '../../../../shared/components/mensaje-mod
   templateUrl: './editar-operador.html',
 })
 export class EditarOperadorComponent implements OnInit {
-  private readonly adminSvc = inject(AdminService);
+  private readonly operadoresSvc = inject(OperadoresService);
 
   readonly operador = input.required<Operador>();
   readonly guardar  = output<void>();
@@ -116,7 +116,7 @@ export class EditarOperadorComponent implements OnInit {
     const idNum = parseInt(o.id.replace('OP-', ''), 10);
 
     this.loading.set(true);
-    this.adminSvc.editarOperador(idNum, {
+    this.operadoresSvc.editarOperador(idNum, {
       contrasena:  this.password(),
       nombres:     this.nombres(),
       apellidos:   this.apellidos(),

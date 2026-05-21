@@ -20,8 +20,8 @@ import {
   X,
   RefreshCw,
 } from 'lucide-angular';
-import { AdminService } from '../../../core/services/admin.service';
-import { RolUsuario, UsuarioAdmin } from '../../../models/admin.model';
+import { UsuarioService } from '../../../core/services/usuario.service';
+import { RolUsuario, UsuarioAdmin } from '../../../models/usuario.model';
 import { NuevoUsuarioComponent } from './nuevo-usuario/nuevo-usuario';
 import { EditarUsuarioComponent } from './editar-usuario/editar-usuario';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
@@ -36,7 +36,7 @@ type FiltroEstado = 'Activos' | 'Bajas';
   templateUrl: './usuarios.html',
 })
 export class UsuariosComponent implements OnInit {
-  private readonly adminSvc   = inject(AdminService);
+  private readonly usuarioSvc = inject(UsuarioService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly UserCogIcon      = UserCog;
@@ -110,7 +110,7 @@ export class UsuariosComponent implements OnInit {
       switchMap(() => {
         this.cargando.set(true);
         const idStr = this.busquedaId().trim();
-        return this.adminSvc.getUsuarios({
+        return this.usuarioSvc.getUsuarios({
           estado: this.filtroEstado() === 'Activos' ? 'ACTIVO' : 'INACTIVO',
           id:     idStr ? parseInt(idStr, 10) : undefined,
           nombre: this.busquedaNombre() || undefined,
@@ -197,7 +197,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   protected darDeBajaUsuario(id: number): void {
-    this.adminSvc.actualizarEstadoUsuario(id, 'INACTIVO').subscribe({
+    this.usuarioSvc.actualizarEstadoUsuario(id, 'INACTIVO').subscribe({
       next: result => {
         if (result.exitoso === 1) {
           this.cargarUsuarios();
@@ -211,7 +211,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   protected reactivarUsuario(id: number): void {
-    this.adminSvc.actualizarEstadoUsuario(id, 'ACTIVO').subscribe({
+    this.usuarioSvc.actualizarEstadoUsuario(id, 'ACTIVO').subscribe({
       next: result => {
         if (result.exitoso === 1) {
           this.cargarUsuarios();

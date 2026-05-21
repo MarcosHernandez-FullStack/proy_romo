@@ -1,35 +1,74 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { DetalleServicio, EstadoAdmin, EstadoOperativo, Servicio, TrazabilidadItem, VehiculoDetalle } from '../../models/servicio.model';
+import { DetalleServicio, EstadoAdminServicio, EstadoOperativo, Servicio, TrazabilidadItem, VehiculoDetalle } from '../../models/operaciones.model';
+import { CrearReservaDto, ReservaApiItem, ReservaResultado, ValidarHorarioDto } from '../../models/reservas.model';
 import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
-export class ServicioService {
+export class ReservasService {
   private readonly http    = inject(HttpClient);
   private readonly authSvc = inject(AuthService);
+
+  // ── Agenda admin ──────────────────────────────────────────────────────────
+
+  getHorarios(fecha: Date, rol: string, capacidad: number): Observable<{ hora: string; estado: string }[]> {
+    const fechaStr = this.toDateStr(fecha);
+    return this.http.get<{ hora: string; estado: string }[]>(
+      `${API}/reservas/horarios`,
+      { params: { fecha: fechaStr, rol, capacidad: capacidad.toString() } }
+    );
+  }
+
+  getHorariosReprogramacion(fecha: Date, rol: string, capacidad: number, idReserva: number): Observable<{ hora: string; estado: string }[]> {
+    const fechaStr = this.toDateStr(fecha);
+    return this.http.get<{ hora: string; estado: string }[]>(
+      `${API}/reservas/horarios-reprogramacion`,
+      { params: { fecha: fechaStr, rol, capacidad: capacidad.toString(), idReserva: idReserva.toString() } }
+    );
+  }
+
+  deleteTimer(id: number): Observable<void> {
+    return this.http.delete<void>(`${API}/reservas/timer/${id}`);
+  }
+
+  validarHorario(dto: ValidarHorarioDto): Observable<ReservaResultado> {
+    return this.http.post<ReservaResultado>(`${API}/reservas/validar-horario`, dto);
+  }
+
+  crearReserva(dto: CrearReservaDto): Observable<ReservaResultado> {
+    return this.http.post<ReservaResultado>(`${API}/reservas/crear-reserva`, dto);
+  }
+
+  // ── Vista cliente ─────────────────────────────────────────────────────────
 
   getServicios(fechaInicio?: string, fechaFin?: string): Observable<Servicio[]> {
     const params: Record<string, string> = {};
     const idCliente = this.authSvc.session()?.idCliente;
-    if (idCliente)    params['idCliente']           = String(idCliente);
-    if (fechaInicio)  params['fechaServicioInicio']  = fechaInicio;
-    if (fechaFin)     params['fechaServicioFin']     = fechaFin;
-
+    if (idCliente)   params['idCliente']          = String(idCliente);
+    if (fechaInicio) params['fechaServicioInicio'] = fechaInicio;
+    if (fechaFin)    params['fechaServicioFin']    = fechaFin;
     return this.http.get<ReservaApiItem[]>(`${API}/operaciones`, { params }).pipe(
       map(data => (data ?? []).map(r => this.mapServicio(r)))
     );
   }
 
   getDetalle(id: string): Observable<DetalleServicio> {
-    return this.http.get<ReservaApiItem[]>(`${API}/operaciones`, {
-      params: { id },
-    }).pipe(
+    return this.http.get<ReservaApiItem[]>(`${API}/operaciones`, { params: { id } }).pipe(
       map(data => this.mapDetalle(data[0]))
     );
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  private toDateStr(fecha: Date): string {
+    const y = fecha.getFullYear();
+    const m = String(fecha.getMonth() + 1).padStart(2, '0');
+    const d = String(fecha.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   private mapServicio(r: ReservaApiItem): Servicio {
@@ -57,9 +96,9 @@ export class ServicioService {
       horaFin:          r.horaFin?.substring(0, 5)    ?? '',
       duracionHoras:    r.nroBloques,
       vehiculosDetalle: (r.vehiculos ?? []).map<VehiculoDetalle>(v => ({
-        tipo:       v.tipo        ?? '',
-        placa:      v.placa       ?? '',
-        modelo:     v.modelo      ?? '',
+        tipo:        v.tipo        ?? '',
+        placa:       v.placa       ?? '',
+        modelo:      v.modelo      ?? '',
         observacion: v.observacion ?? '',
       })),
       trazabilidad: this.buildTrazabilidad(r),
@@ -87,9 +126,7 @@ export class ServicioService {
     items.push({
       estado:      estadoLabel[estadoOp],
       descripcion: estadoOp === 'Finalizado' ? 'Confirmado por el operador en campo' : `En estado ${estadoOp}`,
-      fecha:       '',
-      hora:        '',
-      color:       estadoColor[estadoOp],
+      fecha: '', hora: '', color: estadoColor[estadoOp],
     });
 
     if (estadoAdmin === 'Facturado' || estadoAdmin === 'Pagado') {
@@ -98,7 +135,6 @@ export class ServicioService {
     if (estadoAdmin === 'Pagado') {
       items.push({ estado: 'Pago Confirmado', descripcion: 'Validado por administración', fecha: '', hora: '', color: 'orange' });
     }
-
     return items;
   }
 
@@ -112,8 +148,8 @@ export class ServicioService {
     return tabla[e?.toUpperCase()] ?? 'Reservado';
   }
 
-  private mapEstadoAdmin(e: string): EstadoAdmin {
-    const tabla: Record<string, EstadoAdmin> = {
+  private mapEstadoAdmin(e: string): EstadoAdminServicio {
+    const tabla: Record<string, EstadoAdminServicio> = {
       PENDIENTE: 'Pendiente',
       FACTURADO: 'Facturado',
       PAGADO:    'Pagado',
@@ -122,28 +158,3 @@ export class ServicioService {
   }
 }
 
-interface ReservaApiItem {
-  id:                   number;
-  direccionOrigen:      string;
-  direccionDestino:     string;
-  cantidadCarga:        number;
-  horaInicio:           string;
-  horaFin:              string;
-  nroBloques:           number;
-  estadoOperacion:      string;
-  estadoAdministrativo: string;
-  nombreCliente?:       string | null;
-  gruaAsignada?:        string | null;
-  operadorAsignado?:    string | null;
-  vehiculos?:           VehiculoApiItem[];
-  fechaHoraFormateada:  string;
-  cantidadVehiculos:    number;
-  costo:                number;
-}
-
-interface VehiculoApiItem {
-  placa?:       string | null;
-  modelo?:      string | null;
-  tipo?:        string | null;
-  observacion?: string | null;
-}
