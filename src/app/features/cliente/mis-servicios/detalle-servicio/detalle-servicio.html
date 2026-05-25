@@ -19,18 +19,18 @@
 
       @if (detalle()) {
         <div class="flex items-center gap-3 mt-3">
-          @let dot = estadoOpDotColor(detalle()!.estadoOperativo);
+          @let dot = estadoOpDotColor(detalle()!.estadoOperacion);
           <div class="flex items-center gap-2 bg-[#f9fafb] border border-[#e5e7eb] rounded-full px-3 h-7">
             <div class="rounded-full size-2 shrink-0" [style.background-color]="dot"></div>
-            <span class="text-[13px] font-medium" [class]="estadoOpClass(detalle()!.estadoOperativo)">{{ detalle()!.estadoOperativo }}</span>
+            <span class="text-[13px] font-medium" [class]="estadoOpClass(detalle()!.estadoOperacion)">{{ estadoOpLabel(detalle()!.estadoOperacion) }}</span>
           </div>
-          @let sa = estadoAdminClass(detalle()!.estadoAdmin);
+          @let sa = estadoAdminClass(detalle()!.estadoAdministrativo);
           <div
             class="flex items-center rounded-full px-3 h-7 border text-[13px] font-semibold"
             [style.background-color]="sa.bg"
             [style.border-color]="sa.border"
             [style.color]="sa.text"
-          >{{ detalle()!.estadoAdmin }}</div>
+          >{{ estadoAdminLabel(detalle()!.estadoAdministrativo) }}</div>
         </div>
       }
     </div>
@@ -49,12 +49,12 @@
           <div class="flex flex-col gap-3">
             <div class="flex items-center gap-3">
               <div class="bg-[#00c950] rounded-full size-3 shrink-0"></div>
-              <span class="text-[14px] text-[#364153]">{{ detalle()!.origen }}</span>
+              <span class="text-[14px] text-[#364153]">{{ detalle()!.direccionOrigen }}</span>
             </div>
             <div class="w-px h-4 bg-[#e5e7eb] ml-[5px]"></div>
             <div class="flex items-center gap-3">
               <div class="bg-[#fb2c36] rounded-full size-3 shrink-0"></div>
-              <span class="text-[14px] text-[#364153]">{{ detalle()!.destino }}</span>
+              <span class="text-[14px] text-[#364153]">{{ detalle()!.direccionDestino }}</span>
             </div>
           </div>
         </div>
@@ -65,15 +65,15 @@
           <div class="flex items-center gap-3">
             <lucide-angular [img]="CheckCircleIcon" class="size-5 shrink-0" color="#155dfc" [strokeWidth]="2" />
             <span class="text-[18px] font-bold text-[#1447e6]">{{ detalle()!.horaInicio }} – {{ detalle()!.horaFin }}</span>
-            <span class="text-[14px] text-[#155dfc]">{{ detalle()!.duracionHoras }} h</span>
+            <span class="text-[14px] text-[#155dfc]">{{ duracionHoras() }} h</span>
           </div>
-          <p class="text-[12px] text-[#4a7bcc] mt-1">{{ detalle()!.fecha }} · {{ detalle()!.hora }}</p>
+          <p class="text-[12px] text-[#4a7bcc] mt-1">{{ detalle()!.fechaHoraFormateada }}</p>
         </div>
 
         <!-- Vehículos trasladados -->
         <div>
           <p class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider mb-3">
-            Vehículos Trasladados ({{ detalle()!.vehiculos }})
+            Vehículos Trasladados ({{ detalle()!.cantidadVehiculos }})
           </p>
           <div class="border border-[#e5e7eb] rounded-xl overflow-hidden">
             <!-- Cabecera -->
@@ -87,7 +87,7 @@
             </div>
             <!-- Filas con scroll interno -->
             <div class="overflow-y-auto" style="max-height: 240px">
-              @for (v of detalle()!.vehiculosDetalle; track v.placa; let i = $index) {
+              @for (v of detalle()!.vehiculos; track v.placa; let i = $index) {
                 <div
                   class="grid items-center border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors"
                   style="grid-template-columns: 36px 1fr 1fr 1fr 1.4fr; min-height: 48px"
@@ -98,7 +98,7 @@
                   <p class="px-3 text-[12px] font-semibold text-[#364153] capitalize">{{ v.tipo || '—' }}</p>
                   <p class="px-3 text-[12px] font-semibold text-[#364153] font-mono">{{ v.placa || '—' }}</p>
                   <p class="px-3 text-[12px] text-[#364153]">{{ v.modelo || '—' }}</p>
-                  <p class="px-3 text-[12px] text-[#6a7282] truncate" [title]="v.observacion">{{ v.observacion || '—' }}</p>
+                  <p class="px-3 text-[12px] text-[#6a7282] truncate" [title]="v.observacion ?? ''">{{ v.observacion || '—' }}</p>
                 </div>
               } @empty {
                 <div class="py-6 text-[13px] text-[#9ca3af] text-center">
@@ -113,7 +113,7 @@
         <div>
           <p class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider mb-3">Trazabilidad Administrativa</p>
           <div class="flex flex-col gap-3">
-            @for (item of detalle()!.trazabilidad; track item.estado) {
+            @for (item of trazabilidad(); track item.estado) {
               <div class="flex items-start gap-4">
                 <div
                   class="size-8 rounded-full flex items-center justify-center shrink-0 mt-0.5"
@@ -139,15 +139,15 @@
           <div class="flex flex-col gap-2 mb-4">
             <div class="flex items-center justify-between">
               <span class="text-[13px] text-[#bedbff]">Vehículos trasladados</span>
-              <span class="text-[13px] text-white font-medium">{{ detalle()!.vehiculos }} unidad</span>
+              <span class="text-[13px] text-white font-medium">{{ detalle()!.cantidadVehiculos }} unidad</span>
             </div>
             <div class="flex items-center justify-between">
               <span class="text-[13px] text-[#bedbff]">Bloque de servicio</span>
-              <span class="text-[13px] text-white font-medium">{{ detalle()!.horaInicio }} – {{ detalle()!.horaFin }} ({{ detalle()!.duracionHoras }} h)</span>
+              <span class="text-[13px] text-white font-medium">{{ detalle()!.horaInicio }} – {{ detalle()!.horaFin }} ({{ duracionHoras() }} h)</span>
             </div>
             <div class="flex items-center justify-between">
               <span class="text-[13px] text-[#bedbff]">Estado de pago</span>
-              <span class="text-[13px] text-white font-medium">{{ detalle()!.estadoAdmin }}</span>
+              <span class="text-[13px] text-white font-medium">{{ estadoAdminLabel(detalle()!.estadoAdministrativo) }}</span>
             </div>
           </div>
           <div class="border-t border-white/20 pt-4 flex items-center justify-between">
@@ -159,7 +159,7 @@
         <!-- Fecha -->
         <div class="flex items-center gap-2 text-[12px] text-[#9ca3af]">
           <lucide-angular [img]="CheckCircleIcon" class="size-4" color="#9ca3af" [strokeWidth]="2" />
-          <span>{{ detalle()!.fecha }}</span>
+          <span>{{ fechaDisplay() }}</span>
         </div>
 
         <!-- Botón cerrar -->

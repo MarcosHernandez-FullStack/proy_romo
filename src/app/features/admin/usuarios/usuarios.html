@@ -160,11 +160,11 @@
             </span>
 
             <!-- FECHA CREACIÓN -->
-            <p class="text-[#4a5565] text-[13px]">{{ u.fechaCreacion }}</p>
+            <p class="text-[#4a5565] text-[13px]">{{ u.fechaCreacionFormat }}</p>
 
             <!-- ACCIONES -->
             <div class="flex items-center gap-1">
-              @if (u.activo === 'ACTIVO') {
+              @if (u.estado === 'ACTIVO') {
                 <button type="button" (click)="usuarioEditar.set(u)"
                   class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
                   title="Editar">

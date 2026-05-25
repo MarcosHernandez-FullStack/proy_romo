@@ -1,35 +1,29 @@
-export type EstadoServicioAdmin = 'Reservado' | 'Asignado' | 'En Curso' | 'Finalizado' | 'Cancelado';
-export type EstadoAdminServicio = 'Pendiente' | 'Facturado' | 'Pagado';
-export type EstadoOperativo     = 'Finalizado' | 'En Curso' | 'Asignado' | 'Reservado';
-
 export interface ServicioAdmin {
-  id:          string;
-  cliente:     string;
-  costo:       number;
-  origen:      string;
-  destino:     string;
-  distanciaKm: number;
-  fecha:       string;
-  hora:        string;
-  tiempoMin:   number;
-  bloques:     number;
-  carga:       string;
-  vehiculos:   number;
-  operador:    string | null;
-  unidad:      string | null;
-  estado:      EstadoServicioAdmin;
+  id:             number;
+  cliente:        string;
+  costo:          number;
+  origen:         string;
+  destino:        string;
+  distanciaKm:    number;
+  fecha:          string;
+  hora:           string;
+  tiempoMin:      number;
+  bloques:        number;
+  cantidadCarga:  number;
+  operador:       string | null;
+  unidad:         string | null;
+  estado:         string;
 }
 
 export interface Servicio {
-  id:             string;
-  fecha:          string;
-  hora:           string;
-  origen:         string;
-  destino:        string;
-  vehiculos:      number;
-  costo:          number;
-  estadoOperativo: EstadoOperativo;
-  estadoAdmin:    EstadoAdminServicio;
+  id:                  number;
+  fechaHoraFormateada: string;
+  direccionOrigen:     string;
+  direccionDestino:    string;
+  cantidadVehiculos:   number;
+  costo:               number;
+  estadoOperacion:     string;
+  estadoAdministrativo: string;
 }
 
 export interface TrazabilidadItem {
@@ -41,21 +35,19 @@ export interface TrazabilidadItem {
 }
 
 export interface VehiculoDetalle {
-  tipo:        string;
-  placa:       string;
-  modelo:      string;
-  observacion: string;
+  tipo?:        string | null;
+  placa?:       string | null;
+  modelo?:      string | null;
+  observacion?: string | null;
 }
 
 export interface DetalleServicio extends Servicio {
-  operadorNombre:   string;
-  operadorTelefono: string;
-  unidadPlaca:      string;
+  operadorAsignado: string | null;
+  gruaAsignada:     string | null;
   horaInicio:       string;
   horaFin:          string;
-  duracionHoras:    number;
-  vehiculosDetalle: VehiculoDetalle[];
-  trazabilidad:     TrazabilidadItem[];
+  nroBloques:       number;
+  vehiculos:        VehiculoDetalle[];
 }
 
 export interface GruaSugerida {

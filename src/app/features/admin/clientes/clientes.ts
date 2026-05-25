@@ -55,15 +55,15 @@ export class ClientesComponent implements OnInit {
   protected readonly exitoEstado = signal<{ titulo: string; id: string } | null>(null);
 
   protected readonly totalClientes = computed(() => this.clientes().length);
-  protected readonly clientesActivos = computed(() => this.clientes().filter((c) => c.activo).length);
-  protected readonly clientesInactivos = computed(() => this.clientes().filter((c) => !c.activo).length);
+  protected readonly clientesActivos = computed(() => this.clientes().filter((c) => c.estado === 'ACTIVO').length);
+  protected readonly clientesInactivos = computed(() => this.clientes().filter((c) => c.estado !== 'ACTIVO').length);
 
   protected readonly clientesFiltrados = computed(() => {
     const activos = this.filtroEstado() === 'Activos';
     const busq = this.busqueda().toLowerCase();
     return this.clientes().filter((c) =>
-      c.activo === activos &&
-      (!busq || c.empresa.toLowerCase().includes(busq) || c.id.toLowerCase().includes(busq) || c.contacto.toLowerCase().includes(busq))
+      (c.estado === 'ACTIVO') === activos &&
+      (!busq || c.empresa.toLowerCase().includes(busq) || String(c.id).includes(busq) || c.nomContacto.toLowerCase().includes(busq))
     );
   });
 
@@ -81,13 +81,13 @@ export class ClientesComponent implements OnInit {
     this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
   }
 
-  protected darDeBajaCliente(id: string): void {
-    this.clientes.update((prev) => prev.map((c) => (c.id === id ? { ...c, activo: false } : c)));
-    this.exitoEstado.set({ titulo: '¡Cliente Dado de Baja!', id });
+  protected darDeBajaCliente(id: number): void {
+    this.clientes.update((prev) => prev.map((c) => (c.id === id ? { ...c, estado: 'INACTIVO' } : c)));
+    this.exitoEstado.set({ titulo: '¡Cliente Dado de Baja!', id: String(id) });
   }
 
-  protected reactivarCliente(id: string): void {
-    this.clientes.update((prev) => prev.map((c) => (c.id === id ? { ...c, activo: true } : c)));
-    this.exitoEstado.set({ titulo: '¡Cliente Reactivado!', id });
+  protected reactivarCliente(id: number): void {
+    this.clientes.update((prev) => prev.map((c) => (c.id === id ? { ...c, estado: 'ACTIVO' } : c)));
+    this.exitoEstado.set({ titulo: '¡Cliente Reactivado!', id: String(id) });
   }
 }

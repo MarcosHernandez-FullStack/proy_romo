@@ -36,7 +36,7 @@ export class TarifasComponent implements OnInit {
   protected readonly tarifaEditar = signal<TarifaCliente | null>(null);
 
   // Form fields (shared between Nueva and Editar)
-  protected readonly formClienteId = signal('');
+  protected readonly formClienteId = signal<number>(0);
   protected readonly formTarifaBase = signal(0);
   protected readonly formTarifaKm = signal(0);
   protected readonly formVigenciaDesde = signal('');
@@ -58,7 +58,7 @@ export class TarifasComponent implements OnInit {
     if (!busq) return this.tarifas();
     return this.tarifas().filter((t) => {
       const c = this.clientes().find((cl) => cl.id === t.clienteId);
-      return c ? c.empresa.toLowerCase().includes(busq) || c.id.toLowerCase().includes(busq) : false;
+      return c ? c.empresa.toLowerCase().includes(busq) || String(c.id).includes(busq) : false;
     });
   });
 
@@ -73,11 +73,11 @@ export class TarifasComponent implements OnInit {
     });
   }
 
-  protected getNombreCliente(clienteId: string): string {
-    return this.clientes().find((c) => c.id === clienteId)?.empresa ?? clienteId;
+  protected getNombreCliente(clienteId: number): string {
+    return this.clientes().find((c) => c.id === clienteId)?.empresa ?? String(clienteId);
   }
 
-  protected eliminarTarifa(clienteId: string): void {
+  protected eliminarTarifa(clienteId: number): void {
     this.tarifas.update((prev) => prev.filter((t) => t.clienteId !== clienteId));
   }
 
@@ -94,7 +94,7 @@ export class TarifasComponent implements OnInit {
   }
 
   protected onAbrirNueva(): void {
-    this.formClienteId.set('');
+    this.formClienteId.set(0);
     this.formTarifaBase.set(0);
     this.formTarifaKm.set(0);
     this.formVigenciaDesde.set('');
@@ -138,7 +138,7 @@ export class TarifasComponent implements OnInit {
   }
 
   protected get formEsValido(): boolean {
-    return !!this.formClienteId() && this.formTarifaBase() > 0 && this.formTarifaKm() > 0 && !!this.formVigenciaDesde();
+    return this.formClienteId() > 0 && this.formTarifaBase() > 0 && this.formTarifaKm() > 0 && !!this.formVigenciaDesde();
   }
 
   protected onSolicitarGuardarGlobal(): void {

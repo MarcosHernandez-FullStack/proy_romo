@@ -40,10 +40,10 @@ export class EditarClienteComponent implements OnInit {
   ngOnInit(): void {
     const c = this.cliente();
     this.empresa.set(c.empresa);
-    this.contacto.set(c.contacto);
-    this.correo.set(c.correo);
-    this.telefono.set(c.telefono);
-    this.loginId.set(c.loginId);
+    this.contacto.set(c.nomContacto);
+    this.correo.set(c.correoContacto);
+    this.telefono.set(c.nroContacto ?? '');
+    this.loginId.set(c.alias);
     this.tarifaBase.set(c.tarifaBase);
     this.tarifaKm.set(c.tarifaKm);
   }
@@ -110,9 +110,7 @@ export class EditarClienteComponent implements OnInit {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    const idNumerico = parseInt(this.cliente().id.replace('CLI-', ''), 10);
-
-    this.clientesSvc.editarCliente(idNumerico, {
+    this.clientesSvc.editarCliente(this.cliente().id, {
       contrasena:     this.password() || undefined,
       empresa:        this.empresa(),
       nomContacto:    this.contacto(),

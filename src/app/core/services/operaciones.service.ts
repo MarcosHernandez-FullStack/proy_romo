@@ -47,21 +47,21 @@ export class OperacionesService {
 
 const SERVICIOS_ADMIN: ServicioAdmin[] = [
   {
-    id: 'SRV-001', cliente: 'Transportes XYZ S.A.', costo: 562.5,
+    id: 1, cliente: 'Transportes XYZ S.A.', costo: 562.5,
     origen: 'Av. Corrientes 1234, CABA', destino: 'Av. Libertador 5678, Vicente López',
     distanciaKm: 12.5, fecha: '4/2/2024', hora: '10:00', tiempoMin: 80, bloques: 2,
-    carga: 'Estándar', vehiculos: 1, operador: null, unidad: null, estado: 'Reservado',
+    cantidadCarga: 1, operador: null, unidad: null, estado: 'RESERVADO',
   },
   {
-    id: 'SRV-002', cliente: 'Logística Beta Ltda.', costo: 420.0,
+    id: 2, cliente: 'Logística Beta Ltda.', costo: 420.0,
     origen: 'Av. Santa Fe 2000, CABA', destino: 'Av. Maipú 300, Olivos',
     distanciaKm: 8.3, fecha: '4/2/2024', hora: '11:00', tiempoMin: 60, bloques: 2,
-    carga: 'Estándar', vehiculos: 1, operador: 'Roberto Sánchez', unidad: 'GRU-001', estado: 'Asignado',
+    cantidadCarga: 1, operador: 'Roberto Sánchez', unidad: 'GRU-001', estado: 'ASIGNADO',
   },
   {
-    id: 'SRV-003', cliente: 'Distribuidora Central', costo: 890.0,
+    id: 3, cliente: 'Distribuidora Central', costo: 890.0,
     origen: 'Av. Cabildo 500, CABA', destino: 'Ruta 8 km 40, Pilar',
     distanciaKm: 25.0, fecha: '4/2/2024', hora: '09:00', tiempoMin: 120, bloques: 3,
-    carga: 'Múltiple', vehiculos: 2, operador: 'Fernando López', unidad: 'GRU-002', estado: 'En Curso',
+    cantidadCarga: 2, operador: 'Fernando López', unidad: 'GRU-002', estado: 'ENCURSO',
   },
 ];

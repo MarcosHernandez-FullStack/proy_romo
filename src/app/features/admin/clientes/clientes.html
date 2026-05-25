@@ -108,11 +108,11 @@
 
           <!-- CONTACTO -->
           <div>
-            <p class="text-[#101828] text-[13px] font-semibold">{{ c.contacto }}</p>
-            @if (c.telefono) {
+            <p class="text-[#101828] text-[13px] font-semibold">{{ c.nomContacto }}</p>
+            @if (c.nroContacto) {
               <div class="flex items-center gap-1 mt-0.5">
                 <lucide-angular [img]="PhoneIcon" class="size-3" color="#9ca3af" [strokeWidth]="1.5" />
-                <span class="text-[#6a7282] text-[12px]">{{ c.telefono }}</span>
+                <span class="text-[#6a7282] text-[12px]">{{ c.nroContacto }}</span>
               </div>
             }
           </div>
@@ -120,7 +120,7 @@
           <!-- CORREO -->
           <div class="flex items-center gap-1.5 min-w-0">
             <lucide-angular [img]="MailIcon" class="size-3.5 shrink-0" color="#9ca3af" [strokeWidth]="1.5" />
-            <span class="text-[#4a5565] text-[13px] truncate">{{ c.correo }}</span>
+            <span class="text-[#4a5565] text-[13px] truncate">{{ c.correoContacto }}</span>
           </div>
 
           <!-- TARIFA BASE -->
@@ -149,7 +149,7 @@
 
           <!-- ACCIONES -->
           <div class="flex items-center gap-1">
-            @if (c.activo) {
+            @if (c.estado === 'ACTIVO') {
               <button type="button" (click)="clienteEditar.set(c)"
                 class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
                 title="Editar">

@@ -91,7 +91,7 @@ export class NuevaUnidadComponent {
       placa:          this.placa(),
       marca:          this.marca(),
       modelo:         this.modelo(),
-      añoFabricacion: Number(this.anio()),
+      anioFabricacion: Number(this.anio()),
       capacidad:      this.capacidad(),
       fecVenSeg:      this.vencimientoSeguro(),
     }).subscribe({

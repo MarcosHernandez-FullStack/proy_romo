@@ -75,11 +75,11 @@ export class SeleccionClienteComponent implements AfterViewInit {
 
   readonly modoCliente = input(false);
   readonly clientes    = input.required<ClienteB2B[]>();
-  readonly clienteId   = input.required<string>();
+  readonly clienteId   = input.required<number>();
   readonly origen      = input.required<string>();
   readonly destino     = input.required<string>();
 
-  readonly clienteIdChange  = output<string>();
+  readonly clienteIdChange  = output<number>();
   readonly origenChange     = output<string>();
   readonly destinoChange    = output<string>();
   readonly rutaChange       = output<{ distanciaKm: number; tiempoMin: number; coordLatOrigen: string; coordLonOrigen: string; coordLatDestino: string; coordLonDestino: string } | null>();
@@ -105,7 +105,7 @@ export class SeleccionClienteComponent implements AfterViewInit {
   protected readonly parametroOperativo  = signal<ParametrosOperativos | null>(null);
 
   // Override de tarifa por cliente: almacena el id del cliente y el tipo elegido
-  protected readonly tarifaOverride = signal<{ id: string; tipo: 'personalizada' | 'global' } | null>(null);
+  protected readonly tarifaOverride = signal<{ id: number; tipo: 'personalizada' | 'global' } | null>(null);
 
   protected readonly clienteTienePersonalizada = computed(() => {
     const c = this.clienteSeleccionado();

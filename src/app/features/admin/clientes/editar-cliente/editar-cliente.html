@@ -229,7 +229,7 @@
     titulo="¡Cliente Actualizado!"
     mensaje="Los datos del cliente fueron actualizados correctamente."
     etiqueta="ID CLIENTE"
-    [detalle]="cliente().id"
+    [detalle]="'' + cliente().id"
     labelCerrar="Aceptar"
     (cerrar)="guardar.emit()" />
 }

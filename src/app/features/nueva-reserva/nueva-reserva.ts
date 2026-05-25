@@ -50,7 +50,7 @@ export class NuevaReservaComponent implements OnInit {
   protected readonly capacidadEfectiva = computed(() =>
     this.tipoCarga() === 'estandar' ? 1 : this.cantidadVehiculos()
   );
-  protected readonly clienteId = signal('');
+  protected readonly clienteId = signal<number>(0);
   protected readonly origen = signal('');
   protected readonly destino = signal('');
 
@@ -220,7 +220,7 @@ export class NuevaReservaComponent implements OnInit {
       horaFin,
       cantidadCarga:        this.capacidadEfectiva(),
       rol:                  session.rol,
-      idCliente:            session.idCliente ?? parseInt(this.clienteId().replace('CLI-', ''), 10),
+      idCliente:            session.idCliente ?? this.clienteId(),
       idOperador:           null as number | null,
       direccionOrigen:      this.origen(),
       coordLatOrigen:       this.coordLatOrigen(),
@@ -302,7 +302,7 @@ export class NuevaReservaComponent implements OnInit {
   ngOnInit(): void {
     const session = this.activeSession();
     if (session?.rol === 'CLIENTE' && session.idCliente) {
-      this.clienteId.set(String(session.idCliente));
+      this.clienteId.set(session.idCliente);
     } else {
       this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
     }
@@ -454,7 +454,7 @@ export class NuevaReservaComponent implements OnInit {
     this.currentStep.set(0);
     this.tipoCarga.set('estandar');
     this.cantidadVehiculos.set(2);
-    this.clienteId.set('');
+    this.clienteId.set(0);
     this.origen.set('');
     this.destino.set('');
     this.vehiculosData.set([]);
@@ -490,7 +490,7 @@ export class NuevaReservaComponent implements OnInit {
   );
 
   protected readonly step1Complete = computed(() =>
-    !!this.clienteId() && !!this.origen() && !!this.destino()
+    this.clienteId() > 0 && !!this.origen() && !!this.destino()
   );
 
   protected readonly step2Complete = computed(() => this.horarioValidado());

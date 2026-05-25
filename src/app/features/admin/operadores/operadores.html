@@ -111,7 +111,7 @@
           <!-- ID -->
           <div>
             <p class="text-[#101828] text-[13px] font-bold font-mono">{{ o.id }}</p>
-            @if (o.activo) {
+            @if (o.estado === 'ACTIVO') {
               <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#16a34a] mt-0.5">
                 <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                 Acceso Activo
@@ -122,7 +122,7 @@
           </div>
 
           <!-- Nombre -->
-          <p class="text-[#101828] text-[14px] font-semibold">{{ o.nombre }}</p>
+          <p class="text-[#101828] text-[14px] font-semibold">{{ o.nombresCompleto }}</p>
 
           <!-- Teléfono -->
           <div class="flex items-center gap-1.5 text-[#4a5565] text-[13px]">
@@ -131,7 +131,7 @@
           </div>
 
           <!-- Licencia -->
-          <p class="text-[#4a5565] text-[13px] font-mono font-semibold">{{ o.licencia }}</p>
+          <p class="text-[#4a5565] text-[13px] font-mono font-semibold">{{ o.nroLicencia }}</p>
 
           <!-- Vencimiento -->
           <div>
@@ -142,7 +142,7 @@
               <p class="text-[13px]"
                 [class.text-[#e7000b]]="licenciaVencida(o)"
                 [class.text-[#4a5565]]="!licenciaVencida(o)">
-                {{ formatFecha(o.vencimientoLicencia) }}
+                {{ o.fecVenLic }}
               </p>
             </div>
             @if (licenciaVencida(o)) {
@@ -155,14 +155,14 @@
 
           <!-- Próximo servicio -->
           <div>
-            @if (o.proximoServicio) {
+            @if (o.proximaFechaServicio) {
               <button type="button" (click)="abrirServicios(o)" [disabled]="loadingServicios()"
                 class="flex items-center gap-2 group cursor-pointer disabled:opacity-60">
                 <span class="flex items-center gap-1.5 text-[13px] text-[#374151]">
                   <lucide-angular [img]="CalendarIcon" class="size-3.5 text-[#6a7282]" color="#6a7282" [strokeWidth]="1.5" />
-                  <span class="font-semibold text-[#155dfc]">{{ o.proximoServicio.fecha }}</span>
+                  <span class="font-semibold text-[#155dfc]">{{ formatProximaFecha(o.proximaFechaServicio) }}</span>
                   <lucide-angular [img]="ClockIcon" class="size-3.5 text-[#6a7282]" color="#9ca3af" [strokeWidth]="1.5" />
-                  {{ o.proximoServicio.hora }}
+                  {{ formatProximaHora(o.proximaHoraServicio) }}
                 </span>
                 @if (serviciosExtra(o) > 0) {
                   <span class="text-[11px] font-bold bg-[#155dfc] text-white px-2 py-0.5 rounded-full">
@@ -177,9 +177,10 @@
 
           <!-- Disponibilidad -->
           <div class="flex items-center gap-1.5">
-            <span class="inline-flex items-center px-2.5 py-1 rounded-full border text-[12px] font-semibold {{ colorDisponibilidad(o.tipoDisponibilidad) }}"
-              [title]="tooltipDisponibilidad(o.tipoDisponibilidad)">
-              {{ o.tipoDisponibilidad }}
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full border text-[12px] font-semibold"
+              [class]="colorDisponibilidad(tipoDisponibilidadLabel(o.totalHorasSemanales))"
+              [title]="tooltipDisponibilidad(tipoDisponibilidadLabel(o.totalHorasSemanales))">
+              {{ tipoDisponibilidadLabel(o.totalHorasSemanales) }}
             </span>
             <button type="button" (click)="operadorDisponib.set(o)"
               class="size-7 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer shrink-0">
@@ -189,7 +190,7 @@
 
           <!-- Acciones -->
           <div class="flex items-center gap-1">
-            @if (o.activo) {
+            @if (o.estado === 'ACTIVO') {
               <button type="button" (click)="operadorEditar.set(o)"
                 class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer">
                 <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
@@ -263,28 +264,29 @@
 @if (operadorServicios()) {
   <app-proximos-servicios
     [operador]="operadorServicios()!"
-    (cerrar)="operadorServicios.set(null)" />
+    [servicios]="serviciosDelOperador()"
+    (cerrar)="operadorServicios.set(null); serviciosDelOperador.set([])" />
 }
 
 <!-- Modal: Gestión de disponibilidad -->
 @if (operadorDisponib()) {
   <app-gestion-disponibilidad
     [operador]="operadorDisponib()!"
-    (guardar)="onGuardarDisponibilidad($event)"
+    (guardar)="onGuardarDisponibilidad()"
     (cerrar)="operadorDisponib.set(null)" />
 }
 
 <!-- Modal: Confirmar cambio de estado -->
 @if (showConfirmEstado() && operadorEnConfirmacion()) {
   <app-mensaje-modal
-    [tipo]="operadorEnConfirmacion()!.activo ? 'advertencia' : 'info'"
-    [titulo]="operadorEnConfirmacion()!.activo ? 'Desactivar operador' : 'Reactivar operador'"
-    [mensaje]="operadorEnConfirmacion()!.activo
-      ? '¿Está seguro de que desea desactivar a ' + operadorEnConfirmacion()!.nombre + '?\nSu acceso al sistema quedará bloqueado.'
-      : '¿Está seguro de que desea reactivar a ' + operadorEnConfirmacion()!.nombre + '?\nRecuperará acceso al sistema.'"
+    [tipo]="operadorEnConfirmacion()!.estado === 'ACTIVO' ? 'advertencia' : 'info'"
+    [titulo]="operadorEnConfirmacion()!.estado === 'ACTIVO' ? 'Desactivar operador' : 'Reactivar operador'"
+    [mensaje]="operadorEnConfirmacion()!.estado === 'ACTIVO'
+      ? '¿Está seguro de que desea desactivar a ' + operadorEnConfirmacion()!.nombresCompleto + '?\nSu acceso al sistema quedará bloqueado.'
+      : '¿Está seguro de que desea reactivar a ' + operadorEnConfirmacion()!.nombresCompleto + '?\nRecuperará acceso al sistema.'"
     [confirmable]="true"
     [labelCancelar]="'Cancelar'"
-    [labelConfirmar]="operadorEnConfirmacion()!.activo ? 'Sí, desactivar' : 'Sí, reactivar'"
+    [labelConfirmar]="operadorEnConfirmacion()!.estado === 'ACTIVO' ? 'Sí, desactivar' : 'Sí, reactivar'"
     (cerrar)="showConfirmEstado.set(false); operadorEnConfirmacion.set(null)"
     (confirmar)="confirmarCambioEstado()" />
 }

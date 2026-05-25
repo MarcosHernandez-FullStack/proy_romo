@@ -27,24 +27,24 @@ export class HorariosRegularesComponent implements OnInit {
   }
 
   protected horarioClienteLabel(h: HorarioRegular): string {
-    return h.activo ? `${h.abre} – ${h.cierra}` : 'No disponible';
+    return h.estado === 'ACTIVO' ? `${h.horaInicio} – ${h.horaFinal}` : 'No disponible';
   }
 
   protected toggleActivo(idx: number): void {
     this.editados.update((arr) =>
-      arr.map((h, i) => (i === idx ? { ...h, activo: !h.activo } : h))
+      arr.map((h, i) => (i === idx ? { ...h, estado: h.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO' } : h))
     );
   }
 
-  protected updateAbre(idx: number, val: string): void {
+  protected updateHoraInicio(idx: number, val: string): void {
     this.editados.update((arr) =>
-      arr.map((h, i) => (i === idx ? { ...h, abre: val } : h))
+      arr.map((h, i) => (i === idx ? { ...h, horaInicio: val } : h))
     );
   }
 
-  protected updateCierra(idx: number, val: string): void {
+  protected updateHoraFinal(idx: number, val: string): void {
     this.editados.update((arr) =>
-      arr.map((h, i) => (i === idx ? { ...h, cierra: val } : h))
+      arr.map((h, i) => (i === idx ? { ...h, horaFinal: val } : h))
     );
   }
 

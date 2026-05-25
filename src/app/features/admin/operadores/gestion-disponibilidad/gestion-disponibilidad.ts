@@ -33,7 +33,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   private readonly operadoresSvc = inject(OperadoresService);
 
   readonly operador = input.required<Operador>();
-  readonly guardar  = output<GridDisponibilidad>();
+  readonly guardar  = output<void>();
   readonly cerrar   = output<void>();
 
   readonly dias  = DIAS_SEMANA;
@@ -109,7 +109,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.grid.set(this.clonarGrid(this.operador().disponibilidad));
+    this.grid.set(this.emptyGrid());
     this.cargarDesdeApi();
   }
 
@@ -247,9 +247,7 @@ export class GestionDisponibilidadComponent implements OnInit {
   // ── Helpers de conversión ──────────────────────────────────
 
   private idNumerico(): number | null {
-    const raw = this.operador().id.replace('OP-', '');
-    const n   = parseInt(raw, 10);
-    return isNaN(n) ? null : n;
+    return this.operador().id || null;
   }
 
   private gridARangos(): DispRango[] {

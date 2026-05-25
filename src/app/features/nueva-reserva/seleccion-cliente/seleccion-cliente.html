@@ -21,12 +21,12 @@
         <lucide-angular [img]="Building2Icon" class="size-4" color="#364153" [strokeWidth]="1.5" />
         Seleccionar Cliente B2B *
       </label>
-      <select [ngModel]="clienteId()" (ngModelChange)="clienteIdChange.emit($event)" name="clienteId"
+      <select [ngModel]="clienteId()" (ngModelChange)="clienteIdChange.emit(+$event)" name="clienteId"
         class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
-        <option value="">Seleccionar cliente...</option>
+        <option [ngValue]="0">Seleccionar cliente...</option>
         @for (c of clientes(); track c.id) {
-          @if (c.activo) {
-            <option [value]="c.id">{{ c.id }} - {{ c.empresa }} (Tarifa personalizada: ${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
+          @if (c.estado === 'ACTIVO') {
+            <option [ngValue]="c.id">{{ c.id }} - {{ c.empresa }} (Tarifa personalizada: ${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
           }
         }
       </select>
@@ -205,7 +205,7 @@
       Anterior
     </button>
     <button type="button" (click)="siguiente.emit()"
-      [disabled]="(!modoCliente() && !clienteId()) || !ruta()"
+      [disabled]="(!modoCliente() && clienteId() === 0) || !ruta()"
       class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer">
       Siguiente
     </button>

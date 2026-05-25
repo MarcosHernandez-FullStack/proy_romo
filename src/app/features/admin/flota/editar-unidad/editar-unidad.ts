@@ -39,11 +39,19 @@ export class EditarUnidadComponent implements OnInit {
   ngOnInit(): void {
     const u = this.unidad();
     this.placa.set(u.placa);
-    this.anio.set(String(u.anio));
+    this.anio.set(String(u.anioFabricacion));
     this.marca.set(u.marca);
     this.modelo.set(u.modelo);
     this.capacidad.set(u.capacidad);
-    this.vencimientoSeguro.set(u.vencimientoSeguro);
+    this.vencimientoSeguro.set(this.toIso(u.fecVenSeg));
+  }
+
+  private toIso(fec: string | null): string {
+    if (!fec) return '';
+    const parts = fec.split('/');
+    if (parts.length !== 3) return fec;
+    const [d, m, y] = parts;
+    return `${y}-${m}-${d}`;
   }
 
   // ── Validaciones por campo ────────────────────────────────
@@ -94,13 +102,11 @@ export class EditarUnidadComponent implements OnInit {
     this.errorMsg.set('');
     this.guardando.set(true);
 
-    const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
-
-    this.flotaSvc.editarGrua(idNumerico, {
+    this.flotaSvc.editarGrua(this.unidad().id, {
       placa:          this.placa(),
       marca:          this.marca(),
       modelo:         this.modelo(),
-      añoFabricacion: Number(this.anio()),
+      anioFabricacion: Number(this.anio()),
       capacidad:      this.capacidad(),
       fecVenSeg:      this.vencimientoSeguro(),
     }).subscribe({

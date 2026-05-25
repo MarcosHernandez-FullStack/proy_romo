@@ -125,7 +125,7 @@
         <!-- MARCA / MODELO -->
         <div>
           <p class="text-[#101828] text-[14px] font-bold">{{ u.marca }} {{ u.modelo }}</p>
-          <p class="text-[#9ca3af] text-[12px] mt-0.5">Año {{ u.anio }}</p>
+          <p class="text-[#9ca3af] text-[12px] mt-0.5">Año {{ u.anioFabricacion }}</p>
         </div>
 
         <!-- CAPACIDAD -->
@@ -136,34 +136,34 @@
 
         <!-- VENCIMIENTO SEGURO -->
         <div>
-          <p class="text-[#101828] text-[13px]">{{ formatFecha(u.vencimientoSeguro) }}</p>
+          <p class="text-[#101828] text-[13px]">{{ u.fecVenSeg ?? '—' }}</p>
           <span class="inline-block mt-0.5 text-[11px] font-semibold border rounded-full px-2 py-0.5"
-            [class]="seguroBadgeClass(seguroBadge(u.vencimientoSeguro))">
-            {{ seguroBadge(u.vencimientoSeguro) }}
+            [class]="seguroBadgeClass(seguroBadge(u.fecVenSeg ?? ''))">
+            {{ seguroBadge(u.fecVenSeg ?? '') }}
           </span>
         </div>
 
         <!-- ESTADO ACTUAL -->
         <button type="button" (click)="onEstadoClick(u)"
           class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold transition-opacity"
-          [class]="estadoClass(u.estado)"
-          [class.cursor-pointer]="u.estado !== 'Baja'"
-          [class.hover:opacity-80]="u.estado !== 'Baja'"
-          [class.cursor-default]="u.estado === 'Baja'"
-          [title]="u.estado === 'Baja' ? '' : 'Gestionar servicios / cambiar estado'">
-          @if (u.estado === 'Operativa') {
+          [class]="estadoClass(estadoDisplay(u))"
+          [class.cursor-pointer]="u.estado !== 'INACTIVO'"
+          [class.hover:opacity-80]="u.estado !== 'INACTIVO'"
+          [class.cursor-default]="u.estado === 'INACTIVO'"
+          [title]="u.estado === 'INACTIVO' ? '' : 'Gestionar servicios / cambiar estado'">
+          @if (estadoDisplay(u) === 'Operativa') {
             <lucide-angular [img]="CheckCircleIcon" class="size-3" color="#166534" [strokeWidth]="2" />
-          } @else if (u.estado === 'En Taller') {
+          } @else if (estadoDisplay(u) === 'En Taller') {
             <lucide-angular [img]="WrenchIcon" class="size-3" color="#854d0e" [strokeWidth]="2" />
           } @else {
             <lucide-angular [img]="AlertTriangleIcon" class="size-3" color="#c10007" [strokeWidth]="2" />
           }
-          {{ u.estado }}
+          {{ estadoDisplay(u) }}
         </button>
 
         <!-- ACCIONES -->
         <div class="flex items-center gap-1">
-          @if (u.estado !== 'Baja') {
+          @if (u.estado !== 'INACTIVO') {
             <button type="button" (click)="unidadEditar.set(u)"
               class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
               title="Editar">
@@ -175,7 +175,7 @@
             title="Ver detalle">
             <lucide-angular [img]="FileTextIcon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
           </button>
-          @if (u.estado !== 'Baja') {
+          @if (u.estado !== 'INACTIVO') {
             <button type="button" (click)="darDeBaja(u.id)"
               class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
               title="Dar de baja">

@@ -1,27 +1,4 @@
 export interface ClienteB2B {
-  id:             string;
-  empresa:        string;
-  contacto:       string;
-  correo:         string;
-  telefono:       string;
-  loginId:        string;
-  password:       string;
-  tarifaBase:     number;
-  tarifaKm:       number;
-  tipoTarifaBase: 'GLOBAL' | 'CUSTOM';
-  tipoTarifaKm:   'GLOBAL' | 'CUSTOM';
-  activo:         boolean;
-}
-
-export interface TarifaCliente {
-  clienteId:     string;
-  tarifaBase:    number;
-  tarifaKm:      number;
-  vigenciaDesde: string;
-  vigenciaHasta: string | null;
-}
-
-export interface ClienteApiItem {
   id:              number;
   empresa:         string;
   nomContacto:     string;
@@ -34,6 +11,14 @@ export interface ClienteApiItem {
   estado:          string;
   alias:           string;
   contraseña:      string | null;
+}
+
+export interface TarifaCliente {
+  clienteId:     number;
+  tarifaBase:    number;
+  tarifaKm:      number;
+  vigenciaDesde: string;
+  vigenciaHasta: string | null;
 }
 
 export interface CrearClienteRequest {

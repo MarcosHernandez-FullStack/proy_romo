@@ -18,7 +18,6 @@ import {
   Eye,
 } from 'lucide-angular';
 import { ReportesService } from '../../../core/services/reportes.service';
-import { EstadoAdminServicio, EstadoServicioAdmin } from '../../../models/operaciones.model';
 import { ServicioReporte } from '../../../models/reportes.model';
 import { AccionFacturarComponent } from './accion-facturar/accion-facturar';
 import { AccionRegistrarPagoComponent } from './accion-registrar-pago/accion-registrar-pago';
@@ -26,8 +25,8 @@ import { RevisionCancelacionComponent } from './revision-cancelacion/revision-ca
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 import { MensajeModalComponent } from '../../../shared/components/mensaje-modal/mensaje-modal';
 
-type FiltroOperativo = 'Todos' | 'Finalizado' | 'Cancelado';
-type FiltroAdmin = 'Todos' | 'Pendiente' | 'Facturado' | 'Pagado';
+type FiltroOperativo = 'Todos' | 'FINALIZADO' | 'CANCELADO';
+type FiltroAdmin = 'Todos' | 'PENDIENTE' | 'FACTURADO' | 'PAGADO';
 
 @Component({
   selector: 'app-reportes',
@@ -64,8 +63,8 @@ export class ReportesComponent implements OnInit {
   protected readonly filtroAdmin = signal<FiltroAdmin>('Todos');
   protected readonly paginaActual = signal(1);
 
-  protected readonly filtrosOperativos: FiltroOperativo[] = ['Todos', 'Finalizado', 'Cancelado'];
-  protected readonly filtrosAdmin: FiltroAdmin[] = ['Todos', 'Pendiente', 'Facturado', 'Pagado'];
+  protected readonly filtrosOperativos: FiltroOperativo[] = ['Todos', 'FINALIZADO', 'CANCELADO'];
+  protected readonly filtrosAdmin: FiltroAdmin[] = ['Todos', 'PENDIENTE', 'FACTURADO', 'PAGADO'];
 
   protected readonly servicioFacturar    = signal<ServicioReporte | null>(null);
   protected readonly servicioPago        = signal<ServicioReporte | null>(null);
@@ -85,13 +84,13 @@ export class ReportesComponent implements OnInit {
   protected readonly clientesUnicos = computed(() => [...new Set(this.servicios().map((s) => s.cliente))].sort());
 
   protected readonly totalServicios = computed(() => this.servicios().length);
-  protected readonly finalizados = computed(() => this.servicios().filter((s) => s.estado === 'Finalizado').length);
-  protected readonly cancelados = computed(() => this.servicios().filter((s) => s.estado === 'Cancelado').length);
-  protected readonly montoTotal = computed(() => this.servicios().filter((s) => s.estado === 'Finalizado').reduce((sum, s) => sum + s.costo, 0));
+  protected readonly finalizados = computed(() => this.servicios().filter((s) => s.estado === 'FINALIZADO').length);
+  protected readonly cancelados = computed(() => this.servicios().filter((s) => s.estado === 'CANCELADO').length);
+  protected readonly montoTotal = computed(() => this.servicios().filter((s) => s.estado === 'FINALIZADO').reduce((sum, s) => sum + s.costo, 0));
 
-  protected readonly pendientes = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'Pendiente' && s.estado === 'Finalizado').length);
-  protected readonly facturados = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'Facturado').length);
-  protected readonly pagados = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'Pagado').length);
+  protected readonly pendientes = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'PENDIENTE' && s.estado === 'FINALIZADO').length);
+  protected readonly facturados = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'FACTURADO').length);
+  protected readonly pagados = computed(() => this.serviciosFiltrados().filter((s) => s.estadoAdministrativo === 'PAGADO').length);
 
   protected readonly serviciosFiltrados = computed(() => {
     const busq = this.busqueda().toLowerCase();
@@ -105,8 +104,8 @@ export class ReportesComponent implements OnInit {
       const matchCliente = !cliente || s.cliente === cliente;
       const matchDesde = !desde || s.fecha >= desde;
       const matchHasta = !hasta || s.fecha <= hasta;
-      const matchOp = opFiltro === 'Todos' || s.estado === (opFiltro as EstadoServicioAdmin);
-      const matchAdm = admFiltro === 'Todos' || s.estadoAdministrativo === (admFiltro as EstadoAdminServicio);
+      const matchOp = opFiltro === 'Todos' || s.estado === opFiltro;
+      const matchAdm = admFiltro === 'Todos' || s.estadoAdministrativo === admFiltro;
       return matchBusq && matchCliente && matchDesde && matchHasta && matchOp && matchAdm;
     });
   });
@@ -137,13 +136,13 @@ export class ReportesComponent implements OnInit {
     if (!s) return;
     this.guardandoFactura.set(true);
     this.errorAccion.set(null);
-    this.reportesSvc.updEstadoAdministrativo(s.id, 'Facturado').subscribe({
+    this.reportesSvc.updEstadoAdministrativo(s.id, 'FACTURADO').subscribe({
       next: (res) => {
         this.guardandoFactura.set(false);
         this.servicioFacturar.set(null);
         this.mensajeResultado.set(res.mensaje);
         if (res.exitoso === 1) {
-          this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Facturado' as EstadoAdminServicio } : srv));
+          this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'FACTURADO' } : srv));
           this.servicioResultado.set(s);
           this.showExitoFactura.set(true);
         } else {
@@ -164,13 +163,13 @@ export class ReportesComponent implements OnInit {
     if (!s) return;
     this.guardandoPago.set(true);
     this.errorAccion.set(null);
-    this.reportesSvc.updEstadoAdministrativo(s.id, 'Pagado').subscribe({
+    this.reportesSvc.updEstadoAdministrativo(s.id, 'PAGADO').subscribe({
       next: (res) => {
         this.guardandoPago.set(false);
         this.servicioPago.set(null);
         this.mensajeResultado.set(res.mensaje);
         if (res.exitoso === 1) {
-          this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'Pagado' as EstadoAdminServicio } : srv));
+          this.servicios.update((prev) => prev.map((srv) => srv.id === s.id ? { ...srv, estadoAdministrativo: 'PAGADO' } : srv));
           this.servicioResultado.set(s);
           this.showExitoPago.set(true);
         } else {
@@ -222,18 +221,33 @@ export class ReportesComponent implements OnInit {
 
   protected estadoOperClass(estado: string): string {
     switch (estado) {
-      case 'Finalizado': return 'bg-[#dcfce7] text-[#166534] border-[#bbf7d0]';
-      case 'Cancelado': return 'bg-[#fef2f2] text-[#c10007] border-[#fca5a5]';
-      default: return 'bg-[#f3f4f6] text-[#4a5565]';
+      case 'FINALIZADO': return 'bg-[#dcfce7] text-[#166534] border-[#bbf7d0]';
+      case 'CANCELADO':  return 'bg-[#fef2f2] text-[#c10007] border-[#fca5a5]';
+      default:           return 'bg-[#f3f4f6] text-[#4a5565]';
     }
   }
 
   protected estadoAdminClass(estado: string): string {
     switch (estado) {
-      case 'Pagado': return 'bg-[#dcfce7] text-[#166534] border-[#bbf7d0]';
-      case 'Facturado': return 'bg-[#fef9c3] text-[#854d0e] border-[#fde68a]';
-      case 'Pendiente': return 'bg-[#f3f4f6] text-[#4a5565] border-[#e5e7eb]';
-      default: return 'bg-[#f3f4f6] text-[#4a5565]';
+      case 'PAGADO':    return 'bg-[#dcfce7] text-[#166534] border-[#bbf7d0]';
+      case 'FACTURADO': return 'bg-[#fef9c3] text-[#854d0e] border-[#fde68a]';
+      case 'PENDIENTE': return 'bg-[#f3f4f6] text-[#4a5565] border-[#e5e7eb]';
+      default:          return 'bg-[#f3f4f6] text-[#4a5565]';
     }
+  }
+
+  protected estadoLabel(estado: string): string {
+    const labels: Record<string, string> = {
+      FINALIZADO: 'Finalizado', CANCELADO: 'Cancelado', RESERVADO: 'Reservado',
+      ASIGNADO: 'Asignado', ENCURSO: 'En Curso',
+    };
+    return labels[estado] ?? estado;
+  }
+
+  protected estadoAdminLabel(estado: string): string {
+    const labels: Record<string, string> = {
+      PENDIENTE: 'Pendiente', FACTURADO: 'Facturado', PAGADO: 'Pagado',
+    };
+    return labels[estado] ?? estado;
   }
 }

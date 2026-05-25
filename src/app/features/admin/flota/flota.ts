@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from 'lucide-angular';
 import { FlotaService } from '../../../core/services/flota.service';
-import { EstadoUnidad, UnidadFlota } from '../../../models/flota.model';
+import { UnidadFlota } from '../../../models/flota.model';
 import { NuevaUnidadComponent } from './nueva-unidad/nueva-unidad';
 import { EditarUnidadComponent } from './editar-unidad/editar-unidad';
 import { DetalleUnidadComponent } from './detalle-unidad/detalle-unidad';
@@ -76,10 +76,10 @@ export class FlotaComponent implements OnInit {
   protected readonly exitoRetorno    = signal<string | null>(null);
 
   protected readonly totalUnidades   = computed(() => this.flota().length);
-  protected readonly operativas      = computed(() => this.flota().filter(u => u.estado === 'Operativa').length);
-  protected readonly enTaller        = computed(() => this.flota().filter(u => u.estado === 'En Taller').length);
+  protected readonly operativas      = computed(() => this.flota().filter(u => u.estado === 'ACTIVO' && u.estadoOperacion !== 'ENTALLER').length);
+  protected readonly enTaller        = computed(() => this.flota().filter(u => u.estadoOperacion === 'ENTALLER').length);
   protected readonly segurosCriticos = computed(() => this.flota().filter(u => {
-    const badge = this.seguroBadge(u.vencimientoSeguro);
+    const badge = this.seguroBadge(u.fecVenSeg ?? '');
     return badge === 'POR VENCER' || badge === 'VENCIDO';
   }).length);
 
@@ -103,16 +103,17 @@ export class FlotaComponent implements OnInit {
   protected readonly flotaFiltrada = computed(() => {
     const filtro = this.filtroFlota();
     const busq = this.busqueda().toLowerCase();
-    const estadoMap: Record<FiltroFlota, EstadoUnidad> = {
-      Activas: 'Operativa',
-      'En Taller': 'En Taller',
-      Bajas: 'Baja',
-    };
-    return this.flota().filter(
-      (u) =>
-        u.estado === estadoMap[filtro] &&
-        (!busq || u.placa.toLowerCase().includes(busq) || u.marca.toLowerCase().includes(busq) || u.modelo.toLowerCase().includes(busq) || u.id.toLowerCase().includes(busq))
-    );
+    return this.flota().filter(u => {
+      const matchFiltro = filtro === 'Activas'   ? (u.estado === 'ACTIVO' && u.estadoOperacion !== 'ENTALLER')
+                        : filtro === 'En Taller' ? (u.estadoOperacion === 'ENTALLER')
+                        :                          (u.estado === 'INACTIVO');
+      return matchFiltro && (!busq ||
+        u.placa.toLowerCase().includes(busq) ||
+        u.marca.toLowerCase().includes(busq) ||
+        u.modelo.toLowerCase().includes(busq) ||
+        String(u.id).includes(busq)
+      );
+    });
   });
 
   ngOnInit(): void {
@@ -146,9 +147,15 @@ export class FlotaComponent implements OnInit {
     this.flotaSvc.getFlota().subscribe((gruas) => this.flota.set(gruas));
   }
 
+  protected estadoDisplay(u: UnidadFlota): string {
+    if (u.estado === 'INACTIVO') return 'Baja';
+    if (u.estadoOperacion === 'ENTALLER') return 'En Taller';
+    return 'Operativa';
+  }
+
   protected onEstadoClick(u: UnidadFlota): void {
-    if (u.estado === 'Baja') return;
-    if (u.estado === 'En Taller') {
+    if (u.estado === 'INACTIVO') return;
+    if (u.estadoOperacion === 'ENTALLER') {
       this.unidadRetorno.set(u);
     } else {
       this.unidadLiberar.set(u);
@@ -174,7 +181,7 @@ export class FlotaComponent implements OnInit {
     if (!u) return;
     this.unidadLiberar.set(null);
     this.cargarFlota();
-    this.exitoLiberar.set(u.id);
+    this.exitoLiberar.set(String(u.id));
   }
 
   protected onConfirmarRetorno(): void {
@@ -182,39 +189,37 @@ export class FlotaComponent implements OnInit {
     if (!u) return;
     this.unidadRetorno.set(null);
     this.cargarFlota();
-    this.exitoRetorno.set(u.id);
+    this.exitoRetorno.set(String(u.id));
   }
 
-  protected darDeBaja(id: string): void {
-    const idNumerico = parseInt(id.split('-')[1], 10);
+  protected darDeBaja(id: number): void {
     this.guardando.set(true);
     this.errorGuardar.set(null);
-    this.flotaSvc.actualizarEstadoGrua(idNumerico, 'INACTIVO').subscribe({
+    this.flotaSvc.actualizarEstadoGrua(id, 'INACTIVO').subscribe({
       next: result => {
         this.guardando.set(false);
         if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
         this.cargarFlota();
-        this.exitoBaja.set(id);
+        this.exitoBaja.set(String(id));
       },
       error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
     });
   }
 
-  protected reactivar(id: string): void {
-    const idNumerico = parseInt(id.split('-')[1], 10);
-    this.flotaSvc.actualizarEstadoGrua(idNumerico, 'ACTIVO').subscribe({
+  protected reactivar(id: number): void {
+    this.flotaSvc.actualizarEstadoGrua(id, 'ACTIVO').subscribe({
       next: result => {
         if (result.exitoso === 1) {
           this.cargarFlota();
-          this.exitoReactivar.set(id);
+          this.exitoReactivar.set(String(id));
         }
       },
       error: () => {},
     });
   }
 
-  protected estadoClass(estado: EstadoUnidad): string {
-    switch (estado) {
+  protected estadoClass(display: string): string {
+    switch (display) {
       case 'Operativa': return 'bg-[#dcfce7] text-[#166534] border-[#bbf7d0]';
       case 'En Taller': return 'bg-[#fef9c3] text-[#854d0e] border-[#fde68a]';
       case 'Baja': return 'bg-[#fef2f2] text-[#c10007] border-[#fca5a5]';
@@ -222,10 +227,11 @@ export class FlotaComponent implements OnInit {
     }
   }
 
-  protected seguroBadge(fecha: string): 'VIGENTE' | 'POR VENCER' | 'VENCIDO' {
-    if (!fecha) return 'VIGENTE';
+  protected seguroBadge(fecVenSeg: string): 'VIGENTE' | 'POR VENCER' | 'VENCIDO' {
+    if (!fecVenSeg) return 'VIGENTE';
+    const [d, m, y] = fecVenSeg.split('/');
+    const ts = new Date(+y, +m - 1, +d).getTime();
     const now = Date.now();
-    const ts = new Date(fecha).getTime();
     if (ts < now) return 'VENCIDO';
     if (ts < now + 30 * 24 * 60 * 60 * 1000) return 'POR VENCER';
     return 'VIGENTE';
@@ -238,11 +244,5 @@ export class FlotaComponent implements OnInit {
       case 'VENCIDO': return 'bg-[#fef2f2] text-[#c10007] border-[#fca5a5]';
       default: return '';
     }
-  }
-
-  protected formatFecha(dateStr: string): string {
-    if (!dateStr) return '—';
-    const [y, m, d] = dateStr.split('-');
-    return `${d}/${m}/${y}`;
   }
 }

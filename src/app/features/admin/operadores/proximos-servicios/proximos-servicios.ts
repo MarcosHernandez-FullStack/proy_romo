@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import { Operador } from '../../../../models/operadores.model';
+import { Operador, ServicioProximo } from '../../../../models/operadores.model';
 
 @Component({
   selector: 'app-proximos-servicios',
@@ -9,5 +9,6 @@ import { Operador } from '../../../../models/operadores.model';
 })
 export class ProximosServiciosComponent {
   readonly operador = input.required<Operador>();
+  readonly servicios = input.required<ServicioProximo[]>();
   readonly cerrar   = output<void>();
 }

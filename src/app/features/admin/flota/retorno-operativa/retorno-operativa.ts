@@ -58,9 +58,7 @@ export class RetornoOperativaComponent {
     this.errorMsg.set(null);
     this.guardando.set(true);
 
-    const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
-
-    this.flotaSvc.retornoOperativa(idNumerico, {
+    this.flotaSvc.retornoOperativa(this.unidad().id, {
       nombreResponsable: this.nombreResponsable().trim(),
       kilometraje:       this.kilometraje()!,
       nota:              this.nota().trim(),

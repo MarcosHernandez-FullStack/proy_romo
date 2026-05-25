@@ -42,10 +42,17 @@ export class EditarOperadorComponent implements OnInit {
     this.nombres.set(o.nombres);
     this.apellidos.set(o.apellidos);
     this.correo.set(o.correo);
-    this.telefono.set(o.telefono);
+    this.telefono.set(o.telefono ?? '');
     this.password.set('');
-    this.licencia.set(o.licencia);
-    this.vencimientoLicencia.set(o.vencimientoLicencia);
+    this.licencia.set(o.nroLicencia);
+    this.vencimientoLicencia.set(this.toIso(o.fecVenLic));
+  }
+
+  private toIso(fec: string): string {
+    const parts = fec.split('/');
+    if (parts.length !== 3) return fec;
+    const [d, m, y] = parts;
+    return `${y}-${m}-${d}`;
   }
 
   // ── Validaciones por campo ────────────────────────────────
@@ -112,11 +119,8 @@ export class EditarOperadorComponent implements OnInit {
     this.mostrarErrores.set(true);
     if (!this.esValido || this.loading()) return;
 
-    const o = this.operador();
-    const idNum = parseInt(o.id.replace('OP-', ''), 10);
-
     this.loading.set(true);
-    this.operadoresSvc.editarOperador(idNum, {
+    this.operadoresSvc.editarOperador(this.operador().id, {
       contrasena:  this.password(),
       nombres:     this.nombres(),
       apellidos:   this.apellidos(),

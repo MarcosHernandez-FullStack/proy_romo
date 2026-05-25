@@ -144,7 +144,7 @@
                   class="size-4 rounded border-[#d1d5dc] accent-[#155dfc] cursor-pointer"
                 />
                 <div class="rounded-full size-2 shrink-0" [style.background-color]="estadoOpDotColor(estado)"></div>
-                <span class="text-[13px] text-[#364153]">{{ estado }}</span>
+                <span class="text-[13px] text-[#364153]">{{ estadoOpLabel(estado) }}</span>
               </label>
             }
           </div>
@@ -182,7 +182,7 @@
                   (change)="toggleFiltroAdmin(estado)"
                   class="size-4 rounded border-[#d1d5dc] accent-[#155dfc] cursor-pointer"
                 />
-                <span class="text-[13px] text-[#364153]">{{ estado }}</span>
+                <span class="text-[13px] text-[#364153]">{{ estadoAdminLabel(estado) }}</span>
               </label>
             }
           </div>
@@ -255,18 +255,18 @@
         <!-- ID / Fecha -->
         <div class="px-5 py-4">
           <p class="font-semibold text-[#101828] text-[14px] font-mono">{{ srv.id }}</p>
-          <p class="text-[12px] text-[#6a7282] mt-1">{{ srv.fecha }} · {{ srv.hora }}</p>
+          <p class="text-[12px] text-[#6a7282] mt-1">{{ srv.fechaHoraFormateada }}</p>
         </div>
 
         <!-- Trayecto -->
         <div class="px-5 py-4 flex flex-col gap-1 justify-center">
           <div class="flex items-center gap-2">
             <div class="bg-[#00c950] rounded-full size-[6px] shrink-0"></div>
-            <span class="text-[12px] text-[#364153]">{{ srv.origen }}</span>
+            <span class="text-[12px] text-[#364153]">{{ srv.direccionOrigen }}</span>
           </div>
           <div class="flex items-center gap-2">
             <div class="bg-[#fb2c36] rounded-full size-[6px] shrink-0"></div>
-            <span class="text-[12px] text-[#364153]">{{ srv.destino }}</span>
+            <span class="text-[12px] text-[#364153]">{{ srv.direccionDestino }}</span>
           </div>
         </div>
 
@@ -274,7 +274,7 @@
         <div class="px-5 py-4 flex items-center">
           <div class="flex items-center gap-2 bg-[#f3f4f6] border border-[#e5e7eb] rounded-full px-3 h-[26px]">
             <lucide-angular [img]="CarIcon" class="size-3" color="#364153" [strokeWidth]="2" />
-            <span class="text-[12px] font-semibold text-[#364153]">{{ vehiculosLabel(srv.vehiculos) }}</span>
+            <span class="text-[12px] font-semibold text-[#364153]">{{ vehiculosLabel(srv.cantidadVehiculos) }}</span>
           </div>
         </div>
 
@@ -286,20 +286,20 @@
         <!-- Est. Operativo -->
         <div class="px-5 py-4 flex items-center">
           <div class="flex items-center gap-2">
-            <div class="rounded-full size-2 shrink-0" [style.background-color]="estadoOpDotColor(srv.estadoOperativo)"></div>
-            <span class="text-[14px] font-medium" [class]="estadoOpClass(srv.estadoOperativo)">{{ srv.estadoOperativo }}</span>
+            <div class="rounded-full size-2 shrink-0" [style.background-color]="estadoOpDotColor(srv.estadoOperacion)"></div>
+            <span class="text-[14px] font-medium" [class]="estadoOpClass(srv.estadoOperacion)">{{ estadoOpLabel(srv.estadoOperacion) }}</span>
           </div>
         </div>
 
         <!-- Est. Admin -->
         <div class="px-5 py-4 flex items-center">
-          @let s = estadoAdminClass(srv.estadoAdmin);
+          @let s = estadoAdminClass(srv.estadoAdministrativo);
           <div
             class="rounded-full px-3 h-[26px] flex items-center border text-[12px] font-semibold"
             [style.background-color]="s.bg"
             [style.border-color]="s.border"
             [style.color]="s.text"
-          >{{ srv.estadoAdmin }}</div>
+          >{{ estadoAdminLabel(srv.estadoAdministrativo) }}</div>
         </div>
 
         <!-- Ver -->

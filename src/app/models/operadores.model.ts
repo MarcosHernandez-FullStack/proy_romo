@@ -3,28 +3,29 @@ import { GridDisponibilidad } from './agenda.model';
 export type TipoDisponibilidad = 'Tiempo Completo' | 'Horario Parcial' | 'Personalizado';
 
 export interface ServicioProximo {
-  id:      string;
-  fecha:   string;
-  hora:    string;
-  cliente: string;
+  id:             number;
+  fechaServicio:  string;
+  horaInicio:     string;
+  horaFin:        string;
+  nomCliente:     string;
+  fechaAbreviada: string;
 }
 
 export interface Operador {
-  id:                  string;
-  nombre:              string;
-  nombres:             string;
-  apellidos:           string;
-  correo:              string;
-  telefono:            string;
-  loginId:             string;
-  password:            string;
-  licencia:            string;
-  vencimientoLicencia: string;
-  proximoServicio:     { fecha: string; hora: string } | null;
-  serviciosAsignados:  ServicioProximo[];
-  tipoDisponibilidad:  TipoDisponibilidad;
-  disponibilidad:      GridDisponibilidad;
-  activo:              boolean;
+  id:                      number;
+  alias:                   string;
+  nombresCompleto:         string;
+  nombres:                 string;
+  apellidos:               string;
+  correo:                  string;
+  telefono:                string | null;
+  nroLicencia:             string;
+  fecVenLic:               string;
+  estado:                  string;
+  proximaFechaServicio:    string | null;
+  proximaHoraServicio:     string | null;
+  totalServiciosAsignados: number;
+  totalHorasSemanales:     number;
 }
 
 export interface EditarOperadorRequest {
@@ -74,30 +75,4 @@ export interface DispRango {
 export interface DispResult {
   exitoso: number;
   mensaje: string;
-}
-
-export interface OperadorApiItem {
-  id:                      number;
-  alias:                   string;
-  nombresCompleto:         string;
-  nombres:                 string;
-  apellidos:               string;
-  correo:                  string;
-  telefono:                string | null;
-  nroLicencia:             string;
-  fecVenLic:               string;
-  estado:                  string;
-  proximaFechaServicio:    string | null;
-  proximaHoraServicio:     string | null;
-  totalServiciosAsignados: number;
-  totalHorasSemanales:     number;
-}
-
-export interface ProxServApiItem {
-  id:             number;
-  fechaServicio:  string;
-  horaInicio:     string;
-  horaFin:        string;
-  nomCliente:     string;
-  fechaAbreviada: string;
 }

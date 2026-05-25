@@ -24,7 +24,7 @@
           <!-- Login (read-only) -->
           <div>
             <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">ID de Usuario (Login)</label>
-            <input type="text" [value]="operador().loginId" disabled
+            <input type="text" [value]="operador().alias" disabled
               class="w-full border border-[#e5e7eb] rounded-[10px] px-3 py-2.5 text-[14px] text-[#9ca3af] bg-[#f9fafb] cursor-not-allowed" />
             <p class="text-[11px] text-[#9ca3af] mt-1">El alias no puede modificarse.</p>
           </div>
@@ -225,7 +225,7 @@
     titulo="¡Operador Actualizado!"
     mensaje="Los datos del operador fueron actualizados exitosamente."
     etiqueta="ID OPERADOR"
-    [detalle]="operador().id"
+    [detalle]="'' + operador().id"
     labelCerrar="Aceptar"
     (cerrar)="guardar.emit()" />
 }

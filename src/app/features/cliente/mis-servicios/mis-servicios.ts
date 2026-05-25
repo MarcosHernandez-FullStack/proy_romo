@@ -14,7 +14,7 @@ import {
   DollarSign,
 } from 'lucide-angular';
 import { ReservasService } from '../../../core/services/reservas.service';
-import { DetalleServicio, EstadoAdminServicio, EstadoOperativo, Servicio } from '../../../models/operaciones.model';
+import { DetalleServicio, Servicio } from '../../../models/operaciones.model';
 import { DetalleServicioComponent } from './detalle-servicio/detalle-servicio';
 
 @Component({
@@ -26,10 +26,10 @@ import { DetalleServicioComponent } from './detalle-servicio/detalle-servicio';
 export class MisServiciosComponent implements OnInit {
   private readonly reservasSvc = inject(ReservasService);
 
-  protected readonly SearchIcon     = Search;
-  protected readonly DownloadIcon   = Download;
-  protected readonly EyeIcon        = Eye;
-  protected readonly CarIcon        = Car;
+  protected readonly SearchIcon       = Search;
+  protected readonly DownloadIcon     = Download;
+  protected readonly EyeIcon          = Eye;
+  protected readonly CarIcon          = Car;
   protected readonly ChevronDownIcon  = ChevronDown;
   protected readonly ChevronUpIcon    = ChevronUp;
   protected readonly ChevronLeftIcon  = ChevronLeft;
@@ -37,36 +37,38 @@ export class MisServiciosComponent implements OnInit {
   protected readonly FileTextIcon     = FileText;
   protected readonly DollarSignIcon   = DollarSign;
 
-  protected readonly servicios = signal<Servicio[]>([]);
-  protected readonly cargando  = signal(false);
-  protected readonly searchQuery = signal('');
-  protected readonly fechaDesde = signal('');
-  protected readonly fechaHasta = signal('');
+  protected readonly servicios    = signal<Servicio[]>([]);
+  protected readonly cargando     = signal(false);
+  protected readonly searchQuery  = signal('');
+  protected readonly fechaDesde   = signal('');
+  protected readonly fechaHasta   = signal('');
 
-  protected readonly detalle = signal<DetalleServicio | null>(null);
-  protected readonly showDetalle = signal(false);
+  protected readonly detalle        = signal<DetalleServicio | null>(null);
+  protected readonly showDetalle    = signal(false);
   protected readonly detalleLoading = signal(false);
 
   readonly ITEMS_POR_PAGINA = 10;
   protected readonly paginaActual = signal(1);
 
-  // Dropdowns de filtro
-  protected readonly filtroOpOpen = signal(false);
+  protected readonly filtroOpOpen    = signal(false);
   protected readonly filtroAdminOpen = signal(false);
-  protected readonly filtroOp = signal<Set<EstadoOperativo>>(new Set());
-  protected readonly filtroAdmin = signal<Set<EstadoAdminServicio>>(new Set());
+  protected readonly filtroOp        = signal<Set<string>>(new Set());
+  protected readonly filtroAdmin     = signal<Set<string>>(new Set());
 
-  protected readonly estadosOp: EstadoOperativo[] = ['Reservado', 'Asignado', 'En Curso', 'Finalizado'];
-  protected readonly estadosAdmin: EstadoAdminServicio[] = ['Pendiente', 'Facturado', 'Pagado'];
+  protected readonly estadosOp:    string[] = ['RESERVADO', 'ASIGNADO', 'ENCURSO', 'FINALIZADO'];
+  protected readonly estadosAdmin: string[] = ['PENDIENTE', 'FACTURADO', 'PAGADO'];
 
   protected readonly filtered = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    const opFilter = this.filtroOp();
+    const q           = this.searchQuery().toLowerCase();
+    const opFilter    = this.filtroOp();
     const adminFilter = this.filtroAdmin();
-    return this.servicios().filter((s) => {
-      const matchQ = !q || s.id.toLowerCase().includes(q) || s.origen.toLowerCase().includes(q) || s.destino.toLowerCase().includes(q);
-      const matchOp = opFilter.size === 0 || opFilter.has(s.estadoOperativo);
-      const matchAdmin = adminFilter.size === 0 || adminFilter.has(s.estadoAdmin);
+    return this.servicios().filter(s => {
+      const matchQ     = !q
+        || String(s.id).includes(q)
+        || s.direccionOrigen.toLowerCase().includes(q)
+        || s.direccionDestino.toLowerCase().includes(q);
+      const matchOp    = opFilter.size === 0    || opFilter.has(s.estadoOperacion);
+      const matchAdmin = adminFilter.size === 0 || adminFilter.has(s.estadoAdministrativo);
       return matchQ && matchOp && matchAdmin;
     });
   });
@@ -88,38 +90,46 @@ export class MisServiciosComponent implements OnInit {
     return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
   });
 
-  // KPIs (globales — siempre sobre el total sin filtro)
   protected readonly totalServicios = computed(() => this.servicios().length);
-  protected readonly enOperacion = computed(
-    () => this.servicios().filter((s) => s.estadoOperativo === 'Asignado' || s.estadoOperativo === 'En Curso').length
+
+  protected readonly enOperacion = computed(() =>
+    this.servicios().filter(s =>
+      s.estadoOperacion === 'ASIGNADO' || s.estadoOperacion === 'ENCURSO'
+    ).length
   );
+
   protected readonly montoPendiente = computed(() =>
     this.servicios()
-      .filter((s) => s.estadoAdmin === 'Pendiente' || s.estadoAdmin === 'Facturado')
-      .reduce((sum, s) => sum + s.costo, 0)
-  );
-  protected readonly montoLiquidado = computed(() =>
-    this.servicios()
-      .filter((s) => s.estadoAdmin === 'Pagado')
+      .filter(s => s.estadoAdministrativo === 'PENDIENTE' || s.estadoAdministrativo === 'FACTURADO')
       .reduce((sum, s) => sum + s.costo, 0)
   );
 
-  // Totales del footer — reflejan la vista filtrada actual
+  protected readonly montoLiquidado = computed(() =>
+    this.servicios()
+      .filter(s => s.estadoAdministrativo === 'PAGADO')
+      .reduce((sum, s) => sum + s.costo, 0)
+  );
+
   protected readonly montoLiquidadoFiltrado = computed(() =>
     this.filtered()
-      .filter((s) => s.estadoAdmin === 'Pagado')
+      .filter(s => s.estadoAdministrativo === 'PAGADO')
       .reduce((sum, s) => sum + s.costo, 0)
   );
+
   protected readonly countLiquidadoFiltrado = computed(() =>
-    this.filtered().filter((s) => s.estadoAdmin === 'Pagado').length
+    this.filtered().filter(s => s.estadoAdministrativo === 'PAGADO').length
   );
+
   protected readonly montoPendienteFiltrado = computed(() =>
     this.filtered()
-      .filter((s) => s.estadoAdmin === 'Pendiente' || s.estadoAdmin === 'Facturado')
+      .filter(s => s.estadoAdministrativo === 'PENDIENTE' || s.estadoAdministrativo === 'FACTURADO')
       .reduce((sum, s) => sum + s.costo, 0)
   );
+
   protected readonly countPendienteFiltrado = computed(() =>
-    this.filtered().filter((s) => s.estadoAdmin === 'Pendiente' || s.estadoAdmin === 'Facturado').length
+    this.filtered().filter(s =>
+      s.estadoAdministrativo === 'PENDIENTE' || s.estadoAdministrativo === 'FACTURADO'
+    ).length
   );
 
   ngOnInit(): void {
@@ -134,10 +144,10 @@ export class MisServiciosComponent implements OnInit {
     });
   }
 
-  protected verDetalle(id: string): void {
+  protected verDetalle(id: number): void {
     this.detalleLoading.set(true);
     this.showDetalle.set(true);
-    this.reservasSvc.getDetalle(id).subscribe((data) => {
+    this.reservasSvc.getDetalle(id).subscribe(data => {
       this.detalle.set(data);
       this.detalleLoading.set(false);
     });
@@ -179,34 +189,55 @@ export class MisServiciosComponent implements OnInit {
   }
 
   protected vehiculosLabel(n: number): string {
-    if (n === 1) return '1 Vehículo';
-    if (n >= 3) return `${n} Vehículos`;
-    return `${n} Vehículos`;
+    return n === 1 ? '1 Vehículo' : `${n} Vehículos`;
   }
 
-  protected estadoOpClass(estado: EstadoOperativo): string {
+  protected estadoOpLabel(estado: string): string {
     switch (estado) {
-      case 'Finalizado': return 'text-[#008236]';
-      case 'En Curso': return 'text-[#ca3500]';
-      case 'Asignado': return 'text-[#1447e6]';
-      case 'Reservado': return 'text-[#bb4d00]';
+      case 'RESERVADO':  return 'Reservado';
+      case 'ASIGNADO':   return 'Asignado';
+      case 'ENCURSO':    return 'En Curso';
+      case 'FINALIZADO': return 'Finalizado';
+      case 'CANCELADO':  return 'Cancelado';
+      default:           return estado;
     }
   }
 
-  protected estadoOpDotColor(estado: EstadoOperativo): string {
+  protected estadoAdminLabel(estado: string): string {
     switch (estado) {
-      case 'Finalizado': return '#00c950';
-      case 'En Curso': return '#ff6900';
-      case 'Asignado': return '#2b7fff';
-      case 'Reservado': return '#ffb900';
+      case 'PENDIENTE':  return 'Pendiente';
+      case 'FACTURADO':  return 'Facturado';
+      case 'PAGADO':     return 'Pagado';
+      default:           return estado;
     }
   }
 
-  protected estadoAdminClass(estado: EstadoAdminServicio): { bg: string; border: string; text: string } {
+  protected estadoOpClass(estado: string): string {
     switch (estado) {
-      case 'Pagado': return { bg: '#f0fdf4', border: '#b9f8cf', text: '#008236' };
-      case 'Facturado': return { bg: '#eff6ff', border: '#bedbff', text: '#1447e6' };
-      case 'Pendiente': return { bg: '#fffbeb', border: '#ffd230', text: '#bb4d00' };
+      case 'FINALIZADO': return 'text-[#008236]';
+      case 'ENCURSO':    return 'text-[#ca3500]';
+      case 'ASIGNADO':   return 'text-[#1447e6]';
+      case 'RESERVADO':  return 'text-[#bb4d00]';
+      default:           return 'text-[#6a7282]';
+    }
+  }
+
+  protected estadoOpDotColor(estado: string): string {
+    switch (estado) {
+      case 'FINALIZADO': return '#00c950';
+      case 'ENCURSO':    return '#ff6900';
+      case 'ASIGNADO':   return '#2b7fff';
+      case 'RESERVADO':  return '#ffb900';
+      default:           return '#9ca3af';
+    }
+  }
+
+  protected estadoAdminClass(estado: string): { bg: string; border: string; text: string } {
+    switch (estado) {
+      case 'PAGADO':    return { bg: '#f0fdf4', border: '#b9f8cf', text: '#008236' };
+      case 'FACTURADO': return { bg: '#eff6ff', border: '#bedbff', text: '#1447e6' };
+      case 'PENDIENTE': return { bg: '#fffbeb', border: '#ffd230', text: '#bb4d00' };
+      default:          return { bg: '#f3f4f6', border: '#e5e7eb', text: '#6a7282' };
     }
   }
 
@@ -214,8 +245,8 @@ export class MisServiciosComponent implements OnInit {
     return '$' + n.toLocaleString('es-AR');
   }
 
-  protected toggleFiltroOp(estado: EstadoOperativo): void {
-    this.filtroOp.update((set) => {
+  protected toggleFiltroOp(estado: string): void {
+    this.filtroOp.update(set => {
       const next = new Set(set);
       next.has(estado) ? next.delete(estado) : next.add(estado);
       return next;
@@ -223,8 +254,8 @@ export class MisServiciosComponent implements OnInit {
     this.paginaActual.set(1);
   }
 
-  protected toggleFiltroAdmin(estado: EstadoAdminServicio): void {
-    this.filtroAdmin.update((set) => {
+  protected toggleFiltroAdmin(estado: string): void {
+    this.filtroAdmin.update(set => {
       const next = new Set(set);
       next.has(estado) ? next.delete(estado) : next.add(estado);
       return next;

@@ -31,7 +31,7 @@ export class DashboardComponent implements OnInit {
   protected readonly motorActivo = signal(true);
 
   protected readonly operadoresDisponibles = computed(
-    () => this.operadores().filter((o) => o.activo).length
+    () => this.operadores().filter((o) => o.estado === 'ACTIVO').length
   );
 
   protected readonly today = new Date().toLocaleDateString('es-AR', {

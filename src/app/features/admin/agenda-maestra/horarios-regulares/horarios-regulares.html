@@ -21,28 +21,28 @@
       <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">HORA FIN</span>
       <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">HORARIO CLIENTE</span>
     </div>
-    @for (h of editados(); track h.dia) {
+    @for (h of editados(); track h.nombreDia) {
       <div class="grid grid-cols-5 items-center px-4 py-3 border-b border-[#e5e7eb] last:border-0 hover:bg-[#fafafa] transition-colors">
-        <span class="text-[#101828] text-[14px] font-medium">{{ h.dia }}</span>
+        <span class="text-[#101828] text-[14px] font-medium">{{ h.nombreDia }}</span>
         <div>
           <button type="button" (click)="toggleActivo($index)"
             class="text-[13px] font-semibold rounded-full px-2.5 py-0.5 cursor-pointer transition-colors"
-            [class.bg-[#f0fdf4]]="h.activo"
-            [class.text-[#008236]]="h.activo"
-            [class.hover:bg-[#dcfce7]]="h.activo"
-            [class.bg-[#fef2f2]]="!h.activo"
-            [class.text-[#c10007]]="!h.activo"
-            [class.hover:bg-[#fee2e2]]="!h.activo">
-            {{ h.activo ? 'Activo' : 'Inactivo' }}
+            [class.bg-[#f0fdf4]]="h.estado === 'ACTIVO'"
+            [class.text-[#008236]]="h.estado === 'ACTIVO'"
+            [class.hover:bg-[#dcfce7]]="h.estado === 'ACTIVO'"
+            [class.bg-[#fef2f2]]="h.estado !== 'ACTIVO'"
+            [class.text-[#c10007]]="h.estado !== 'ACTIVO'"
+            [class.hover:bg-[#fee2e2]]="h.estado !== 'ACTIVO'">
+            {{ h.estado === 'ACTIVO' ? 'Activo' : 'Inactivo' }}
           </button>
         </div>
-        <select [ngModel]="h.abre" (ngModelChange)="updateAbre($index, $event)" [disabled]="!h.activo"
+        <select [ngModel]="h.horaInicio" (ngModelChange)="updateHoraInicio($index, $event)" [disabled]="h.estado !== 'ACTIVO'"
           class="w-24 border border-[#d1d5dc] rounded-lg px-2 py-1.5 text-[13px] text-[#101828] disabled:opacity-40 disabled:bg-[#f3f4f6] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
           @for (hora of horas; track hora) {
             <option [value]="hora">{{ hora }}</option>
           }
         </select>
-        <select [ngModel]="h.cierra" (ngModelChange)="updateCierra($index, $event)" [disabled]="!h.activo"
+        <select [ngModel]="h.horaFinal" (ngModelChange)="updateHoraFinal($index, $event)" [disabled]="h.estado !== 'ACTIVO'"
           class="w-24 border border-[#d1d5dc] rounded-lg px-2 py-1.5 text-[13px] text-[#101828] disabled:opacity-40 disabled:bg-[#f3f4f6] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer">
           @for (hora of horas; track hora) {
             <option [value]="hora">{{ hora }}</option>

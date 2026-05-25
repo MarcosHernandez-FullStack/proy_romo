@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, catchError, map } from 'rxjs';
-import { AgendaExcepcionResult, CrearUpdExcepcionDto, ExcepcionAgenda, HorarioApiItem, HorarioRegular } from '../../models/agenda.model';
+import { AgendaExcepcionResult, CrearUpdExcepcionDto, ExcepcionAgenda, HorarioRegular } from '../../models/agenda.model';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
@@ -28,14 +28,8 @@ export class AgendaService {
   }
 
   getHorariosRegulares(): Observable<HorarioRegular[]> {
-    return this.http.get<HorarioApiItem[]>(`${API}/agenda/horarios`, { params: { rol: 'CLIENTE' } }).pipe(
-      map(items => items.map(i => ({
-        id:     i.id,
-        dia:    i.nombreDia,
-        abre:   i.horaInicio,
-        cierra: i.horaFinal,
-        activo: i.estado === 'ACTIVO',
-      }))),
+    return this.http.get<HorarioRegular[]>(`${API}/agenda/horarios`, { params: { rol: 'CLIENTE' } }).pipe(
+      map(items => items ?? []),
       catchError(() => of(HORARIOS_REGULARES))
     );
   }
@@ -44,9 +38,9 @@ export class AgendaService {
     const body = {
       horarios: horarios.map(h => ({
         id:         h.id,
-        estado:     h.activo ? 'ACTIVO' : 'INACTIVO',
-        horaInicio: h.abre,
-        horaFinal:  h.cierra,
+        estado:     h.estado,
+        horaInicio: h.horaInicio,
+        horaFinal:  h.horaFinal,
       })),
     };
     return this.http.put<{ exitoso: number; mensaje: string }>(`${API}/agenda/horarios`, body);
@@ -54,11 +48,11 @@ export class AgendaService {
 }
 
 const HORARIOS_REGULARES: HorarioRegular[] = [
-  { id: 1, dia: 'Lunes',     abre: '07:00', cierra: '20:00', activo: true  },
-  { id: 2, dia: 'Martes',    abre: '07:00', cierra: '20:00', activo: true  },
-  { id: 3, dia: 'Miércoles', abre: '07:00', cierra: '20:00', activo: true  },
-  { id: 4, dia: 'Jueves',    abre: '07:00', cierra: '20:00', activo: true  },
-  { id: 5, dia: 'Viernes',   abre: '07:00', cierra: '20:00', activo: true  },
-  { id: 6, dia: 'Sábado',    abre: '08:00', cierra: '14:00', activo: true  },
-  { id: 7, dia: 'Domingo',   abre: '00:00', cierra: '00:00', activo: false },
+  { id: 1, nroDia: 1, nombreDia: 'Lunes',     estado: 'ACTIVO',   horaInicio: '07:00', horaFinal: '20:00' },
+  { id: 2, nroDia: 2, nombreDia: 'Martes',    estado: 'ACTIVO',   horaInicio: '07:00', horaFinal: '20:00' },
+  { id: 3, nroDia: 3, nombreDia: 'Miércoles', estado: 'ACTIVO',   horaInicio: '07:00', horaFinal: '20:00' },
+  { id: 4, nroDia: 4, nombreDia: 'Jueves',    estado: 'ACTIVO',   horaInicio: '07:00', horaFinal: '20:00' },
+  { id: 5, nroDia: 5, nombreDia: 'Viernes',   estado: 'ACTIVO',   horaInicio: '07:00', horaFinal: '20:00' },
+  { id: 6, nroDia: 6, nombreDia: 'Sábado',    estado: 'ACTIVO',   horaInicio: '08:00', horaFinal: '14:00' },
+  { id: 7, nroDia: 7, nombreDia: 'Domingo',   estado: 'INACTIVO', horaInicio: '00:00', horaFinal: '00:00' },
 ];

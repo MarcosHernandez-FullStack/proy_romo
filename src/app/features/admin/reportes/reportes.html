@@ -110,7 +110,7 @@
               [class.bg-[#155dfc]]="filtroOperativo() === f"
               [class.text-white]="filtroOperativo() === f"
               [class.text-[#6a7282]]="filtroOperativo() !== f">
-              {{ f }}
+              {{ f === 'Todos' ? 'Todos' : estadoLabel(f) }}
             </button>
           }
         </div>
@@ -124,7 +124,7 @@
               [class.bg-[#155dfc]]="filtroAdmin() === f"
               [class.text-white]="filtroAdmin() === f"
               [class.text-[#6a7282]]="filtroAdmin() !== f">
-              {{ f }}
+              {{ f === 'Todos' ? 'Todos' : estadoAdminLabel(f) }}
             </button>
           }
         </div>
@@ -191,14 +191,14 @@
         <div class="flex items-center gap-1.5">
           <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
             [class]="estadoOperClass(s.estado)">
-            @if (s.estado === 'Finalizado') {
+            @if (s.estado === 'FINALIZADO') {
               <lucide-angular [img]="CheckCircleIcon" class="size-3" [strokeWidth]="2" />
             } @else {
               <lucide-angular [img]="XCircleIcon" class="size-3" [strokeWidth]="2" />
             }
-            {{ s.estado }}
+            {{ estadoLabel(s.estado) }}
           </span>
-          @if (s.estado === 'Cancelado') {
+          @if (s.estado === 'CANCELADO') {
             <button type="button" (click)="abrirRevisionCancelacion(s)"
               class="size-5 flex items-center justify-center rounded-md hover:bg-[#fef2f2] transition-colors cursor-pointer"
               title="Ver detalle de cancelación">
@@ -207,16 +207,16 @@
           }
         </div>
         <!-- Estado Admin -->
-        @if (s.estado === 'Cancelado') {
+        @if (s.estado === 'CANCELADO') {
           <span class="text-[#9ca3af] text-[12px]">N/A</span>
-        } @else if (s.estadoAdministrativo === 'Pendiente') {
+        } @else if (s.estadoAdministrativo === 'PENDIENTE') {
           <div class="flex items-center gap-1">
             <button type="button" (click)="servicioFacturar.set(s)"
               class="inline-flex items-center gap-1 border border-[#fde68a] bg-[#fef9c3] text-[#854d0e] rounded-full px-2.5 py-0.5 text-[11px] font-semibold hover:bg-[#fde68a] transition-colors cursor-pointer">
               Facturar
             </button>
           </div>
-        } @else if (s.estadoAdministrativo === 'Facturado') {
+        } @else if (s.estadoAdministrativo === 'FACTURADO') {
           <div class="flex items-center gap-1">
             <button type="button" (click)="servicioPago.set(s)"
               class="inline-flex items-center gap-1 border border-[#bedbff] text-[#1447e6] rounded-full px-2.5 py-0.5 text-[11px] font-semibold hover:bg-[#eff6ff] transition-colors cursor-pointer">
@@ -226,7 +226,7 @@
         } @else {
           <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
             [class]="estadoAdminClass(s.estadoAdministrativo)">
-            {{ s.estadoAdministrativo }}
+            {{ estadoAdminLabel(s.estadoAdministrativo) }}
           </span>
         }
       </div>

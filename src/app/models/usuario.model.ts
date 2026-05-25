@@ -1,39 +1,21 @@
 export type RolUsuario = 'ADMINISTRADOR' | 'STAFF';
 
 export interface UsuarioAdmin {
-  id:            number;
-  nombres:       string;
-  apellidos:     string;
-  correo:        string;
-  telefono:      string;
-  rol:           RolUsuario;
-  fechaCreacion: string;
-  activo:        string;
+  id:                  number;
+  nombres:             string;
+  apellidos:           string;
+  correo:              string;
+  telefono:            string;
+  rol:                 RolUsuario;
+  estado:              string;
+  fechaCreacion:       string;
+  fechaCreacionFormat: string;
 }
 
 export interface CrearUsuarioResult {
   exitoso: number;
   mensaje: string;
   idNuevo: number;
-}
-
-export interface UsuarioApiItem {
-  id:                  number;
-  nombres:             string;
-  apellidos:           string;
-  correo:              string;
-  telefono:            string;
-  rol:                 string;
-  estado:              string;
-  fechaCreacion:       string;
-  fechaCreacionFormat: string;
-}
-
-export interface UsuarioPagedApiResponse {
-  total:                number;
-  totalAdministradores: number;
-  totalStaff:           number;
-  datos:                UsuarioApiItem[];
 }
 
 export interface CrearUsuarioRequest {
@@ -62,4 +44,12 @@ export interface GetUsuariosParams {
   rol?:     string;
   pagina?:  number;
   tamano?:  number;
+}
+
+
+export interface UsuarioPagedApiResponse {
+  total:                number;
+  totalAdministradores: number;
+  totalStaff:           number;
+  datos:                UsuarioAdmin[];
 }

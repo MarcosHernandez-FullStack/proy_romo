@@ -2,8 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserCog, Plus, Search, Pencil, RotateCcw, Trash2, Phone, Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-angular';
 import { OperadoresService } from '../../../core/services/operadores.service';
-import { DIAS_SEMANA, DiaSemana, GridDisponibilidad, HoraGrid, HORAS_GRID } from '../../../models/agenda.model';
-import { Operador, TipoDisponibilidad } from '../../../models/operadores.model';
+import { Operador, ServicioProximo } from '../../../models/operadores.model';
 import { NuevoOperadorComponent } from './nuevo-operador/nuevo-operador';
 import { EditarOperadorComponent } from './editar-operador/editar-operador';
 import { ProximosServiciosComponent } from './proximos-servicios/proximos-servicios';
@@ -54,6 +53,7 @@ export class OperadoresComponent implements OnInit {
   protected readonly showNuevo          = signal(false);
   protected readonly operadorEditar     = signal<Operador | null>(null);
   protected readonly operadorServicios  = signal<Operador | null>(null);
+  protected readonly serviciosDelOperador = signal<ServicioProximo[]>([]);
   protected readonly loadingServicios   = signal(false);
   protected readonly operadorDisponib   = signal<Operador | null>(null);
 
@@ -65,16 +65,16 @@ export class OperadoresComponent implements OnInit {
 
   protected readonly totalOperadores  = computed(() => this.operadores().length);
   protected readonly conServiciosHoy  = computed(() =>
-    this.operadores().filter(o => o.activo && o.proximoServicio).length
+    this.operadores().filter(o => o.estado === 'ACTIVO' && o.proximaFechaServicio).length
   );
   protected readonly conServiciosAsig = computed(() =>
-    this.operadores().filter(o => o.activo && o.serviciosAsignados.length > 0).length
+    this.operadores().filter(o => o.estado === 'ACTIVO' && o.totalServiciosAsignados > 0).length
   );
   protected readonly licenciasVencidas = computed(() => {
     const hoy = Date.now();
     return this.operadores().filter(o => {
-      if (!o.vencimientoLicencia) return false;
-      return new Date(o.vencimientoLicencia).getTime() < hoy;
+      if (!o.fecVenLic) return false;
+      return this.parseFecVenLic(o.fecVenLic) < hoy;
     }).length;
   });
 
@@ -82,8 +82,8 @@ export class OperadoresComponent implements OnInit {
     const activos = this.filtroEstado() === 'Activos';
     const busq = this.busqueda().toLowerCase();
     return this.operadores().filter(o =>
-      o.activo === activos &&
-      (!busq || o.nombre.toLowerCase().includes(busq) || o.licencia.toLowerCase().includes(busq))
+      (o.estado === 'ACTIVO') === activos &&
+      (!busq || o.nombresCompleto.toLowerCase().includes(busq) || o.nroLicencia.toLowerCase().includes(busq))
     );
   });
 
@@ -133,14 +133,15 @@ export class OperadoresComponent implements OnInit {
 
   protected abrirServicios(o: Operador): void {
     this.loadingServicios.set(true);
-    const idNum = parseInt(o.id.replace('OP-', ''), 10);
-    this.operadoresSvc.getServiciosOperador(idNum).subscribe({
+    this.operadoresSvc.getServiciosOperador(o.id).subscribe({
       next: servicios => {
-        this.operadorServicios.set({ ...o, serviciosAsignados: servicios });
+        this.operadorServicios.set(o);
+        this.serviciosDelOperador.set(servicios);
         this.loadingServicios.set(false);
       },
       error: () => {
         this.operadorServicios.set(o);
+        this.serviciosDelOperador.set([]);
         this.loadingServicios.set(false);
       },
     });
@@ -156,32 +157,7 @@ export class OperadoresComponent implements OnInit {
     this.operadoresSvc.getOperadores().subscribe(data => this.operadores.set(data));
   }
 
-  protected onGuardarDisponibilidad(grid: GridDisponibilidad): void {
-    const op = this.operadorDisponib();
-    if (!op) return;
-
-    // Derivar tipo de disponibilidad desde la grilla actualizada
-    let totalHoras = 0;
-    for (const dia of DIAS_SEMANA) {
-      for (const hora of HORAS_GRID) {
-        if (grid[dia]?.[hora]) totalHoras++;
-      }
-    }
-    const diasLab: DiaSemana[] = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
-    const horasNegocio: HoraGrid[] = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
-    const esCompleto =
-      diasLab.every(d =>
-        horasNegocio.every(h => grid[d]?.[h]) &&
-        HORAS_GRID.filter(h => !horasNegocio.includes(h)).every(h => !grid[d]?.[h])
-      ) &&
-      !(['Sáb', 'Dom'] as DiaSemana[]).some(d => HORAS_GRID.some(h => grid[d]?.[h]));
-    const tipoDisponibilidad: TipoDisponibilidad =
-      esCompleto ? 'Tiempo Completo' :
-      totalHoras > 0 && totalHoras <= 25 ? 'Horario Parcial' : 'Personalizado';
-
-    this.operadores.update(prev =>
-      prev.map(o => o.id === op.id ? { ...o, disponibilidad: grid, tipoDisponibilidad } : o)
-    );
+  protected onGuardarDisponibilidad(): void {
     this.operadorDisponib.set(null);
   }
 
@@ -197,17 +173,16 @@ export class OperadoresComponent implements OnInit {
     this.showConfirmEstado.set(false);
     this.loadingEstado.set(true);
 
-    const idNum      = parseInt(op.id.replace('OP-', ''), 10);
-    const nuevoEstado = op.activo ? 'INACTIVO' : 'ACTIVO';
+    const nuevoEstado = op.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
 
-    this.operadoresSvc.actualizarEstadoOperador(idNum, nuevoEstado).subscribe({
+    this.operadoresSvc.actualizarEstadoOperador(op.id, nuevoEstado).subscribe({
       next: result => {
         this.loadingEstado.set(false);
         this.operadorEnConfirmacion.set(null);
         if (result.exitoso === 1) {
           this.operadoresSvc.getOperadores().subscribe(data => this.operadores.set(data));
-          const titulo = op.activo ? '¡Operador Dado de Baja!' : '¡Operador Reactivado!';
-          this.exitoEstado.set({ titulo, id: op.id });
+          const titulo = op.estado === 'ACTIVO' ? '¡Operador Dado de Baja!' : '¡Operador Reactivado!';
+          this.exitoEstado.set({ titulo, id: String(op.id) });
         } else {
           this.modalResultado.set({ tipo: 'error', titulo: 'Error al actualizar', mensaje: result.mensaje || 'No se pudo actualizar el estado del operador.' });
         }
@@ -222,33 +197,49 @@ export class OperadoresComponent implements OnInit {
   }
 
   protected licenciaVencida(o: Operador): boolean {
-    if (!o.vencimientoLicencia) return false;
-    return new Date(o.vencimientoLicencia).getTime() < Date.now();
-  }
-
-  protected formatFecha(dateStr: string): string {
-    if (!dateStr) return '—';
-    const [y, m, d] = dateStr.split('-');
-    return `${d}/${m}/${y}`;
+    if (!o.fecVenLic) return false;
+    return this.parseFecVenLic(o.fecVenLic) < Date.now();
   }
 
   protected serviciosExtra(o: Operador): number {
-    return Math.max(0, o.serviciosAsignados.length - 1);
+    return Math.max(0, o.totalServiciosAsignados - 1);
   }
 
-  protected colorDisponibilidad(tipo: string): string {
-    switch (tipo) {
+  protected formatProximaFecha(fecha: string | null): string {
+    if (!fecha) return '';
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    const d = new Date(fecha);
+    return `${d.getUTCDate()} ${meses[d.getUTCMonth()]}`;
+  }
+
+  protected formatProximaHora(hora: string | null): string {
+    return (hora ?? '').substring(0, 5);
+  }
+
+  protected tipoDisponibilidadLabel(totalHoras: number): string {
+    if (totalHoras >= 40) return 'Tiempo Completo';
+    if (totalHoras > 0)  return 'Horario Parcial';
+    return 'Personalizado';
+  }
+
+  protected colorDisponibilidad(label: string): string {
+    switch (label) {
       case 'Tiempo Completo': return 'bg-[#f0fdf4] text-[#166534] border-[#bbf7d0]';
       case 'Horario Parcial': return 'bg-[#fefce8] text-[#854d0e] border-[#fde68a]';
       default:                return 'bg-[#f5f3ff] text-[#5b21b6] border-[#ddd6fe]';
     }
   }
 
-  protected tooltipDisponibilidad(tipo: string): string {
-    switch (tipo) {
+  protected tooltipDisponibilidad(label: string): string {
+    switch (label) {
       case 'Tiempo Completo': return 'Lun–Vie, 08:00–17:00 exactos, sin fines de semana';
       case 'Horario Parcial': return 'Entre 1 y 25 horas semanales configuradas';
       default:                return 'Sin horario configurado o más de 25h con patrón personalizado';
     }
+  }
+
+  private parseFecVenLic(fec: string): number {
+    const [d, m, y] = fec.split('/');
+    return new Date(+y, +m - 1, +d).getTime();
   }
 }

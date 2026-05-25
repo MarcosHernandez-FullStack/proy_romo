@@ -24,11 +24,12 @@ export interface ExcepcionAgenda {
 }
 
 export interface HorarioRegular {
-  id:     number;
-  dia:    string;
-  abre:   string;
-  cierra: string;
-  activo: boolean;
+  id:         number;
+  nroDia:     number;
+  nombreDia:  string;
+  estado:     string;
+  horaInicio: string;
+  horaFinal:  string;
 }
 
 export interface SlotAdmin {
@@ -37,14 +38,6 @@ export interface SlotAdmin {
   estadoOriginal?: 'libre' | 'excepcion';
 }
 
-export interface HorarioApiItem {
-  id:         number;
-  nroDia:     number;
-  nombreDia:  string;
-  estado:     string;
-  horaInicio: string;
-  horaFinal:  string;
-}
 
 export interface CrearUpdExcepcionDto {
   id:                number;

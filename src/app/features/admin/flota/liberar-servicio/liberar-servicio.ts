@@ -57,9 +57,7 @@ export class LiberarServicioComponent implements OnInit {
     this.errorMsg.set(null);
     this.guardando.set(true);
 
-    const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
-
-    this.flotaSvc.ingresoTaller(idNumerico, {
+    this.flotaSvc.ingresoTaller(this.unidad().id, {
       nombreResponsable: this.nombreResponsable().trim(),
       kilometraje:       this.kilometraje()!,
       nota:              this.nota().trim(),
@@ -80,11 +78,11 @@ export class LiberarServicioComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const idNumerico = parseInt(this.unidad().id.split('-')[1], 10);
-    if (!idNumerico) return;
+    const id = this.unidad().id;
+    if (!id) return;
 
     this.cargando.set(true);
-    this.flotaSvc.getReservasALiberar(idNumerico).subscribe({
+    this.flotaSvc.getReservasALiberar(id).subscribe({
       next: data => {
         this.reservas.set(data);
         this.cargando.set(false);
