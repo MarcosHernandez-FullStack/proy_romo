@@ -18,7 +18,7 @@
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[12px]">Total Servicios</p>
-        <p class="text-[#101828] text-[28px] font-bold">{{ totalServicios() }}</p>
+        <p class="text-[#101828] text-[28px] font-bold">{{ totalRegistros() }}</p>
       </div>
       <lucide-angular [img]="FileTextIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
     </div>
@@ -47,70 +47,71 @@
 
   <!-- Filters -->
   <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm p-5 flex flex-col gap-4">
-    <h3 class="text-[#101828] text-[15px] font-bold">Filtros de Búsqueda</h3>
 
-    <!-- Row 1: Search + Cliente B2B -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Fila 1: ID + Placa | Cliente B2B -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Izquierda: ID + Placa -->
       <div>
-        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Buscar por ID de Servicio o Placa</label>
-        <div class="relative">
-          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-          <input type="text" [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda"
-            placeholder="Ej: SRV-001 o ABC-123"
-            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">ID de Servicio y Placa</label>
+        <div class="flex gap-2">
+          <div class="relative w-28 shrink-0">
+            <lucide-angular [img]="HashIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+            <input type="text" inputmode="numeric" [ngModel]="filtroId()" (ngModelChange)="onIdChange($event)" name="filtroId"
+              placeholder="ID"
+              class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-2 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
+          <div class="relative flex-1">
+            <lucide-angular [img]="TruckIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+            <input type="text" [ngModel]="filtroPlaca()" (ngModelChange)="onPlacaChange($event)" name="filtroPlaca"
+              placeholder="Ej: ABC-123"
+              class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+          </div>
         </div>
       </div>
+      <!-- Derecha: Empresa -->
       <div>
         <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Cliente B2B</label>
         <div class="relative">
           <lucide-angular [img]="Building2Icon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-          <select [ngModel]="filtroCliente()" (ngModelChange)="setFiltroCliente($event)" name="filtroCliente"
-            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-8 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] bg-white cursor-pointer appearance-none">
-            <option value="">Buscar y seleccionar cliente...</option>
-            @for (c of clientesUnicos(); track c) {
-              <option [value]="c">{{ c }}</option>
-            }
-          </select>
-          <lucide-angular [img]="ChevronDownIcon" class="size-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="filtroEmpresa()" (ngModelChange)="onEmpresaChange($event)" name="filtroEmpresa"
+            placeholder="Buscar por empresa..."
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
         </div>
       </div>
     </div>
 
-    <!-- Row 2: Rango de Fechas -->
-    <div>
-      <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Rango de Fechas</label>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-1">DESDE:</p>
-          <div class="relative">
-            <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-            <input type="date" [ngModel]="fechaDesde()" (ngModelChange)="setFechaDesde($event)" name="fechaDesde"
-              class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-          </div>
+    <!-- Fila 2: Desde | Hasta -->
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Rango de Fechas — Desde</label>
+        <div class="relative">
+          <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="date" [ngModel]="fechaDesde()" (ngModelChange)="setFechaDesde($event)" name="fechaDesde"
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
         </div>
-        <div>
-          <p class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider mb-1">HASTA:</p>
-          <div class="relative">
-            <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-            <input type="date" [ngModel]="fechaHasta()" (ngModelChange)="setFechaHasta($event)" name="fechaHasta"
-              class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-          </div>
+      </div>
+      <div>
+        <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Hasta</label>
+        <div class="relative">
+          <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="date" [ngModel]="fechaHasta()" (ngModelChange)="setFechaHasta($event)" name="fechaHasta"
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
         </div>
       </div>
     </div>
 
-    <!-- Row 3: Estado Operativo + Estado Administrativo -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <!-- Fila 3: Estado Operativo | Estado Administrativo -->
+    <div class="grid grid-cols-2 gap-4">
       <div>
         <label class="text-[#364153] text-[12px] font-semibold mb-1.5 block">Estado Operativo</label>
         <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
           @for (f of filtrosOperativos; track f) {
             <button type="button" (click)="setFiltroOp(f)"
-              class="px-3 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
-              [class.bg-[#155dfc]]="filtroOperativo() === f"
-              [class.text-white]="filtroOperativo() === f"
-              [class.text-[#6a7282]]="filtroOperativo() !== f">
-              {{ f === 'Todos' ? 'Todos' : estadoLabel(f) }}
+              class="flex-1 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroOp() === f"
+              [class.text-white]="filtroOp() === f"
+              [class.text-[#6a7282]]="filtroOp() !== f">
+              {{ f === 'Todos' ? 'Todos' : (f === 'FINALIZADO' ? 'Finalizado' : 'Cancelado') }}
             </button>
           }
         </div>
@@ -120,20 +121,38 @@
         <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
           @for (f of filtrosAdmin; track f) {
             <button type="button" (click)="setFiltroAdm(f)"
-              class="px-3 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
-              [class.bg-[#155dfc]]="filtroAdmin() === f"
-              [class.text-white]="filtroAdmin() === f"
-              [class.text-[#6a7282]]="filtroAdmin() !== f">
-              {{ f === 'Todos' ? 'Todos' : estadoAdminLabel(f) }}
+              class="flex-1 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroAdm() === f"
+              [class.text-white]="filtroAdm() === f"
+              [class.text-[#6a7282]]="filtroAdm() !== f">
+              {{ f === 'Todos' ? 'Todos' : f === 'PENDIENTE' ? 'Pendiente' : f === 'FACTURADO' ? 'Facturado' : 'Pagado' }}
             </button>
           }
         </div>
       </div>
     </div>
 
-    <p class="text-[#155dfc] text-[13px] font-medium">
-      Mostrando <strong>{{ rangoMostrado() }}</strong> de {{ serviciosFiltrados().length }} servicio(s)
-    </p>
+    <!-- Fila 4: contador + acciones -->
+    <div class="flex items-center justify-between pt-1 border-t border-[#f3f4f6]">
+      <p class="text-[#155dfc] text-[13px] font-medium">
+        Mostrando <strong>{{ rangoMostrado() }}</strong> de {{ totalRegistros() }} servicio(s)
+      </p>
+      <div class="flex items-center gap-2">
+        @if (hasFiltros) {
+          <button type="button" (click)="limpiarFiltros()"
+            class="flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-[#e7000b] border border-[#fecaca] bg-[#fff5f5] rounded-[10px] hover:bg-[#fef2f2] transition-colors cursor-pointer">
+            <lucide-angular [img]="XIcon" class="size-3.5" color="#e7000b" [strokeWidth]="2" />
+            Limpiar Filtros
+          </button>
+        }
+        <button type="button" (click)="cargarReportes()"
+          class="h-9 px-4 rounded-[10px] bg-[#155dfc] text-white text-[13px] font-semibold flex items-center gap-2 hover:bg-[#1447e6] transition-colors cursor-pointer">
+          <lucide-angular [img]="RefreshCwIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+          Actualizar
+        </button>
+      </div>
+    </div>
+
   </div>
 
   <!-- Estados summary bar -->
@@ -162,14 +181,19 @@
       }
     </div>
 
-    @if (serviciosFiltrados().length === 0) {
+    @if (cargando()) {
+      <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
+        <div class="size-8 rounded-full border-2 border-[#155dfc] border-t-transparent animate-spin"></div>
+        <p class="text-[14px]">Cargando reportes...</p>
+      </div>
+    } @else if (servicios().length === 0) {
       <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
         <lucide-angular [img]="FileBarChart2Icon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
         <p class="text-[14px]">No hay servicios con los filtros aplicados</p>
       </div>
     }
 
-    @for (s of serviciosPaginados(); track s.id) {
+    @for (s of servicios(); track s.id) {
       <div class="grid grid-cols-[0.6fr_1fr_1.4fr_1.2fr_0.9fr_0.9fr_1fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[750px]">
         <!-- ID -->
         <p class="text-[#101828] text-[13px] font-bold font-mono">SRV-{{ s.id }}</p>
@@ -191,14 +215,14 @@
         <div class="flex items-center gap-1.5">
           <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
             [class]="estadoOperClass(s.estado)">
-            @if (s.estado === 'FINALIZADO') {
+            @if (s.estado === 'Finalizado') {
               <lucide-angular [img]="CheckCircleIcon" class="size-3" [strokeWidth]="2" />
             } @else {
               <lucide-angular [img]="XCircleIcon" class="size-3" [strokeWidth]="2" />
             }
-            {{ estadoLabel(s.estado) }}
+            {{ s.estado }}
           </span>
-          @if (s.estado === 'CANCELADO') {
+          @if (s.estado === 'Cancelado') {
             <button type="button" (click)="abrirRevisionCancelacion(s)"
               class="size-5 flex items-center justify-center rounded-md hover:bg-[#fef2f2] transition-colors cursor-pointer"
               title="Ver detalle de cancelación">
@@ -207,16 +231,16 @@
           }
         </div>
         <!-- Estado Admin -->
-        @if (s.estado === 'CANCELADO') {
+        @if (s.estado === 'Cancelado') {
           <span class="text-[#9ca3af] text-[12px]">N/A</span>
-        } @else if (s.estadoAdministrativo === 'PENDIENTE') {
+        } @else if (s.estadoAdministrativo === 'Pendiente') {
           <div class="flex items-center gap-1">
             <button type="button" (click)="servicioFacturar.set(s)"
               class="inline-flex items-center gap-1 border border-[#fde68a] bg-[#fef9c3] text-[#854d0e] rounded-full px-2.5 py-0.5 text-[11px] font-semibold hover:bg-[#fde68a] transition-colors cursor-pointer">
               Facturar
             </button>
           </div>
-        } @else if (s.estadoAdministrativo === 'FACTURADO') {
+        } @else if (s.estadoAdministrativo === 'Facturado') {
           <div class="flex items-center gap-1">
             <button type="button" (click)="servicioPago.set(s)"
               class="inline-flex items-center gap-1 border border-[#bedbff] text-[#1447e6] rounded-full px-2.5 py-0.5 text-[11px] font-semibold hover:bg-[#eff6ff] transition-colors cursor-pointer">
@@ -226,7 +250,7 @@
         } @else {
           <span class="inline-flex items-center gap-1 border rounded-full px-2.5 py-0.5 text-[11px] font-semibold w-fit"
             [class]="estadoAdminClass(s.estadoAdministrativo)">
-            {{ estadoAdminLabel(s.estadoAdministrativo) }}
+            {{ s.estadoAdministrativo }}
           </span>
         }
       </div>
@@ -237,7 +261,7 @@
     @if (totalPaginas() > 1) {
       <div class="flex items-center justify-between px-5 py-4 border-t border-[#e5e7eb]">
         <span class="text-[#6a7282] text-[13px]">
-          Mostrando {{ rangoMostrado() }} de {{ serviciosFiltrados().length }} servicios
+          Mostrando {{ rangoMostrado() }} de {{ totalRegistros() }} servicios
         </span>
         <div class="flex items-center gap-1">
           <button type="button" (click)="cambiarPagina(paginaActual() - 1)"

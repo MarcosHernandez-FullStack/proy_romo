@@ -1,20 +1,31 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { CrearOperadorRequest, DispOperador, DispRango, DispResult, EditarOperadorRequest, Operador, ServicioProximo } from '../../models/operadores.model';
+import { Observable, map } from 'rxjs';
+import { CrearOperadorRequest, DispOperador, DispRango, DispResult, EditarOperadorRequest, GetOperadoresParams, OperadorPagedDto, ServicioProximo } from '../../models/operadores.model';
 import { CrearUsuarioResult } from '../../models/usuario.model';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
 
+const EMPTY_PAGED: OperadorPagedDto = {
+  total: 0, conServiciosHoy: 0, conServiciosAsignados: 0, licenciasVencidas: 0, datos: [],
+};
+
 @Injectable({ providedIn: 'root' })
 export class OperadoresService {
   private readonly http = inject(HttpClient);
 
-  getOperadores(estado?: string): Observable<Operador[]> {
-    const params: Record<string, string> = {};
-    if (estado) params['estado'] = estado;
-    return this.http.get<Operador[]>(`${API}/Operadores`, { params });
+  getOperadores(params: GetOperadoresParams = {}): Observable<OperadorPagedDto> {
+    const p: Record<string, string> = {};
+    if (params.estado         != null) p['estado']          = params.estado;
+    if (params.id             != null) p['id']              = String(params.id);
+    if (params.nombreCompleto != null) p['nombreCompleto']  = params.nombreCompleto;
+    if (params.nroLicencia    != null) p['nroLicencia']     = params.nroLicencia;
+    if (params.pagina         != null) p['pagina']          = String(params.pagina);
+    if (params.tamano         != null) p['tamano']          = String(params.tamano);
+    return this.http.get<OperadorPagedDto | null>(`${API}/Operadores`, { params: p }).pipe(
+      map(res => res ?? EMPTY_PAGED),
+    );
   }
 
   crearOperador(data: CrearOperadorRequest): Observable<CrearUsuarioResult> {

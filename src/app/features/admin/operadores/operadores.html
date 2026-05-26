@@ -18,7 +18,7 @@
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[12px]">Total Operadores</p>
-        <p class="text-[#101828] text-[28px] font-bold leading-tight">{{ totalOperadores() }}</p>
+        <p class="text-[#101828] text-[28px] font-bold leading-tight">{{ totalRegistros() }}</p>
       </div>
       <div class="size-10 rounded-full bg-[#eff6ff] flex items-center justify-center">
         <lucide-angular [img]="UserCogIcon" class="size-5" color="#155dfc" [strokeWidth]="1.5" />
@@ -62,30 +62,73 @@
   <!-- Table card -->
   <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
 
-    <!-- Search + Filter -->
-    <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
-      <div class="flex-1 min-w-[200px] relative">
-        <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="text" [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda"
-          placeholder="Buscar por nombre, licencia..."
-          class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+    <!-- Filtros -->
+    <div class="flex flex-wrap items-end gap-3 px-5 py-4 border-b border-[#e5e7eb]">
+      <div class="flex flex-col gap-1 w-24">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">ID</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaId()" (ngModelChange)="setBusquedaId($event)" name="busquedaId"
+            placeholder="ID"
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
       </div>
-      <div class="flex items-center gap-0.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
-        <span class="text-[12px] text-[#6a7282] font-medium px-2">Estado:</span>
-        @for (f of filtroEstados; track f) {
-          <button type="button" (click)="cambiarFiltro(f)"
-            class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
-            [class.bg-[#155dfc]]="filtroEstado() === f"
-            [class.text-white]="filtroEstado() === f"
-            [class.text-[#6a7282]]="filtroEstado() !== f">
-            {{ f }}
-          </button>
-        }
+      <div class="flex flex-col gap-1 flex-1 min-w-[220px] max-w-[50%]">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">Nombre Completo</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaNombre()" (ngModelChange)="setBusquedaNombre($event)" name="busquedaNombre"
+            placeholder="Buscar por nombre..."
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
       </div>
+      <div class="flex flex-col gap-1 w-44">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">Licencia</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaLicencia()" (ngModelChange)="setBusquedaLicencia($event)" name="busquedaLicencia"
+            placeholder="Nro. licencia..."
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">Estado</label>
+        <div class="flex items-center gap-0.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1 h-[38px]">
+          @for (f of filtroEstados; track f) {
+            <button type="button" (click)="setFiltroEstado(f)"
+              class="px-4 h-full rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroEstado() === f"
+              [class.text-white]="filtroEstado() === f"
+              [class.text-[#6a7282]]="filtroEstado() !== f">
+              {{ f }}
+            </button>
+          }
+        </div>
+      </div>
+      @if (hasFiltros()) {
+        <button type="button" (click)="limpiarFiltros()"
+          class="flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-[#e7000b] border border-[#fecaca] bg-[#fff5f5] rounded-[10px] hover:bg-[#fef2f2] transition-colors cursor-pointer self-end">
+          <lucide-angular [img]="XIcon" class="size-3.5" color="#e7000b" [strokeWidth]="2" />
+          Limpiar Filtros
+        </button>
+      }
+      <div class="flex-1"></div>
+      <button type="button" (click)="cargarOperadores()"
+        class="flex items-center gap-1.5 px-3 h-[38px] rounded-[10px] border border-[#e5e7eb] text-[13px] text-[#6a7282] hover:bg-[#f3f4f6] transition-colors cursor-pointer self-end">
+        <lucide-angular [img]="RefreshCwIcon" class="size-3.5" color="#6a7282" [strokeWidth]="2" />
+        Actualizar
+      </button>
     </div>
 
     <p class="px-5 py-2 text-[12px] text-[#9ca3af]">
-      Mostrando {{ rangoMostrado() }} de {{ operadoresFiltrados().length }} operador(es)
+      @if (cargando()) {
+        <span class="inline-flex items-center gap-1.5">
+          <span class="size-3 border-2 border-[#155dfc] border-t-transparent rounded-full animate-spin inline-block"></span>
+          Cargando...
+        </span>
+      } @else {
+        Mostrando {{ rangoMostrado() }} de {{ totalRegistros() }} operador(es)
+      }
     </p>
 
     <div class="overflow-x-auto">
@@ -97,14 +140,14 @@
         }
       </div>
 
-      @if (operadoresFiltrados().length === 0) {
+      @if (!cargando() && operadores().length === 0) {
         <div class="py-14 flex flex-col items-center gap-2 text-[#9ca3af]">
           <lucide-angular [img]="UserCogIcon" class="size-10" color="#d1d5dc" [strokeWidth]="1" />
           <p class="text-[14px]">No hay operadores en estado "{{ filtroEstado() }}"</p>
         </div>
       }
 
-      @for (o of operadoresPaginados(); track o.id) {
+      @for (o of operadores(); track o.id) {
         <div class="grid gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[900px]"
           style="grid-template-columns: 0.9fr 1.4fr 1.1fr 1fr 1fr 1.2fr 1.2fr 0.8fr">
 
@@ -215,7 +258,7 @@
     @if (totalPaginas() > 1) {
       <div class="flex items-center justify-between px-5 py-4 border-t border-[#e5e7eb]">
         <span class="text-[#6a7282] text-[13px]">
-          Mostrando {{ rangoMostrado() }} de {{ operadoresFiltrados().length }} operadores
+          Mostrando {{ rangoMostrado() }} de {{ totalRegistros() }} operadores
         </span>
         <div class="flex items-center gap-1">
           <button type="button" (click)="cambiarPagina(paginaActual() - 1)"

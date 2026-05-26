@@ -1,21 +1,30 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { EMPTY, Subject, merge } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, switchMap, tap } from 'rxjs/operators';
 import {
   LucideAngularModule,
-  Search,
   Download,
   Eye,
   Car,
-  ChevronDown,
-  ChevronUp,
   ChevronLeft,
   ChevronRight,
   FileText,
   DollarSign,
+  Hash,
+  MapPin,
 } from 'lucide-angular';
 import { ReservasService } from '../../../core/services/reservas.service';
-import { DetalleServicio, Servicio } from '../../../models/operaciones.model';
+import { DetalleServicio, ReservaPagedDto } from '../../../models/operaciones.model';
 import { DetalleServicioComponent } from './detalle-servicio/detalle-servicio';
+
+const TAMANO = 10;
+
+const EMPTY_PAGED: ReservaPagedDto = {
+  total: 0, totalReservado: 0, totalAsignado: 0, totalEnCurso: 0,
+  montoPendiente: 0, montoLiquidado: 0, datos: [],
+};
 
 @Component({
   selector: 'app-mis-servicios',
@@ -25,123 +34,110 @@ import { DetalleServicioComponent } from './detalle-servicio/detalle-servicio';
 })
 export class MisServiciosComponent implements OnInit {
   private readonly reservasSvc = inject(ReservasService);
+  private readonly destroyRef  = inject(DestroyRef);
 
-  protected readonly SearchIcon       = Search;
   protected readonly DownloadIcon     = Download;
   protected readonly EyeIcon          = Eye;
   protected readonly CarIcon          = Car;
-  protected readonly ChevronDownIcon  = ChevronDown;
-  protected readonly ChevronUpIcon    = ChevronUp;
   protected readonly ChevronLeftIcon  = ChevronLeft;
   protected readonly ChevronRightIcon = ChevronRight;
   protected readonly FileTextIcon     = FileText;
   protected readonly DollarSignIcon   = DollarSign;
+  protected readonly HashIcon         = Hash;
+  protected readonly MapPinIcon       = MapPin;
 
-  protected readonly servicios    = signal<Servicio[]>([]);
-  protected readonly cargando     = signal(false);
-  protected readonly searchQuery  = signal('');
-  protected readonly fechaDesde   = signal('');
-  protected readonly fechaHasta   = signal('');
+  protected readonly filtrosOp:    string[] = ['TODOS', 'RESERVADO', 'ASIGNADO', 'ENCURSO', 'FINALIZADO', 'CANCELADO'];
+  protected readonly filtrosAdmin: string[] = ['TODOS', 'PENDIENTE', 'FACTURADO', 'PAGADO'];
 
-  protected readonly detalle        = signal<DetalleServicio | null>(null);
-  protected readonly showDetalle    = signal(false);
-  protected readonly detalleLoading = signal(false);
+  // ── Filtros ────────────────────────────────────────────────
+  protected readonly filtroId        = signal('');
+  protected readonly fechaDesde      = signal('');
+  protected readonly fechaHasta      = signal('');
+  protected readonly filtroDireccion = signal('');
+  protected readonly filtroOp        = signal('TODOS');
+  protected readonly filtroAdmin     = signal('TODOS');
+  protected readonly paginaActual    = signal(1);
 
-  readonly ITEMS_POR_PAGINA = 10;
-  protected readonly paginaActual = signal(1);
+  // ── Estado ─────────────────────────────────────────────────
+  protected readonly cargando = signal(false);
+  protected readonly paged    = signal<ReservaPagedDto>(EMPTY_PAGED);
 
-  protected readonly filtroOpOpen    = signal(false);
-  protected readonly filtroAdminOpen = signal(false);
-  protected readonly filtroOp        = signal<Set<string>>(new Set());
-  protected readonly filtroAdmin     = signal<Set<string>>(new Set());
+  protected readonly datos = () => this.paged().datos;
 
-  protected readonly estadosOp:    string[] = ['RESERVADO', 'ASIGNADO', 'ENCURSO', 'FINALIZADO'];
-  protected readonly estadosAdmin: string[] = ['PENDIENTE', 'FACTURADO', 'PAGADO'];
+  // ── KPIs desde servidor ────────────────────────────────────
+  protected readonly totalRegistros = () => this.paged().total;
+  protected readonly enOperacion    = () => this.paged().totalAsignado + this.paged().totalEnCurso;
+  protected readonly montoPendiente = () => this.paged().montoPendiente;
+  protected readonly montoLiquidado = () => this.paged().montoLiquidado;
 
-  protected readonly filtered = computed(() => {
-    const q           = this.searchQuery().toLowerCase();
-    const opFilter    = this.filtroOp();
-    const adminFilter = this.filtroAdmin();
-    return this.servicios().filter(s => {
-      const matchQ     = !q
-        || String(s.id).includes(q)
-        || s.direccionOrigen.toLowerCase().includes(q)
-        || s.direccionDestino.toLowerCase().includes(q);
-      const matchOp    = opFilter.size === 0    || opFilter.has(s.estadoOperacion);
-      const matchAdmin = adminFilter.size === 0 || adminFilter.has(s.estadoAdministrativo);
-      return matchQ && matchOp && matchAdmin;
-    });
-  });
-
-  protected readonly totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.filtered().length / this.ITEMS_POR_PAGINA))
-  );
-
-  protected readonly paginadas = computed(() => {
-    const inicio = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA;
-    return this.filtered().slice(inicio, inicio + this.ITEMS_POR_PAGINA);
-  });
-
-  protected readonly paginas = computed(() => {
+  protected readonly totalPaginas = () => Math.max(1, Math.ceil(this.totalRegistros() / TAMANO));
+  protected readonly paginas      = () => {
     const total  = this.totalPaginas();
     const actual = this.paginaActual();
     const inicio = Math.max(1, actual - 2);
     const fin    = Math.min(total, actual + 2);
     return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
-  });
+  };
 
-  protected readonly totalServicios = computed(() => this.servicios().length);
+  // ── Detalle modal ──────────────────────────────────────────
+  protected readonly detalle        = signal<DetalleServicio | null>(null);
+  protected readonly showDetalle    = signal(false);
+  protected readonly detalleLoading = signal(false);
 
-  protected readonly enOperacion = computed(() =>
-    this.servicios().filter(s =>
-      s.estadoOperacion === 'ASIGNADO' || s.estadoOperacion === 'ENCURSO'
-    ).length
-  );
-
-  protected readonly montoPendiente = computed(() =>
-    this.servicios()
-      .filter(s => s.estadoAdministrativo === 'PENDIENTE' || s.estadoAdministrativo === 'FACTURADO')
-      .reduce((sum, s) => sum + s.costo, 0)
-  );
-
-  protected readonly montoLiquidado = computed(() =>
-    this.servicios()
-      .filter(s => s.estadoAdministrativo === 'PAGADO')
-      .reduce((sum, s) => sum + s.costo, 0)
-  );
-
-  protected readonly montoLiquidadoFiltrado = computed(() =>
-    this.filtered()
-      .filter(s => s.estadoAdministrativo === 'PAGADO')
-      .reduce((sum, s) => sum + s.costo, 0)
-  );
-
-  protected readonly countLiquidadoFiltrado = computed(() =>
-    this.filtered().filter(s => s.estadoAdministrativo === 'PAGADO').length
-  );
-
-  protected readonly montoPendienteFiltrado = computed(() =>
-    this.filtered()
-      .filter(s => s.estadoAdministrativo === 'PENDIENTE' || s.estadoAdministrativo === 'FACTURADO')
-      .reduce((sum, s) => sum + s.costo, 0)
-  );
-
-  protected readonly countPendienteFiltrado = computed(() =>
-    this.filtered().filter(s =>
-      s.estadoAdministrativo === 'PENDIENTE' || s.estadoAdministrativo === 'FACTURADO'
-    ).length
-  );
+  private readonly _idChange$        = new Subject<string>();
+  private readonly _direccionChange$ = new Subject<string>();
+  private readonly _reload$          = new Subject<void>();
 
   ngOnInit(): void {
-    this.cargar();
+    merge(
+      this._idChange$.pipe(debounceTime(600),        distinctUntilChanged(), tap(() => this.paginaActual.set(1))),
+      this._direccionChange$.pipe(debounceTime(400), distinctUntilChanged(), tap(() => this.paginaActual.set(1))),
+      this._reload$,
+    ).pipe(
+      switchMap(() => {
+        this.cargando.set(true);
+        const idStr = this.filtroId().trim();
+        const op    = this.filtroOp();
+        const adm   = this.filtroAdmin();
+        return this.reservasSvc.getServicios({
+          id:                   idStr ? Number(idStr) : undefined,
+          estadoOperacion:      op  !== 'TODOS' ? op  : undefined,
+          estadoAdministrativo: adm !== 'TODOS' ? adm : undefined,
+          fechaInicio:          this.fechaDesde()           || undefined,
+          fechaFin:             this.fechaHasta()           || undefined,
+          direccion:            this.filtroDireccion().trim() || undefined,
+          pagina:               this.paginaActual(),
+          tamano:               TAMANO,
+        }).pipe(catchError(() => { this.cargando.set(false); return EMPTY; }));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(data => {
+      this.paged.set(data);
+      this.cargando.set(false);
+    });
+
+    this._reload$.next();
   }
 
-  protected cargar(): void {
-    this.cargando.set(true);
-    this.reservasSvc.getServicios(this.fechaDesde() || undefined, this.fechaHasta() || undefined).subscribe({
-      next: data => { this.servicios.set(data); this.cargando.set(false); },
-      error: ()   => this.cargando.set(false),
-    });
+  protected cargar(): void { this._reload$.next(); }
+
+  protected onIdChange(v: string): void          { this.filtroId.set(v);         this._idChange$.next(v); }
+  protected setFechaDesde(v: string): void       { this.fechaDesde.set(v);       this.paginaActual.set(1); this._reload$.next(); }
+  protected setFechaHasta(v: string): void       { this.fechaHasta.set(v);       this.paginaActual.set(1); this._reload$.next(); }
+  protected onDireccionChange(v: string): void   { this.filtroDireccion.set(v);  this._direccionChange$.next(v); }
+
+  protected cambiarPagina(n: number): void {
+    if (n < 1 || n > this.totalPaginas()) return;
+    this.paginaActual.set(n);
+    this._reload$.next();
+  }
+
+  protected rangoMostrado(): string {
+    const total = this.totalRegistros();
+    if (total === 0) return '0';
+    const desde = (this.paginaActual() - 1) * TAMANO + 1;
+    const hasta  = Math.min(this.paginaActual() * TAMANO, total);
+    return `${desde} - ${hasta}`;
   }
 
   protected verDetalle(id: number): void {
@@ -158,35 +154,8 @@ export class MisServiciosComponent implements OnInit {
     this.detalle.set(null);
   }
 
-  protected setSearch(v: string): void {
-    this.searchQuery.set(v);
-    this.paginaActual.set(1);
-  }
-
-  protected setFechaDesde(v: string): void {
-    this.fechaDesde.set(v);
-    this.paginaActual.set(1);
-    this.cargar();
-  }
-
-  protected setFechaHasta(v: string): void {
-    this.fechaHasta.set(v);
-    this.paginaActual.set(1);
-    this.cargar();
-  }
-
-  protected cambiarPagina(n: number): void {
-    if (n < 1 || n > this.totalPaginas()) return;
-    this.paginaActual.set(n);
-  }
-
-  protected rangoMostrado(): string {
-    const total = this.filtered().length;
-    if (total === 0) return '0';
-    const desde = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA + 1;
-    const hasta = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
-    return `${desde} - ${hasta}`;
-  }
+  protected setFiltroOp(f: string): void    { this.filtroOp.set(f);    this.paginaActual.set(1); this._reload$.next(); }
+  protected setFiltroAdmin(f: string): void { this.filtroAdmin.set(f); this.paginaActual.set(1); this._reload$.next(); }
 
   protected vehiculosLabel(n: number): string {
     return n === 1 ? '1 Vehículo' : `${n} Vehículos`;
@@ -194,6 +163,7 @@ export class MisServiciosComponent implements OnInit {
 
   protected estadoOpLabel(estado: string): string {
     switch (estado) {
+      case 'TODOS':      return 'Todos';
       case 'RESERVADO':  return 'Reservado';
       case 'ASIGNADO':   return 'Asignado';
       case 'ENCURSO':    return 'En Curso';
@@ -205,10 +175,11 @@ export class MisServiciosComponent implements OnInit {
 
   protected estadoAdminLabel(estado: string): string {
     switch (estado) {
-      case 'PENDIENTE':  return 'Pendiente';
-      case 'FACTURADO':  return 'Facturado';
-      case 'PAGADO':     return 'Pagado';
-      default:           return estado;
+      case 'TODOS':     return 'Todos';
+      case 'PENDIENTE': return 'Pendiente';
+      case 'FACTURADO': return 'Facturado';
+      case 'PAGADO':    return 'Pagado';
+      default:          return estado;
     }
   }
 
@@ -243,23 +214,5 @@ export class MisServiciosComponent implements OnInit {
 
   protected formatCosto(n: number): string {
     return '$' + n.toLocaleString('es-AR');
-  }
-
-  protected toggleFiltroOp(estado: string): void {
-    this.filtroOp.update(set => {
-      const next = new Set(set);
-      next.has(estado) ? next.delete(estado) : next.add(estado);
-      return next;
-    });
-    this.paginaActual.set(1);
-  }
-
-  protected toggleFiltroAdmin(estado: string): void {
-    this.filtroAdmin.update(set => {
-      const next = new Set(set);
-      next.has(estado) ? next.delete(estado) : next.add(estado);
-      return next;
-    });
-    this.paginaActual.set(1);
   }
 }

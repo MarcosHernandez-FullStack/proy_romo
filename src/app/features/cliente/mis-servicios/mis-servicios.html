@@ -17,7 +17,7 @@
         </div>
         <span class="text-[11px] font-semibold text-[#99a1af] uppercase tracking-wider">Total</span>
       </div>
-      <p class="text-[30px] font-bold text-[#101828] leading-9">{{ totalServicios() }}</p>
+      <p class="text-[30px] font-bold text-[#101828] leading-9">{{ totalRegistros() }}</p>
       <p class="text-[12px] text-[#6a7282] mt-1">Servicios registrados</p>
     </div>
 
@@ -72,39 +72,58 @@
 
   <!-- Filtros -->
   <div class="bg-white border border-[#e5e7eb] rounded-2xl shadow-sm mb-4 px-5 py-4">
-    <div class="flex flex-wrap items-center gap-3">
-      <!-- Búsqueda -->
-      <div class="relative flex-1 min-w-[180px]">
-        <lucide-angular [img]="SearchIcon" class="absolute left-3 top-1/2 -translate-y-1/2 size-4" color="#9ca3af" [strokeWidth]="2" />
-        <input
-          type="text"
-          placeholder="Buscar por ID o dirección"
-          [ngModel]="searchQuery()"
-          (ngModelChange)="setSearch($event)"
-          name="search"
-          class="w-full border border-[#d1d5dc] rounded-[10px] h-[38px] pl-9 pr-4 text-[14px] text-[#101828] placeholder-[rgba(10,10,10,0.5)] focus:outline-none focus:border-[#155dfc]"
-        />
+    <div class="grid grid-cols-4 gap-3">
+      <!-- ID -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider">ID</label>
+        <div class="relative">
+          <lucide-angular [img]="HashIcon" class="absolute left-3 top-1/2 -translate-y-1/2 size-4" color="#9ca3af" [strokeWidth]="2" />
+          <input
+            type="text"
+            inputmode="numeric"
+            placeholder="Ej. 123"
+            [ngModel]="filtroId()"
+            (ngModelChange)="onIdChange($event)"
+            name="filtroId"
+            class="w-full border border-[#d1d5dc] rounded-[10px] h-[38px] pl-9 pr-3 text-[13px] text-[#101828] placeholder-[rgba(10,10,10,0.4)] focus:outline-none focus:border-[#155dfc]"
+          />
+        </div>
+      </div>
+      <!-- Dirección -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider">Dirección</label>
+        <div class="relative">
+          <lucide-angular [img]="MapPinIcon" class="absolute left-3 top-1/2 -translate-y-1/2 size-4" color="#9ca3af" [strokeWidth]="2" />
+          <input
+            type="text"
+            placeholder="Origen o destino"
+            [ngModel]="filtroDireccion()"
+            (ngModelChange)="onDireccionChange($event)"
+            name="filtroDireccion"
+            class="w-full border border-[#d1d5dc] rounded-[10px] h-[38px] pl-9 pr-3 text-[13px] text-[#101828] placeholder-[rgba(10,10,10,0.4)] focus:outline-none focus:border-[#155dfc]"
+          />
+        </div>
       </div>
       <!-- Desde -->
-      <div class="flex items-center gap-2">
-        <span class="text-[12px] font-medium text-[#6a7282]">Desde</span>
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider">Desde</label>
         <input
           type="date"
           [ngModel]="fechaDesde()"
           (ngModelChange)="setFechaDesde($event)"
           name="fechaDesde"
-          class="border border-[#d1d5dc] rounded-[10px] h-[38px] px-3 text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc]"
+          class="w-full border border-[#d1d5dc] rounded-[10px] h-[38px] px-3 text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc]"
         />
       </div>
       <!-- Hasta -->
-      <div class="flex items-center gap-2">
-        <span class="text-[12px] font-medium text-[#6a7282]">Hasta</span>
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider">Hasta</label>
         <input
           type="date"
           [ngModel]="fechaHasta()"
           (ngModelChange)="setFechaHasta($event)"
           name="fechaHasta"
-          class="border border-[#d1d5dc] rounded-[10px] h-[38px] px-3 text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc]"
+          class="w-full border border-[#d1d5dc] rounded-[10px] h-[38px] px-3 text-[13px] text-[#101828] focus:outline-none focus:border-[#155dfc]"
         />
       </div>
     </div>
@@ -112,80 +131,35 @@
     <!-- Filtros de estado -->
     <div class="flex items-center gap-3 mt-3 pt-3 border-t border-[#f3f4f6]">
 
-      <!-- Dropdown Est. Operativo -->
-      <div class="relative">
-        <button
-          type="button"
-          (click)="filtroOpOpen.set(!filtroOpOpen()); filtroAdminOpen.set(false)"
-          class="flex items-center gap-2 border rounded-[10px] h-[34px] px-3 text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-colors"
-          [class.border-[#155dfc]]="filtroOpOpen() || filtroOp().size > 0"
-          [class.bg-[#eff6ff]]="filtroOpOpen() || filtroOp().size > 0"
-          [class.text-[#155dfc]]="filtroOpOpen() || filtroOp().size > 0"
-          [class.border-[#d1d5dc]]="!filtroOpOpen() && filtroOp().size === 0"
-          [class.bg-white]="!filtroOpOpen() && filtroOp().size === 0"
-          [class.text-[#45556c]]="!filtroOpOpen() && filtroOp().size === 0"
-        >
-          Est. Operativo
-          @if (filtroOp().size > 0) {
-            <span class="bg-[#155dfc] text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">{{ filtroOp().size }}</span>
-          }
-          <lucide-angular [img]="filtroOpOpen() ? ChevronUpIcon : ChevronDownIcon" class="size-3" [color]="filtroOpOpen() || filtroOp().size > 0 ? '#155dfc' : '#45556c'" [strokeWidth]="2" />
-        </button>
-
-        @if (filtroOpOpen()) {
-          <div class="absolute top-[calc(100%+6px)] left-0 z-20 bg-white border border-[#e5e7eb] rounded-xl shadow-lg py-2 w-48">
-            <p class="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider px-3 pb-2">Est. Operativo</p>
-            @for (estado of estadosOp; track estado) {
-              <label class="flex items-center gap-3 px-3 py-2 hover:bg-[#f9fafb] cursor-pointer">
-                <input
-                  type="checkbox"
-                  [checked]="filtroOp().has(estado)"
-                  (change)="toggleFiltroOp(estado)"
-                  class="size-4 rounded border-[#d1d5dc] accent-[#155dfc] cursor-pointer"
-                />
-                <div class="rounded-full size-2 shrink-0" [style.background-color]="estadoOpDotColor(estado)"></div>
-                <span class="text-[13px] text-[#364153]">{{ estadoOpLabel(estado) }}</span>
-              </label>
-            }
-          </div>
+      <!-- Est. Operativo -->
+      <span class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider shrink-0">Est. Operativo</span>
+      <div class="flex gap-1">
+        @for (f of filtrosOp; track f) {
+          <button type="button" (click)="setFiltroOp(f)"
+            class="px-3 h-[28px] rounded-[8px] text-[12px] font-semibold transition-colors cursor-pointer"
+            [class.bg-[#155dfc]]="filtroOp() === f"
+            [class.text-white]="filtroOp() === f"
+            [class.bg-[#f3f4f6]]="filtroOp() !== f"
+            [class.text-[#4a5565]]="filtroOp() !== f">
+            {{ estadoOpLabel(f) }}
+          </button>
         }
       </div>
 
-      <!-- Dropdown Est. Administrativo -->
-      <div class="relative">
-        <button
-          type="button"
-          (click)="filtroAdminOpen.set(!filtroAdminOpen()); filtroOpOpen.set(false)"
-          class="flex items-center gap-2 border rounded-[10px] h-[34px] px-3 text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-colors"
-          [class.border-[#155dfc]]="filtroAdminOpen() || filtroAdmin().size > 0"
-          [class.bg-[#eff6ff]]="filtroAdminOpen() || filtroAdmin().size > 0"
-          [class.text-[#155dfc]]="filtroAdminOpen() || filtroAdmin().size > 0"
-          [class.border-[#d1d5dc]]="!filtroAdminOpen() && filtroAdmin().size === 0"
-          [class.bg-white]="!filtroAdminOpen() && filtroAdmin().size === 0"
-          [class.text-[#008236]]="!filtroAdminOpen() && filtroAdmin().size === 0"
-        >
-          Est. Administrativo
-          @if (filtroAdmin().size > 0) {
-            <span class="bg-[#155dfc] text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center">{{ filtroAdmin().size }}</span>
-          }
-          <lucide-angular [img]="filtroAdminOpen() ? ChevronUpIcon : ChevronDownIcon" class="size-3" [color]="filtroAdminOpen() || filtroAdmin().size > 0 ? '#155dfc' : '#008236'" [strokeWidth]="2" />
-        </button>
+      <div class="w-px h-5 bg-[#e5e7eb] shrink-0"></div>
 
-        @if (filtroAdminOpen()) {
-          <div class="absolute top-[calc(100%+6px)] left-0 z-20 bg-white border border-[#e5e7eb] rounded-xl shadow-lg py-2 w-44">
-            <p class="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider px-3 pb-2">Est. Administrativo</p>
-            @for (estado of estadosAdmin; track estado) {
-              <label class="flex items-center gap-3 px-3 py-2 hover:bg-[#f9fafb] cursor-pointer">
-                <input
-                  type="checkbox"
-                  [checked]="filtroAdmin().has(estado)"
-                  (change)="toggleFiltroAdmin(estado)"
-                  class="size-4 rounded border-[#d1d5dc] accent-[#155dfc] cursor-pointer"
-                />
-                <span class="text-[13px] text-[#364153]">{{ estadoAdminLabel(estado) }}</span>
-              </label>
-            }
-          </div>
+      <!-- Est. Administrativo -->
+      <span class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wider shrink-0">Est. Admin.</span>
+      <div class="flex gap-1">
+        @for (f of filtrosAdmin; track f) {
+          <button type="button" (click)="setFiltroAdmin(f)"
+            class="px-3 h-[28px] rounded-[8px] text-[12px] font-semibold transition-colors cursor-pointer"
+            [class.bg-[#155dfc]]="filtroAdmin() === f"
+            [class.text-white]="filtroAdmin() === f"
+            [class.bg-[#f3f4f6]]="filtroAdmin() !== f"
+            [class.text-[#4a5565]]="filtroAdmin() !== f">
+            {{ estadoAdminLabel(f) }}
+          </button>
         }
       </div>
 
@@ -199,7 +173,7 @@
     <div class="flex items-center justify-between px-5 py-3 border-b border-[#f3f4f6]">
       <p class="text-[12px] text-[#6a7282]">
         Mostrando <span class="font-semibold text-[#364153]">{{ rangoMostrado() }}</span> de
-        <span class="font-semibold text-[#364153]">{{ filtered().length }}</span> servicios
+        <span class="font-semibold text-[#364153]">{{ totalRegistros() }}</span> servicios
       </p>
       @if (totalPaginas() > 1) {
         <div class="flex items-center gap-1">
@@ -247,7 +221,7 @@
 
     <!-- Filas -->
     @if (!cargando()) {
-    @for (srv of paginadas(); track srv.id) {
+    @for (srv of datos(); track srv.id) {
       <div
         class="grid border-b border-[#f3f4f6] hover:bg-[#fafafa] transition-colors min-w-[900px]"
         style="grid-template-columns: 144px 1fr 142px 128px 144px 144px 80px; min-height: 71px"
@@ -327,10 +301,9 @@
         <div class="flex items-center justify-end gap-3 px-5">
           <div class="bg-[#00c950] rounded-full size-2"></div>
           <span class="text-[11px] font-semibold text-[#4a5565] uppercase tracking-wider">Total Liquidado</span>
-          <span class="text-[12px] text-[#99a1af]">(Vista Actual) · {{ countLiquidadoFiltrado() }} reg.</span>
         </div>
         <div class="flex items-center justify-end px-5">
-          <span class="text-[16px] font-bold text-[#00a63e]">{{ formatCosto(montoLiquidadoFiltrado()) }}</span>
+          <span class="text-[16px] font-bold text-[#00a63e]">{{ formatCosto(montoLiquidado()) }}</span>
         </div>
         <div></div>
       </div>
@@ -339,10 +312,9 @@
         <div class="flex items-center justify-end gap-3 px-5">
           <div class="bg-[#fe9a00] rounded-full size-2"></div>
           <span class="text-[11px] font-semibold text-[#4a5565] uppercase tracking-wider">Total Pendiente</span>
-          <span class="text-[12px] text-[#99a1af]">(Vista Actual) · {{ countPendienteFiltrado() }} reg.</span>
         </div>
         <div class="flex items-center justify-end px-5">
-          <span class="text-[16px] font-bold text-[#e17100]">{{ formatCosto(montoPendienteFiltrado()) }}</span>
+          <span class="text-[16px] font-bold text-[#e17100]">{{ formatCosto(montoPendiente()) }}</span>
         </div>
         <div></div>
       </div>

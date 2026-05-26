@@ -19,7 +19,7 @@
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[13px]">Total Unidades</p>
-        <p class="text-[#101828] text-[32px] font-bold leading-none mt-1">{{ totalUnidades() }}</p>
+        <p class="text-[#101828] text-[32px] font-bold leading-none mt-1">{{ totalRegistros() }}</p>
       </div>
       <div class="size-12 bg-[#eff6ff] rounded-[12px] flex items-center justify-center">
         <lucide-angular [img]="TruckIcon" class="size-6" color="#155dfc" [strokeWidth]="1.5" />
@@ -61,33 +61,83 @@
   <!-- Table -->
   <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
 
-    <!-- Search + Filter -->
-    <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
-      <div class="flex-1 relative">
-        <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="text" [ngModel]="busqueda()" (ngModelChange)="setBusqueda($event)" name="busqueda"
-          placeholder="Buscar por placa, marca, modelo..."
-          class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+    <!-- Filtros -->
+    <div class="flex flex-wrap items-end gap-3 px-5 py-4 border-b border-[#e5e7eb]">
+      <div class="flex flex-col gap-1 w-24">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">ID</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaId()" (ngModelChange)="setBusquedaId($event)" name="busquedaId"
+            placeholder="ID"
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-[#6a7282] text-[13px] font-medium">Estado:</span>
-        <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
-          @for (f of filtrosFlota; track f) {
-            <button type="button" (click)="cambiarFiltro(f)"
-              class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
-              [class.bg-[#155dfc]]="filtroFlota() === f"
-              [class.text-white]="filtroFlota() === f"
-              [class.text-[#6a7282]]="filtroFlota() !== f">
+      <div class="flex flex-col gap-1 w-70">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">Placa</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaPlaca()" (ngModelChange)="setBusquedaPlaca($event)" name="busquedaPlaca"
+            placeholder="Placa..."
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1 w-70">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">Marca</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaMarca()" (ngModelChange)="setBusquedaMarca($event)" name="busquedaMarca"
+            placeholder="Marca..."
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1 w-70">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">Modelo</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaModelo()" (ngModelChange)="setBusquedaModelo($event)" name="busquedaModelo"
+            placeholder="Modelo..."
+            class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[11px] font-semibold text-[#6a7282] uppercase tracking-wide">Estado</label>
+        <div class="flex items-center gap-0.5 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1 h-[38px]">
+          @for (f of filtroFlota; track f) {
+            <button type="button" (click)="setFiltro(f)"
+              class="px-4 h-full rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroActual() === f"
+              [class.text-white]="filtroActual() === f"
+              [class.text-[#6a7282]]="filtroActual() !== f">
               {{ f }}
             </button>
           }
         </div>
       </div>
+      @if (hasFiltros()) {
+        <button type="button" (click)="limpiarFiltros()"
+          class="flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-[#e7000b] border border-[#fecaca] bg-[#fff5f5] rounded-[10px] hover:bg-[#fef2f2] transition-colors cursor-pointer self-end">
+          <lucide-angular [img]="XIcon" class="size-3.5" color="#e7000b" [strokeWidth]="2" />
+          Limpiar Filtros
+        </button>
+      }
+      <div class="flex-1"></div>
+      <button type="button" (click)="cargarFlota()"
+        class="flex items-center gap-1.5 px-3 py-2 rounded-[10px] border border-[#e5e7eb] text-[13px] text-[#6a7282] hover:bg-[#f3f4f6] transition-colors cursor-pointer self-end">
+        <lucide-angular [img]="RefreshCwIcon" class="size-3.5" color="#6a7282" [strokeWidth]="2" />
+        Actualizar
+      </button>
     </div>
 
     <!-- Count -->
     <div class="px-5 py-2 border-b border-[#f3f4f6]">
-      <p class="text-[#6a7282] text-[13px]">Mostrando <strong class="text-[#101828]">{{ rangoMostrado() }}</strong> de {{ flotaFiltrada().length }} unidad(es)</p>
+      @if (cargando()) {
+        <p class="text-[#6a7282] text-[13px] inline-flex items-center gap-1.5">
+          <span class="size-3 border-2 border-[#155dfc] border-t-transparent rounded-full animate-spin inline-block"></span>
+          Cargando...
+        </p>
+      } @else {
+        <p class="text-[#6a7282] text-[13px]">Mostrando <strong class="text-[#101828]">{{ rangoMostrado() }}</strong> de {{ totalRegistros() }} unidad(es)</p>
+      }
     </div>
 
     <div class="overflow-x-auto">
@@ -102,15 +152,15 @@
     </div>
 
     <!-- Empty state -->
-    @if (flotaFiltrada().length === 0) {
+    @if (!cargando() && flota().length === 0) {
       <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
         <lucide-angular [img]="TruckIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
-        <p class="text-[14px]">No hay unidades en estado "{{ filtroFlota() }}"</p>
+        <p class="text-[14px]">No hay unidades en estado "{{ filtroActual() }}"</p>
       </div>
     }
 
     <!-- Rows -->
-    @for (u of flotaPaginada(); track u.id) {
+    @for (u of flota(); track u.id) {
       <div class="grid grid-cols-[1.1fr_2fr_0.8fr_1.3fr_1fr_0.8fr] gap-3 items-center px-5 py-3.5 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[650px]">
 
         <!-- ID / PLACA -->
@@ -197,7 +247,7 @@
     @if (totalPaginas() > 1) {
       <div class="flex items-center justify-between px-5 py-4 border-t border-[#e5e7eb]">
         <span class="text-[#6a7282] text-[13px]">
-          Mostrando {{ rangoMostrado() }} de {{ flotaFiltrada().length }} unidades
+          Mostrando {{ rangoMostrado() }} de {{ totalRegistros() }} unidades
         </span>
         <div class="flex items-center gap-1">
           <button type="button" (click)="cambiarPagina(paginaActual() - 1)"

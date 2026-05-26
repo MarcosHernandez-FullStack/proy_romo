@@ -2,6 +2,23 @@ import { GridDisponibilidad } from './agenda.model';
 
 export type TipoDisponibilidad = 'Tiempo Completo' | 'Horario Parcial' | 'Personalizado';
 
+export interface OperadorPagedDto {
+  total:                 number;
+  conServiciosHoy:       number;
+  conServiciosAsignados: number;
+  licenciasVencidas:     number;
+  datos:                 Operador[];
+}
+
+export interface GetOperadoresParams {
+  estado?:         string;
+  id?:             number;
+  nombreCompleto?: string;
+  nroLicencia?:    string;
+  pagina?:         number;
+  tamano?:         number;
+}
+
 export interface ServicioProximo {
   id:             number;
   fechaServicio:  string;

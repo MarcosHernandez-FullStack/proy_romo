@@ -1,17 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { DetalleServicio, Servicio } from '../../models/operaciones.model';
+import { DetalleServicio, GetServiciosParams, ReservaPagedDto } from '../../models/operaciones.model';
 import { CrearReservaDto, ReservaResultado, ValidarHorarioDto } from '../../models/reservas.model';
-import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class ReservasService {
-  private readonly http    = inject(HttpClient);
-  private readonly authSvc = inject(AuthService);
+  private readonly http = inject(HttpClient);
 
   // ── Agenda admin ──────────────────────────────────────────────────────────
 
@@ -45,20 +43,30 @@ export class ReservasService {
 
   // ── Vista cliente ─────────────────────────────────────────────────────────
 
-  getServicios(fechaInicio?: string, fechaFin?: string): Observable<Servicio[]> {
-    const params: Record<string, string> = {};
-    const idCliente = this.authSvc.session()?.idCliente;
-    if (idCliente)   params['idCliente']          = String(idCliente);
-    if (fechaInicio) params['fechaServicioInicio'] = fechaInicio;
-    if (fechaFin)    params['fechaServicioFin']    = fechaFin;
-    return this.http.get<Servicio[]>(`${API}/operaciones`, { params }).pipe(
-      map(data => data ?? [])
+  getServicios(params: GetServiciosParams = {}): Observable<ReservaPagedDto> {
+    let qp = new HttpParams();
+    if (params.id                   != null)  qp = qp.set('id',                    params.id);
+    if (params.estadoOperacion)               qp = qp.set('estadoOperacion',       params.estadoOperacion);
+    if (params.estadoAdministrativo)          qp = qp.set('estadoAdministrativo',  params.estadoAdministrativo);
+    if (params.fechaInicio)                   qp = qp.set('fechaInicio',           params.fechaInicio);
+    if (params.fechaFin)                      qp = qp.set('fechaFin',              params.fechaFin);
+    if (params.direccion)                     qp = qp.set('direccion',             params.direccion);
+    if (params.pagina               != null)  qp = qp.set('pagina',                params.pagina);
+    if (params.tamano               != null)  qp = qp.set('tamano',                params.tamano);
+
+    return this.http.get<ReservaPagedDto>(`${API}/operaciones`, { params: qp }).pipe(
+      map(data => data ?? 
+        {
+          total: 0, totalReservado: 0, totalAsignado: 0, totalEnCurso: 0,
+          montoPendiente: 0, montoLiquidado: 0, datos: [],
+        }
+      )
     );
   }
 
   getDetalle(id: number): Observable<DetalleServicio> {
-    return this.http.get<DetalleServicio[]>(`${API}/operaciones`, { params: { id: String(id) } }).pipe(
-      map(data => data[0])
+    return this.http.get<ReservaPagedDto>(`${API}/operaciones`, { params: { id: String(id) } }).pipe(
+      map(data => data.datos[0] as unknown as DetalleServicio)
     );
   }
 

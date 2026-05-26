@@ -1,19 +1,38 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { BitacoraEntry, DisponibilidadGrua, GruaRequest, IngresoTallerRequest, RetornoOperativaRequest, UnidadFlota } from '../../models/flota.model';
+import { BitacoraEntry, DisponibilidadGrua, GetGruasParams, GruaPagedDto, GruaRequest, IngresoTallerRequest, RetornoOperativaRequest } from '../../models/flota.model';
 import { ReservaALiberar } from '../../models/operaciones.model';
 import { CrearUsuarioResult } from '../../models/usuario.model';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
 
+const EMPTY_PAGED: GruaPagedDto = {
+  total: 0, operativas: 0, enTaller: 0, segurosCriticos: 0, datos: [],
+};
+
 @Injectable({ providedIn: 'root' })
 export class FlotaService {
   private readonly http = inject(HttpClient);
 
-  getFlota(): Observable<UnidadFlota[]> {
-    return this.http.get<UnidadFlota[]>(`${API}/flota`);
+  getGruas(params: GetGruasParams = {}): Observable<GruaPagedDto> {
+    const p: Record<string, string> = {};
+    if (params.estado          != null) p['estado']          = params.estado;
+    if (params.estadoOperacion != null) p['estadoOperacion'] = params.estadoOperacion;
+    if (params.id              != null) p['id']              = String(params.id);
+    if (params.placa           != null) p['placa']           = params.placa;
+    if (params.marca           != null) p['marca']           = params.marca;
+    if (params.modelo          != null) p['modelo']          = params.modelo;
+    if (params.pagina          != null) p['pagina']          = String(params.pagina);
+    if (params.tamano          != null) p['tamano']          = String(params.tamano);
+    return this.http.get<GruaPagedDto | null>(`${API}/flota`, { params: p }).pipe(
+      map(res => res ?? 
+        {
+          total: 0, operativas: 0, enTaller: 0, segurosCriticos: 0, datos: [],
+        }
+      ),
+    );
   }
 
   crearGrua(data: GruaRequest): Observable<CrearUsuarioResult> {

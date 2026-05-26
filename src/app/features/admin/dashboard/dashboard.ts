@@ -48,6 +48,6 @@ export class DashboardComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.operadoresSvc.getOperadores().subscribe((data) => this.operadores.set(data));
+    this.operadoresSvc.getOperadores().subscribe((data) => this.operadores.set(data.datos));
   }
 }

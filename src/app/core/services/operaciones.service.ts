@@ -20,9 +20,10 @@ export class OperacionesService {
     if (params.pagina != null)        p['pagina']          = String(params.pagina);
     if (params.tamano != null)        p['tamano']          = String(params.tamano);
     return this.http.get<ReservaPagedDto | null>(`${API}/operaciones`, { params: p }).pipe(
-      map(res => res ?? 
+      map(res => res ??
         {
           total: 0, datos: [], totalReservado: 0, totalAsignado: 0, totalEnCurso: 0,
+          montoPendiente: 0, montoLiquidado: 0,
         })
     );
   }

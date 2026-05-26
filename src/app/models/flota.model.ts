@@ -1,3 +1,22 @@
+export interface GruaPagedDto {
+  total:           number;
+  operativas:      number;
+  enTaller:        number;
+  segurosCriticos: number;
+  datos:           UnidadFlota[];
+}
+
+export interface GetGruasParams {
+  estado?:          string;
+  estadoOperacion?: string;
+  id?:              number;
+  placa?:           string;
+  marca?:           string;
+  modelo?:          string;
+  pagina?:          number;
+  tamano?:          number;
+}
+
 export interface UnidadFlota {
   id:              number;
   placa:           string;

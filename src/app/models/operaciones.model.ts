@@ -110,6 +110,8 @@ export interface ReservaPagedDto {
   totalReservado: number;
   totalAsignado:  number;
   totalEnCurso:   number;
+  montoPendiente: number;
+  montoLiquidado: number;
 }
 
 export interface GetReservasParams {
@@ -120,6 +122,17 @@ export interface GetReservasParams {
   idOperador?:           number;
   idGrua?:               number;
   estadoAdministrativo?: string;
+  pagina?:               number;
+  tamano?:               number;
+}
+
+export interface GetServiciosParams {
+  id?:                   number;
+  estadoOperacion?:      string;
+  estadoAdministrativo?: string;
+  fechaInicio?:          string;
+  fechaFin?:             string;
+  direccion?:            string;
   pagina?:               number;
   tamano?:               number;
 }
