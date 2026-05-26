@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, catchError, map } from 'rxjs';
-import { AgendaExcepcionResult, CrearUpdExcepcionDto, ExcepcionAgenda, HorarioRegular } from '../../models/agenda.model';
+import { AgendaExcepcionResult, CrearUpdExcepcionDto, ExcepcionPagedDto, GetExcepcionesParams, HorarioRegular } from '../../models/agenda.model';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
@@ -10,12 +10,16 @@ const API = environment.apiUrl;
 export class AgendaService {
   private readonly http = inject(HttpClient);
 
-  getExcepciones(estado?: string): Observable<ExcepcionAgenda[]> {
-    const params: Record<string, string> = {};
-    if (estado) params['estado'] = estado;
-    return this.http.get<ExcepcionAgenda[]>(`${API}/agenda/excepciones`, { params }).pipe(
-      map(data => data ?? []),
-      catchError(() => of([]))
+  getExcepciones(params: GetExcepcionesParams = {}): Observable<ExcepcionPagedDto> {
+    const p: Record<string, string> = {};
+    p['estado'] = 'ACTIVO';
+    if (params.motivo              != null) p['motivo']              = params.motivo;
+    if (params.fechaInicio != null) p['fechaInicio'] = params.fechaInicio;
+    if (params.fechaFin    != null) p['fechaFin']    = params.fechaFin;
+    if (params.pagina              != null) p['pagina']              = String(params.pagina);
+    if (params.tamano              != null) p['tamano']              = String(params.tamano);
+    return this.http.get<ExcepcionPagedDto | null>(`${API}/agenda/excepciones`, { params: p }).pipe(
+      map(res => res ?? { total: 0, datos: [] })
     );
   }
 

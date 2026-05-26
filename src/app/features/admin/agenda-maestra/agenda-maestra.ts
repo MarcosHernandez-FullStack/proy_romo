@@ -3,7 +3,7 @@ import { LucideAngularModule, Clock, Calendar, Loader } from 'lucide-angular';
 import { AgendaService } from '../../../core/services/agenda.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ConfiguracionService } from '../../../core/services/configuracion.service';
-import { ExcepcionAgenda, HorarioRegular } from '../../../models/agenda.model';
+import { HorarioRegular } from '../../../models/agenda.model';
 import { HorariosRegularesComponent } from './horarios-regulares/horarios-regulares';
 import { ExcepcionesComponent } from './excepciones/excepciones';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
@@ -29,10 +29,8 @@ export class AgendaMaestraComponent implements OnInit {
   protected readonly reservasActivo       = signal(true);
   protected readonly guardandoToggle      = signal(false);
   protected readonly horarios             = signal<HorarioRegular[]>([]);
-  protected readonly excepciones          = signal<ExcepcionAgenda[]>([]);
   protected readonly guardando            = signal(false);
   protected readonly cargandoHorarios     = signal(true);
-  protected readonly cargandoExcepciones  = signal(true);
   protected readonly showExito      = signal(false);
   protected readonly tituloExito    = signal('');
   protected readonly mensajeExito   = signal('');
@@ -44,10 +42,6 @@ export class AgendaMaestraComponent implements OnInit {
     this.agendaSvc.getHorariosRegulares().subscribe({
       next:  (data) => { this.horarios.set(data); this.cargandoHorarios.set(false); },
       error: ()     => this.cargandoHorarios.set(false),
-    });
-    this.agendaSvc.getExcepciones().subscribe({
-      next:  (data) => { this.excepciones.set(data); this.cargandoExcepciones.set(false); },
-      error: ()     => this.cargandoExcepciones.set(false),
     });
   }
 
@@ -70,33 +64,6 @@ export class AgendaMaestraComponent implements OnInit {
         this.notifSvc.mostrar(msg ?? 'Error al actualizar el estado de reservas. Intente nuevamente.', 'error');
       },
     });
-  }
-
-  protected onExcepcionCreada(exc: ExcepcionAgenda): void {
-    this.excepciones.update(list => [exc, ...list]);
-    this.tituloExito.set('¡Excepción Registrada!');
-    this.mensajeExito.set('La excepción fue registrada exitosamente.');
-    this.etiquetaExito.set('EXCEPCIÓN N°');
-    this.detalleExito.set(String(exc.id));
-    this.showExito.set(true);
-  }
-
-  protected onExcepcionActualizada(exc: ExcepcionAgenda): void {
-    this.excepciones.update(list => list.map(e => e.id === exc.id ? exc : e));
-    this.tituloExito.set('¡Excepción Actualizada!');
-    this.mensajeExito.set('Los datos de la excepción fueron actualizados correctamente.');
-    this.etiquetaExito.set('EXCEPCIÓN N°');
-    this.detalleExito.set(String(exc.id));
-    this.showExito.set(true);
-  }
-
-  protected onExcepcionEliminada(id: number): void {
-    this.excepciones.update(list => list.filter(e => e.id !== id));
-    this.tituloExito.set('¡Excepción Dada de Baja!');
-    this.mensajeExito.set('La excepción fue desactivada correctamente.');
-    this.etiquetaExito.set('EXCEPCIÓN N°');
-    this.detalleExito.set(String(id));
-    this.showExito.set(true);
   }
 
   protected onGuardarHorarios(horarios: HorarioRegular[]): void {

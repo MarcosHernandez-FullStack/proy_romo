@@ -18,7 +18,7 @@
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[13px]">Total Clientes</p>
-        <p class="text-[#101828] text-[32px] font-bold leading-none mt-1">{{ totalClientes() }}</p>
+        <p class="text-[#101828] text-[32px] font-bold leading-none mt-1">{{ totalRegistros() }}</p>
       </div>
       <div class="size-12 bg-[#eff6ff] rounded-[12px] flex items-center justify-center">
         <lucide-angular [img]="Building2Icon" class="size-6" color="#155dfc" [strokeWidth]="1.5" />
@@ -27,7 +27,7 @@
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[13px]">Clientes Activos</p>
-        <p class="text-[#008236] text-[32px] font-bold leading-none mt-1">{{ clientesActivos() }}</p>
+        <p class="text-[#008236] text-[32px] font-bold leading-none mt-1">{{ totalActivos() }}</p>
       </div>
       <div class="size-12 bg-[#f0fdf4] rounded-[12px] flex items-center justify-center">
         <lucide-angular [img]="CheckCircleIcon" class="size-6" color="#008236" [strokeWidth]="1.5" />
@@ -36,7 +36,7 @@
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-5 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[13px]">Clientes Inactivos</p>
-        <p class="text-[#e7000b] text-[32px] font-bold leading-none mt-1">{{ clientesInactivos() }}</p>
+        <p class="text-[#e7000b] text-[32px] font-bold leading-none mt-1">{{ totalInactivos() }}</p>
       </div>
       <div class="size-12 bg-[#fef2f2] rounded-[12px] flex items-center justify-center">
         <lucide-angular [img]="BanIcon" class="size-6" color="#e7000b" [strokeWidth]="1.5" />
@@ -47,19 +47,45 @@
   <!-- Table -->
   <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
 
-    <!-- Search + Filter -->
-    <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
-      <div class="flex-1 relative">
-        <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="text" [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)" name="busqueda"
-          placeholder="Buscar por empresa, ID, contacto..."
-          class="w-full border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc]" />
+    <!-- Filtros -->
+    <div class="flex flex-wrap items-end gap-2.5 px-5 py-4 border-b border-[#e5e7eb]">
+
+      <!-- ID -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">ID</label>
+        <input type="text" inputmode="numeric" [ngModel]="busquedaId()" (ngModelChange)="setBusquedaId($event)" name="busquedaId"
+          placeholder="ID"
+          class="w-20 border border-[#d1d5dc] rounded-[10px] px-3 py-2 text-[14px] text-[#101828] placeholder:text-[#9ca3af] focus:outline-none focus:border-[#155dfc]" />
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-[#6a7282] text-[13px] font-medium">Estado:</span>
+
+      <!-- Empresa -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Empresa</label>
+        <div class="relative">
+          <lucide-angular [img]="Building2Icon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaEmpresa()" (ngModelChange)="setBusquedaEmpresa($event)" name="busquedaEmpresa"
+            placeholder="Empresa..."
+            class="w-52 border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] placeholder:text-[#9ca3af] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+
+      <!-- Contacto -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Contacto</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaContacto()" (ngModelChange)="setBusquedaContacto($event)" name="busquedaContacto"
+            placeholder="Contacto..."
+            class="w-52 border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] placeholder:text-[#9ca3af] focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+
+      <!-- Estado -->
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Estado</label>
         <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
           @for (f of filtroEstados; track f) {
-            <button type="button" (click)="filtroEstado.set(f)"
+            <button type="button" (click)="setFiltroEstado(f)"
               class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
               [class.bg-[#155dfc]]="filtroEstado() === f"
               [class.text-white]="filtroEstado() === f"
@@ -69,11 +95,23 @@
           }
         </div>
       </div>
-    </div>
 
-    <!-- Count -->
-    <div class="px-5 py-2 border-b border-[#f3f4f6]">
-      <p class="text-[#6a7282] text-[13px]">Mostrando <strong class="text-[#101828]">{{ clientesFiltrados().length }}</strong> cliente(s)</p>
+      <!-- Limpiar filtros -->
+      @if (hasFiltros()) {
+        <button type="button" (click)="limpiarFiltros()"
+          class="flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-[#e7000b] border border-[#fecaca] bg-[#fff5f5] rounded-[10px] hover:bg-[#fef2f2] transition-colors cursor-pointer">
+          <lucide-angular [img]="XIcon" class="size-3.5" color="#e7000b" [strokeWidth]="2" />
+          Limpiar Filtros
+        </button>
+      }
+
+      <!-- Actualizar -->
+      <button type="button" (click)="cargarClientes()" [disabled]="cargando()"
+        class="ml-auto flex items-center gap-1.5 px-3 py-2 text-[13px] font-medium text-[#364153] border border-[#e5e7eb] bg-white rounded-[10px] hover:bg-[#f3f4f6] disabled:opacity-50 transition-colors cursor-pointer">
+        <lucide-angular [img]="RefreshCwIcon" class="size-3.5" color="#364153" [strokeWidth]="1.5" />
+        Actualizar
+      </button>
+
     </div>
 
     <div class="overflow-x-auto">
@@ -85,94 +123,136 @@
         }
       </div>
 
+      <!-- Loading -->
+      @if (cargando()) {
+        <div class="py-10 flex items-center justify-center">
+          <div class="size-6 border-2 border-[#155dfc] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }
+
       <!-- Empty state -->
-      @if (clientesFiltrados().length === 0) {
+      @if (!cargando() && clientes().length === 0) {
         <div class="py-12 flex flex-col items-center gap-2 text-[#9ca3af]">
-          <lucide-angular [img]="UsersIcon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
-          <p class="text-[14px]">No hay clientes en estado "{{ filtroEstado() }}"</p>
+          <lucide-angular [img]="Building2Icon" class="size-8" color="#d1d5dc" [strokeWidth]="1" />
+          <p class="text-[14px]">No se encontraron clientes</p>
         </div>
       }
 
       <!-- Rows -->
-      @for (c of clientesFiltrados(); track c.id) {
-        <div class="grid grid-cols-[0.8fr_1.5fr_1.2fr_1.2fr_1fr_1fr_0.6fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[720px]">
+      @if (!cargando()) {
+        @for (c of clientes(); track c.id) {
+          <div class="grid grid-cols-[0.8fr_1.5fr_1.2fr_1.2fr_1fr_1fr_0.6fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[720px]">
 
-          <!-- ID -->
-          <p class="text-[#101828] text-[13px] font-bold font-mono">{{ c.id }}</p>
+            <!-- ID -->
+            <p class="text-[#101828] text-[13px] font-bold font-mono">{{ c.id }}</p>
 
-          <!-- EMPRESA -->
-          <div class="flex items-center gap-2">
-            <lucide-angular [img]="Building2Icon" class="size-4 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
-            <p class="text-[#101828] text-[13px] font-semibold">{{ c.empresa }}</p>
+            <!-- EMPRESA -->
+            <div class="flex items-center gap-2">
+              <lucide-angular [img]="Building2Icon" class="size-4 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+              <p class="text-[#101828] text-[13px] font-semibold">{{ c.empresa }}</p>
+            </div>
+
+            <!-- CONTACTO -->
+            <div>
+              <p class="text-[#101828] text-[13px] font-semibold">{{ c.nomContacto }}</p>
+              @if (c.nroContacto) {
+                <div class="flex items-center gap-1 mt-0.5">
+                  <lucide-angular [img]="PhoneIcon" class="size-3" color="#9ca3af" [strokeWidth]="1.5" />
+                  <span class="text-[#6a7282] text-[12px]">{{ c.nroContacto }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- CORREO -->
+            <div class="flex items-center gap-1.5 min-w-0">
+              <lucide-angular [img]="MailIcon" class="size-3.5 shrink-0" color="#9ca3af" [strokeWidth]="1.5" />
+              <span class="text-[#4a5565] text-[13px] truncate">{{ c.correoContacto }}</span>
+            </div>
+
+            <!-- TARIFA BASE -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-[#101828] text-[13px] font-semibold">${{ c.tarifaBase }}</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                [class.bg-[#ccfbf1]]="c.tipoTarifaBase === 'CUSTOM'"
+                [class.text-[#0f766e]]="c.tipoTarifaBase === 'CUSTOM'"
+                [class.bg-[#f3f4f6]]="c.tipoTarifaBase === 'GLOBAL'"
+                [class.text-[#6a7282]]="c.tipoTarifaBase === 'GLOBAL'">
+                {{ c.tipoTarifaBase }}
+              </span>
+            </div>
+
+            <!-- TARIFA KM -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-[#101828] text-[13px] font-semibold">${{ c.tarifaKm }}</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                [class.bg-[#ccfbf1]]="c.tipoTarifaKm === 'CUSTOM'"
+                [class.text-[#0f766e]]="c.tipoTarifaKm === 'CUSTOM'"
+                [class.bg-[#f3f4f6]]="c.tipoTarifaKm === 'GLOBAL'"
+                [class.text-[#6a7282]]="c.tipoTarifaKm === 'GLOBAL'">
+                {{ c.tipoTarifaKm }}
+              </span>
+            </div>
+
+            <!-- ACCIONES -->
+            <div class="flex items-center gap-1">
+              @if (c.estado === 'ACTIVO') {
+                <button type="button" (click)="clienteEditar.set(c)"
+                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
+                  title="Editar">
+                  <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+                </button>
+                <button type="button" (click)="darDeBajaCliente(c.id)"
+                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+                  title="Dar de baja">
+                  <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
+                </button>
+              } @else {
+                <button type="button" (click)="reactivarCliente(c.id)"
+                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer"
+                  title="Reactivar">
+                  <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
+                </button>
+              }
+            </div>
+
           </div>
-
-          <!-- CONTACTO -->
-          <div>
-            <p class="text-[#101828] text-[13px] font-semibold">{{ c.nomContacto }}</p>
-            @if (c.nroContacto) {
-              <div class="flex items-center gap-1 mt-0.5">
-                <lucide-angular [img]="PhoneIcon" class="size-3" color="#9ca3af" [strokeWidth]="1.5" />
-                <span class="text-[#6a7282] text-[12px]">{{ c.nroContacto }}</span>
-              </div>
-            }
-          </div>
-
-          <!-- CORREO -->
-          <div class="flex items-center gap-1.5 min-w-0">
-            <lucide-angular [img]="MailIcon" class="size-3.5 shrink-0" color="#9ca3af" [strokeWidth]="1.5" />
-            <span class="text-[#4a5565] text-[13px] truncate">{{ c.correoContacto }}</span>
-          </div>
-
-          <!-- TARIFA BASE -->
-          <div class="flex items-center gap-1.5">
-            <span class="text-[#101828] text-[13px] font-semibold">${{ c.tarifaBase }}</span>
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
-              [class.bg-[#ccfbf1]]="c.tipoTarifaBase === 'CUSTOM'"
-              [class.text-[#0f766e]]="c.tipoTarifaBase === 'CUSTOM'"
-              [class.bg-[#f3f4f6]]="c.tipoTarifaBase === 'GLOBAL'"
-              [class.text-[#6a7282]]="c.tipoTarifaBase === 'GLOBAL'">
-              {{ c.tipoTarifaBase }}
-            </span>
-          </div>
-
-          <!-- TARIFA KM -->
-          <div class="flex items-center gap-1.5">
-            <span class="text-[#101828] text-[13px] font-semibold">${{ c.tarifaKm }}</span>
-            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded"
-              [class.bg-[#ccfbf1]]="c.tipoTarifaKm === 'CUSTOM'"
-              [class.text-[#0f766e]]="c.tipoTarifaKm === 'CUSTOM'"
-              [class.bg-[#f3f4f6]]="c.tipoTarifaKm === 'GLOBAL'"
-              [class.text-[#6a7282]]="c.tipoTarifaKm === 'GLOBAL'">
-              {{ c.tipoTarifaKm }}
-            </span>
-          </div>
-
-          <!-- ACCIONES -->
-          <div class="flex items-center gap-1">
-            @if (c.estado === 'ACTIVO') {
-              <button type="button" (click)="clienteEditar.set(c)"
-                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
-                title="Editar">
-                <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
-              </button>
-              <button type="button" (click)="darDeBajaCliente(c.id)"
-                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
-                title="Dar de baja">
-                <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
-              </button>
-            } @else {
-              <button type="button" (click)="reactivarCliente(c.id)"
-                class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer"
-                title="Reactivar">
-                <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
-              </button>
-            }
-          </div>
-
-        </div>
+        }
       }
 
     </div>
+
+    <!-- Paginación -->
+    @if (totalPaginas() > 1) {
+      <div class="flex items-center justify-between px-5 py-4 border-t border-[#e5e7eb]">
+        <span class="text-[#6a7282] text-[13px]">
+          Mostrando {{ rangoMostrado() }} de {{ totalRegistros() }} clientes
+        </span>
+        <div class="flex items-center gap-1">
+          <button type="button" (click)="cambiarPagina(paginaActual() - 1)"
+            [disabled]="paginaActual() === 1"
+            class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] disabled:opacity-40 hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+            <lucide-angular [img]="ChevronLeftIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          </button>
+          @for (p of paginas(); track p) {
+            <button type="button" (click)="cambiarPagina(p)"
+              class="size-8 flex items-center justify-center rounded-[8px] text-[13px] font-semibold border transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="paginaActual() === p"
+              [class.text-white]="paginaActual() === p"
+              [class.border-[#155dfc]]="paginaActual() === p"
+              [class.border-[#e5e7eb]]="paginaActual() !== p"
+              [class.text-[#364153]]="paginaActual() !== p">
+              {{ p }}
+            </button>
+          }
+          <button type="button" (click)="cambiarPagina(paginaActual() + 1)"
+            [disabled]="paginaActual() === totalPaginas()"
+            class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] disabled:opacity-40 hover:bg-[#f3f4f6] transition-colors cursor-pointer">
+            <lucide-angular [img]="ChevronRightIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
+          </button>
+        </div>
+      </div>
+    }
+
   </div>
 </div>
 

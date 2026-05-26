@@ -22,22 +22,22 @@
     <div class="flex flex-col gap-1">
       <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Fecha Inicio</label>
       <input type="date" [value]="filtroFechaInicio()"
-        (input)="onFiltroFechaInicio($any($event.target).value)"
+        (input)="setFiltroFechaInicio($any($event.target).value)"
         class="h-9 border border-[#e5e7eb] rounded-[8px] px-3 text-[13px] text-[#101828] bg-white outline-none focus:border-[#155dfc] focus:ring-1 focus:ring-[#155dfc] transition" />
     </div>
     <div class="flex flex-col gap-1">
       <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Fecha Fin</label>
       <input type="date" [value]="filtroFechaFin()"
-        (input)="onFiltroFechaFin($any($event.target).value)"
+        (input)="setFiltroFechaFin($any($event.target).value)"
         class="h-9 border border-[#e5e7eb] rounded-[8px] px-3 text-[13px] text-[#101828] bg-white outline-none focus:border-[#155dfc] focus:ring-1 focus:ring-[#155dfc] transition" />
     </div>
     <div class="flex flex-col gap-1 flex-1 min-w-[220px]">
-      <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Buscar</label>
+      <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Motivo</label>
       <div class="relative">
         <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="text" [value]="filtroTexto()"
-          (input)="onFiltroTexto($any($event.target).value)"
-          placeholder="Tipo, alcance o descripción..."
+        <input type="text" [value]="filtroMotivo()"
+          (input)="setFiltroMotivo($any($event.target).value)"
+          placeholder="Feriado, Mantenimiento, Bloqueo..."
           class="w-full h-9 border border-[#e5e7eb] rounded-[8px] pl-9 pr-3 text-[13px] text-[#101828] bg-white outline-none focus:border-[#155dfc] focus:ring-1 focus:ring-[#155dfc] transition" />
       </div>
     </div>
@@ -47,27 +47,28 @@
     <!-- Header -->
     <div class="grid grid-cols-[2fr_1.5fr_2fr_auto] bg-[#f9fafb] border-b border-[#e5e7eb] px-5 py-2.5 gap-4">
       <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">FECHA</span>
-      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">TIPO / ALCANCE</span>
-      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">MOTIVO / DESCRIPCIÓN</span>
+      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">MOTIVO / ALCANCE</span>
+      <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider">DESCRIPCIÓN</span>
       <span class="text-[#6a7282] text-[12px] font-bold uppercase tracking-wider text-right">ACCIONES</span>
     </div>
 
-    @if (excepcionesFiltradas().length === 0) {
+    @if (cargando()) {
+      <div class="flex items-center justify-center gap-2 py-12 text-[#6a7282]">
+        <lucide-angular [img]="LoaderIcon" class="size-5 animate-spin" color="#155dfc" [strokeWidth]="1.5" />
+        <span class="text-[14px]">Cargando excepciones...</span>
+      </div>
+    } @else if (excepciones().length === 0) {
       <div class="flex items-center justify-center py-12 text-[#9ca3af] text-[14px]">
-        @if (excepciones().length === 0) {
-          No hay excepciones registradas.
-        } @else {
-          No se encontraron excepciones con los filtros aplicados.
-        }
+        No hay excepciones registradas con los filtros aplicados.
       </div>
     }
 
-    @for (exc of excepcionesPagina(); track exc.id) {
+    @for (exc of excepciones(); track exc.id) {
       <div class="grid grid-cols-[2fr_1.5fr_2fr_auto] items-center px-5 py-4 border-b border-[#e5e7eb] last:border-0 hover:bg-[#fafafa] transition-colors gap-4">
 
         <!-- Fecha -->
         <div>
-          <p class="text-[#101828] text-[14px] font-semibold capitalize">{{ formatearFecha(exc.fecha) }}</p>
+          <p class="text-[#101828] text-[14px] font-semibold capitalize">{{ exc.fechaFormatLarga ?? exc.fechaFormatCorta }}</p>
           @if (exc.alcance !== 'Día Completo') {
             <p class="text-[#6a7282] text-[12px] mt-0.5">{{ exc.tiempoInicio }} - {{ exc.tiempoFinal }}</p>
           }
@@ -123,7 +124,7 @@
     <div class="flex items-center justify-between mt-4 px-1 pt-4 border-t border-[#e5e7eb]">
       <span class="text-[#6a7282] text-[13px]">{{ infoRango() }}</span>
       <div class="flex items-center gap-1">
-        <button type="button" (click)="irPagina(paginaActual() - 1)" [disabled]="paginaActual() <= 1"
+        <button type="button" (click)="cambiarPagina(paginaActual() - 1)" [disabled]="paginaActual() <= 1"
           class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] hover:bg-[#f3f4f6] disabled:opacity-40 transition-colors cursor-pointer">
           <lucide-angular [img]="ChevronLeftIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
         </button>
@@ -131,7 +132,7 @@
           @if (i > 0 && p - paginas()[i - 1] > 1) {
             <span class="text-[#9ca3af] text-[13px] px-1 select-none">...</span>
           }
-          <button type="button" (click)="irPagina(p)"
+          <button type="button" (click)="cambiarPagina(p)"
             class="size-8 flex items-center justify-center rounded-[8px] text-[13px] font-semibold border transition-colors cursor-pointer"
             [class.bg-[#155dfc]]="paginaActual() === p"
             [class.text-white]="paginaActual() === p"
@@ -141,7 +142,7 @@
             {{ p }}
           </button>
         }
-        <button type="button" (click)="irPagina(paginaActual() + 1)" [disabled]="paginaActual() >= totalPaginas()"
+        <button type="button" (click)="cambiarPagina(paginaActual() + 1)" [disabled]="paginaActual() >= totalPaginas()"
           class="size-8 flex items-center justify-center rounded-[8px] border border-[#e5e7eb] hover:bg-[#f3f4f6] disabled:opacity-40 transition-colors cursor-pointer">
           <lucide-angular [img]="ChevronRightIcon" class="size-4" color="#364153" [strokeWidth]="1.5" />
         </button>
@@ -163,4 +164,14 @@
     [guardando]="guardando()"
     (guardar)="onGuardarEdicion($event)"
     (cerrar)="showEditarExcepcion.set(false)" />
+}
+
+@if (showExito()) {
+  <app-exito-modal
+    [titulo]="tituloExito()"
+    [mensaje]="mensajeExito()"
+    etiqueta="EXCEPCIÓN N°"
+    [detalle]="detalleExito()"
+    labelCerrar="Aceptar"
+    (cerrar)="onCerrarExito()" />
 }

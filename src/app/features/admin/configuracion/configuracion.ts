@@ -24,6 +24,6 @@ export class ConfiguracionComponent implements OnInit {
   protected readonly clientes = signal<ClienteB2B[]>([]);
 
   ngOnInit(): void {
-    this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
+    this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data.datos));
   }
 }

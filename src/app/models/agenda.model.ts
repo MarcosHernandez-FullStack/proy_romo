@@ -14,13 +14,27 @@ export type GridDisponibilidad = Record<DiaSemana, Record<HoraGrid, boolean>>;
 
 export interface ExcepcionAgenda {
   id:                number;
-  fecha:             string;
+  fechaFormatCorta:  string;
+  fechaFormatLarga?: string;
   motivo:            string;
   alcance:           string;
   tiempoInicio:      string;
   tiempoFinal:       string;
   descripcionMotivo: string;
   estado:            string;
+}
+
+export interface ExcepcionPagedDto {
+  total: number;
+  datos: ExcepcionAgenda[];
+}
+
+export interface GetExcepcionesParams {
+  motivo?:      string;
+  fechaInicio?: string;
+  fechaFin?:    string;
+  pagina?:      number;
+  tamano?:      number;
 }
 
 export interface HorarioRegular {

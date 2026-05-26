@@ -1,3 +1,19 @@
+export interface ClientePagedDto {
+  total:          number;
+  totalActivos:   number;
+  totalInactivos: number;
+  datos:          ClienteB2B[];
+}
+
+export interface GetClientesParams {
+  estado?:   string;
+  id?:       number;
+  empresa?:  string;
+  contacto?: string;
+  pagina?:   number;
+  tamano?:   number;
+}
+
 export interface ClienteB2B {
   id:              number;
   empresa:         string;

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, delay, map } from 'rxjs';
-import { ClienteB2B, CrearClienteRequest, EditarClienteRequest, TarifaCliente } from '../../models/clientes.model';
+import { Observable, map, of, delay } from 'rxjs';
+import { ClientePagedDto, CrearClienteRequest, EditarClienteRequest, GetClientesParams, TarifaCliente } from '../../models/clientes.model';
 import { CrearUsuarioResult } from '../../models/usuario.model';
 import { environment } from '../../../environments/environment';
 
@@ -11,9 +11,20 @@ const API = environment.apiUrl;
 export class ClientesService {
   private readonly http = inject(HttpClient);
 
-  getClientes(): Observable<ClienteB2B[]> {
-    return this.http.get<ClienteB2B[]>(`${API}/clientes`).pipe(
-      map(data => data ?? [])
+  getClientes(params: GetClientesParams = {}): Observable<ClientePagedDto> {
+    const p: Record<string, string> = {};
+    if (params.estado)         p['estado']   = params.estado;
+    if (params.id != null)     p['id']       = String(params.id);
+    if (params.empresa)        p['empresa']  = params.empresa;
+    if (params.contacto)       p['contacto'] = params.contacto;
+    if (params.pagina != null) p['pagina']   = String(params.pagina);
+    if (params.tamano != null) p['tamano']   = String(params.tamano);
+    return this.http.get<ClientePagedDto | null>(`${API}/clientes`, { params: p }).pipe(
+      map(res => res ?? 
+        {
+          total: 0, datos: [], totalActivos: 0, totalInactivos: 0,
+        }
+      )
     );
   }
 

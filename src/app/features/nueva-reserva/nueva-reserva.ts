@@ -304,7 +304,7 @@ export class NuevaReservaComponent implements OnInit {
     if (session?.rol === 'CLIENTE' && session.idCliente) {
       this.clienteId.set(session.idCliente);
     } else {
-      this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data));
+      this.clientesSvc.getClientes().subscribe((data) => this.clientes.set(data.datos));
     }
   }
 

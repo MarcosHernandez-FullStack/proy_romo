@@ -36,7 +36,7 @@ export class EditarExcepcionComponent implements OnInit {
 
   ngOnInit(): void {
     const exc = this.excepcion();
-    this.fecha.set(exc.fecha);
+    this.fecha.set(exc.fechaFormatCorta);
     this.motivo.set(exc.motivo as TipoExcepcion);
     this.alcance.set(
       exc.alcance === 'Rango de Horas' ? 'Rango de Horas Específico' : exc.alcance as AlcanceExcepcion
@@ -58,7 +58,7 @@ export class EditarExcepcionComponent implements OnInit {
     if (!this.esValido) return;
     this.guardar.emit({
       id:                this.excepcion().id,
-      fecha:             this.fecha(),
+      fechaFormatCorta:  this.fecha(),
       motivo:            this.motivo(),
       alcance:           this.alcance(),
       tiempoInicio:      this.alcance() === 'Día Completo' ? '00:00' : this.tiempoInicio(),

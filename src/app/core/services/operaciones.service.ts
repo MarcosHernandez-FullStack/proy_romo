@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, delay, map } from 'rxjs';
-import { ReservaOperacion, ServicioAdmin, Sugerencias } from '../../models/operaciones.model';
+import { GetReservasParams, ReservaPagedDto, ServicioAdmin, Sugerencias } from '../../models/operaciones.model';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
@@ -10,12 +10,20 @@ const API = environment.apiUrl;
 export class OperacionesService {
   private readonly http = inject(HttpClient);
 
-  getReservas(fecha?: string, idGrua?: number): Observable<ReservaOperacion[]> {
-    const params: Record<string, string> = {};
-    if (fecha)  params['fechaServicio'] = fecha;
-    if (idGrua) params['idGrua']        = String(idGrua);
-    return this.http.get<ReservaOperacion[]>(`${API}/operaciones`, { params }).pipe(
-      map(data => data ?? [])
+  getReservas(params: GetReservasParams = {}): Observable<ReservaPagedDto> {
+    const p: Record<string, string> = {};
+    if (params.estadoOperacion)       p['estadoOperacion'] = params.estadoOperacion;
+    if (params.id != null)            p['id']              = String(params.id);
+    if (params.fechaInicio)           p['fechaInicio']     = params.fechaInicio;
+    if (params.fechaFin)              p['fechaFin']        = params.fechaFin;
+    if (params.idGrua != null)        p['idGrua']          = String(params.idGrua);
+    if (params.pagina != null)        p['pagina']          = String(params.pagina);
+    if (params.tamano != null)        p['tamano']          = String(params.tamano);
+    return this.http.get<ReservaPagedDto | null>(`${API}/operaciones`, { params: p }).pipe(
+      map(res => res ?? 
+        {
+          total: 0, datos: [], totalReservado: 0, totalAsignado: 0, totalEnCurso: 0,
+        })
     );
   }
 

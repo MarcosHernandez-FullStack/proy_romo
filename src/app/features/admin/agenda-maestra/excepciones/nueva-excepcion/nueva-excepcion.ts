@@ -44,7 +44,7 @@ export class NuevaExcepcionComponent {
   protected onGuardar(): void {
     if (!this.esValido) return;
     const exc: Omit<ExcepcionAgenda, 'id'> = {
-      fecha:             this.fecha(),
+      fechaFormatCorta:  this.fecha(),
       motivo:            this.motivo(),
       alcance:           this.alcance(),
       tiempoInicio:      this.alcance() === 'Día Completo' ? '00:00' : this.tiempoInicio(),

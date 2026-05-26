@@ -76,26 +76,52 @@ export interface Sugerencias {
 }
 
 export interface ReservaOperacion {
-  id:                 number;
-  direccionOrigen:    string;
-  direccionDestino:   string;
-  cantidadCarga:      number;
-  fechaServicio:      string;
-  horaInicio:         string;
-  horaFin:            string;
-  nroBloques:         number;
-  distanciaKm:        number;
-  tiempoEstimado:     number;
-  tiempoManiobra:     number;
-  estadoOperacion:    string;
-  estado:             string;
-  gruaAsignada?:      string | null;
-  operadorAsignado?:  string | null;
-  nombreCliente?:     string | null;
-  vehiculos?:         VehiculoDetalle[];
-  costoTotal?:        number | null;
-  motivoCancelacion?: string | null;
-  canceladoPor?:      string | null;
+  id:                   number;
+  direccionOrigen:      string;
+  coordLatOrigen:       string;
+  coordLonOrigen:       string;
+  direccionDestino:     string;
+  coordLatDestino:      string;
+  coordLonDestino:      string;
+  cantidadCarga:        number;
+  fechaServicio:        string;
+  horaInicio:           string;
+  horaFin:              string;
+  nroBloques:           number;
+  distanciaKm:          number;
+  tiempoEstimado:       number;
+  tiempoManiobra:       number;
+  tiempoRetorno:        number;
+  estadoOperacion:      string;
+  estado:               string;
+  nombreCliente?:       string | null;
+  gruaAsignada?:        string | null;
+  operadorAsignado?:    string | null;
+  vehiculos?:           VehiculoDetalle[];
+  fechaHoraFormateada:  string;
+  cantidadVehiculos:    number;
+  estadoAdministrativo: string;
+  costo:                number;
+}
+
+export interface ReservaPagedDto {
+  total:          number;
+  datos:          ReservaOperacion[];
+  totalReservado: number;
+  totalAsignado:  number;
+  totalEnCurso:   number;
+}
+
+export interface GetReservasParams {
+  estadoOperacion?:      string;
+  id?:                   number;
+  fechaInicio?:          string;
+  fechaFin?:             string;
+  idOperador?:           number;
+  idGrua?:               number;
+  estadoAdministrativo?: string;
+  pagina?:               number;
+  tamano?:               number;
 }
 
 export interface ReservaALiberar {

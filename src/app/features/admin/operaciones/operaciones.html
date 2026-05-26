@@ -11,21 +11,21 @@
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-4 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[12px]">Reservados</p>
-        <p class="text-[#101828] text-[32px] font-bold">{{ countPendiente() }}</p>
+        <p class="text-[#101828] text-[32px] font-bold">{{ totalReservado() }}</p>
       </div>
       <lucide-angular [img]="AlertTriangleIcon" class="size-6" color="#e17100" [strokeWidth]="1.5" />
     </div>
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-4 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[12px]">Asignados</p>
-        <p class="text-[#101828] text-[32px] font-bold">{{ countAsignado() }}</p>
+        <p class="text-[#101828] text-[32px] font-bold">{{ totalAsignado() }}</p>
       </div>
       <lucide-angular [img]="CheckCircle2Icon" class="size-6" color="#7c3aed" [strokeWidth]="1.5" />
     </div>
     <div class="bg-white border border-[#e5e7eb] rounded-[14px] px-4 py-4 shadow-sm flex items-center justify-between">
       <div>
         <p class="text-[#6a7282] text-[12px]">En Curso</p>
-        <p class="text-[#101828] text-[32px] font-bold">{{ countEnCurso() }}</p>
+        <p class="text-[#101828] text-[32px] font-bold">{{ totalEnCurso() }}</p>
       </div>
       <lucide-angular [img]="TruckIcon" class="size-6" color="#155dfc" [strokeWidth]="1.5" />
     </div>
@@ -35,29 +35,54 @@
   <div class="bg-white border border-[#e5e7eb] rounded-[14px] shadow-sm overflow-hidden">
 
     <!-- Search + tabs -->
-    <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-[#e5e7eb]">
-      <div class="relative">
-        <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="text" [ngModel]="busquedaId()" (ngModelChange)="setBusqueda($event)" name="busquedaId"
-          placeholder=" Buscar por ID..."
-          class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc]" />
+    <div class="flex flex-wrap items-end gap-3 px-5 py-4 border-b border-[#e5e7eb]">
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">ID</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="busquedaId()" (ngModelChange)="setBusquedaId($event)" name="busquedaId"
+            placeholder="Buscar por ID..."
+            class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 h-9 text-[13px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc]" />
+        </div>
       </div>
-      <div class="relative">
-        <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
-        <input type="date" [ngModel]="fechaFiltro()" (ngModelChange)="setFechaFiltro($event)" name="fechaFiltro"
-          class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 py-2 text-[14px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc] cursor-pointer" />
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Fecha Inicio</label>
+        <div class="relative">
+          <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="setFechaInicio($event)" name="fechaInicio"
+            class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 h-9 text-[13px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc] cursor-pointer" />
+        </div>
       </div>
-      <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
-        @for (tab of filtroTabs; track tab) {
-          <button type="button" (click)="cambiarTab(tab)"
-            class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
-            [class.bg-[#155dfc]]="filtroTab() === tab"
-            [class.text-white]="filtroTab() === tab"
-            [class.text-[#6a7282]]="filtroTab() !== tab">
-            {{ tabLabel[tab] }}
-          </button>
-        }
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Fecha Fin</label>
+        <div class="relative">
+          <lucide-angular [img]="CalendarIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="date" [ngModel]="fechaFin()" (ngModelChange)="setFechaFin($event)" name="fechaFin"
+            class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 h-9 text-[13px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc] cursor-pointer" />
+        </div>
       </div>
+       <div class="flex flex-col gap-1">
+         <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Estado Operación</label>
+        <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
+          @for (tab of filtroTabs; track tab) {
+            <button type="button" (click)="cambiarTab(tab)"
+              class="px-4 h-8 rounded-[8px] text-[13px] font-semibold transition-colors cursor-pointer"
+              [class.bg-[#155dfc]]="filtroTab() === tab"
+              [class.text-white]="filtroTab() === tab"
+              [class.text-[#6a7282]]="filtroTab() !== tab">
+              {{ tabLabel[tab] }}
+            </button>
+          }
+        </div>
+       </div>
+      
+      @if (hasFiltros()) {
+        <button type="button" (click)="limpiarFiltros()"
+          class="flex items-center gap-1.5 px-3 h-9 text-[13px] font-medium text-[#e7000b] border border-[#fecaca] bg-[#fff5f5] rounded-[10px] hover:bg-[#fef2f2] transition-colors cursor-pointer">
+          <lucide-angular [img]="XIcon" class="size-3.5" color="#e7000b" [strokeWidth]="2" />
+          Limpiar Filtros
+        </button>
+      }
       <button type="button" (click)="cargar()"
         class="ml-auto flex items-center gap-1.5 text-[#6a7282] text-[13px] hover:text-[#155dfc] transition-colors cursor-pointer">
         <lucide-angular [img]="RotateCcwIcon" class="size-4" [strokeWidth]="1.5" />
@@ -79,21 +104,15 @@
       }
 
       <!-- Sin resultados -->
-      @if (!cargando() && reservasFiltradas().length === 0) {
+      @if (!cargando() && reservas().length === 0) {
         <div class="py-12 flex flex-col items-center gap-3 text-[#9ca3af]">
           <lucide-angular [img]="TruckIcon" class="size-10" color="#d1d5dc" [strokeWidth]="1" />
-          <!-- @if (busquedaId().trim() || fechaFiltro()) { -->
-            <p class="text-[14px] font-medium text-[#6a7282]">Sin resultados para los filtros aplicados</p>
-           <!--  <p class="text-[12px]">Intenta con otro ID o fecha</p> -->
-          <!-- } @else {
-            <p class="text-[14px] font-medium text-[#6a7282]">No hay reservas en estado "{{ tabLabel[filtroTab()] }}"</p>
-            <p class="text-[12px]">Las reservas aparecerán aquí cuando estén disponibles</p>
-          } -->
+          <p class="text-[14px] font-medium text-[#6a7282]">Sin resultados para los filtros aplicados</p>
         </div>
       }
 
       <!-- Filas -->
-      @for (r of reservasPaginadas(); track r.id) {
+      @for (r of reservas(); track r.id) {
         <div class="grid grid-cols-[0.7fr_2fr_2fr_0.8fr_1fr_1.3fr_0.7fr_1fr_0.8fr] gap-2 items-center px-4 py-3.5 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[900px]">
           <p class="text-[#101828] text-[13px] font-bold font-mono">#{{ r.id }}</p>
           <div class="flex items-start gap-1.5">
@@ -117,7 +136,7 @@
           <div>
             <div class="flex items-center gap-1">
               <lucide-angular [img]="ClockIcon" class="size-3.5" color="#6a7282" [strokeWidth]="1.5" />
-              <span class="text-[#364153] text-[12px]">{{ formatHora(r.horaInicio) }} - {{ formatHora(r.horaFin) }}</span>
+              <span class="text-[#364153] text-[12px]">{{ r.horaInicio }} - {{ r.horaFin }}</span>
             </div>
           </div>
           <p class="text-[#364153] text-[12px]">{{ r.nroBloques }}</p>
@@ -127,14 +146,12 @@
           </span>
           <div class="flex items-center gap-1">
             @if (soloDetalle(r)) {
-              <!-- Solo visualización -->
               <button type="button" (click)="abrirAsignar(r)"
                 class="size-7 flex items-center justify-center rounded-lg hover:bg-[#f3f4f6] transition-colors cursor-pointer"
                 title="Ver detalle">
                 <lucide-angular [img]="EyeIcon" class="size-3.5" color="#6a7282" [strokeWidth]="1.5" />
               </button>
             } @else {
-              <!-- Acciones operativas -->
               <button type="button" (click)="abrirAsignar(r)"
                 class="size-7 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
                 title="Asignar">
@@ -160,7 +177,7 @@
     @if (totalPaginas() > 1) {
       <div class="flex items-center justify-between px-5 py-4 border-t border-[#e5e7eb]">
         <span class="text-[#6a7282] text-[13px]">
-          Mostrando {{ rangoMostrado() }} de {{ reservasFiltradas().length }} reservas
+          Mostrando {{ rangoMostrado() }} de {{ totalRegistros() }} reservas
         </span>
         <div class="flex items-center gap-1">
           <button type="button" (click)="cambiarPagina(paginaActual() - 1)"

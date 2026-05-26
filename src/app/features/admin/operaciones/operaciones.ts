@@ -1,5 +1,7 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, merge, switchMap, tap } from 'rxjs';
 import {
   LucideAngularModule,
   TriangleAlert,
@@ -16,6 +18,7 @@ import {
   ChevronRight,
   RotateCcw,
   Eye,
+  X,
 } from 'lucide-angular';
 import { OperacionesService } from '../../../core/services/operaciones.service';
 import { ConfiguracionService } from '../../../core/services/configuracion.service';
@@ -25,7 +28,7 @@ import { CancelarServicioComponent } from './cancelar-servicio/cancelar-servicio
 import { ReprogramarServicioComponent } from './reprogramar-servicio/reprogramar-servicio';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
-type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELADO';
+type FiltroTab = 'TODOS' | 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELADO';
 
 @Component({
   selector: 'app-operaciones',
@@ -41,8 +44,9 @@ type FiltroTab = 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELA
   templateUrl: './operaciones.html',
 })
 export class OperacionesComponent implements OnInit {
-  private readonly operacionesSvc    = inject(OperacionesService);
+  private readonly operacionesSvc  = inject(OperacionesService);
   private readonly configuracionSvc = inject(ConfiguracionService);
+  private readonly destroyRef       = inject(DestroyRef);
 
   protected readonly AlertTriangleIcon  = TriangleAlert;
   protected readonly CheckCircle2Icon   = CircleCheck;
@@ -58,19 +62,27 @@ export class OperacionesComponent implements OnInit {
   protected readonly ChevronRightIcon   = ChevronRight;
   protected readonly RotateCcwIcon      = RotateCcw;
   protected readonly EyeIcon            = Eye;
+  protected readonly XIcon              = X;
 
   readonly ITEMS_POR_PAGINA = 10;
 
-  protected readonly reservas      = signal<ReservaOperacion[]>([]);
-  protected readonly cargando      = signal(false);
-  protected readonly filtroTab     = signal<FiltroTab>('RESERVADO');
-  protected readonly busquedaId    = signal('');
-  protected readonly fechaFiltro   = signal('');
-  protected readonly paginaActual  = signal(1);
-  protected readonly tiempoCorte   = signal<number | null>(null);
+  protected readonly reservas        = signal<ReservaOperacion[]>([]);
+  protected readonly totalRegistros  = signal(0);
+  protected readonly totalReservado  = signal(0);
+  protected readonly totalAsignado   = signal(0);
+  protected readonly totalEnCurso    = signal(0);
+  protected readonly cargando        = signal(false);
 
-  protected readonly filtroTabs: FiltroTab[] = ['RESERVADO', 'ASIGNADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'];
+  protected readonly filtroTab    = signal<FiltroTab>('TODOS');
+  protected readonly busquedaId   = signal('');
+  protected readonly fechaInicio  = signal('');
+  protected readonly fechaFin     = signal('');
+  protected readonly paginaActual = signal(1);
+  protected readonly tiempoCorte  = signal<number | null>(null);
+
+  protected readonly filtroTabs: FiltroTab[] = ['TODOS', 'RESERVADO', 'ASIGNADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'];
   protected readonly tabLabel: Record<FiltroTab, string> = {
+    TODOS:      'Todos',
     RESERVADO:  'Reservado',
     ASIGNADO:   'Asignado',
     EN_CURSO:   'En Curso',
@@ -88,34 +100,18 @@ export class OperacionesComponent implements OnInit {
   protected readonly reservaReprogramar = signal<ReservaOperacion | null>(null);
 
   // Éxito modal
-  protected readonly showExito      = signal(false);
-  protected readonly exitoTitulo    = signal('');
-  protected readonly exitoMensaje   = signal('');
-  protected readonly exitoEtiqueta  = signal('');
-  protected readonly exitoDetalle   = signal('');
+  protected readonly showExito     = signal(false);
+  protected readonly exitoTitulo   = signal('');
+  protected readonly exitoMensaje  = signal('');
+  protected readonly exitoEtiqueta = signal('');
+  protected readonly exitoDetalle  = signal('');
 
-  // KPIs
-  protected readonly countPendiente = computed(() => this.reservas().filter(r => r.estadoOperacion === 'RESERVADO').length);
-  protected readonly countAsignado  = computed(() => this.reservas().filter(r => r.estadoOperacion === 'ASIGNADO').length);
-  protected readonly countEnCurso   = computed(() => this.reservas().filter(r => r.estadoOperacion === 'EN_CURSO').length);
-
-  // Filtrado + paginación
-  protected readonly reservasFiltradas = computed(() => {
-    const busq = this.busquedaId().trim();
-    return this.reservas().filter(r =>
-      r.estadoOperacion === this.filtroTab() &&
-      (!busq || String(r.id).includes(busq))
-    );
-  });
+  private readonly _idChange$ = new Subject<string>();
+  private readonly _reload$   = new Subject<void>();
 
   protected readonly totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.reservasFiltradas().length / this.ITEMS_POR_PAGINA))
+    Math.max(1, Math.ceil(this.totalRegistros() / this.ITEMS_POR_PAGINA))
   );
-
-  protected readonly reservasPaginadas = computed(() => {
-    const inicio = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA;
-    return this.reservasFiltradas().slice(inicio, inicio + this.ITEMS_POR_PAGINA);
-  });
 
   protected readonly paginas = computed(() => {
     const total  = this.totalPaginas();
@@ -125,77 +121,116 @@ export class OperacionesComponent implements OnInit {
     return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
   });
 
+  protected readonly hasFiltros = computed(() =>
+    !!this.busquedaId() || !!this.fechaInicio() || !!this.fechaFin()
+  );
+
   ngOnInit(): void {
-    this.cargar();
+    merge(
+      this._idChange$.pipe(debounceTime(600), distinctUntilChanged(), tap(() => this.paginaActual.set(1))),
+      this._reload$,
+    ).pipe(
+      switchMap(() => {
+        this.cargando.set(true);
+        const idStr = this.busquedaId().trim();
+        const tab = this.filtroTab();
+        return this.operacionesSvc.getReservas({
+          estadoOperacion: tab === 'TODOS' ? undefined : tab,
+          id:              idStr ? parseInt(idStr, 10) : undefined,
+          fechaInicio:     this.fechaInicio() || undefined,
+          fechaFin:        this.fechaFin()    || undefined,
+          pagina:          this.paginaActual(),
+          tamano:          this.ITEMS_POR_PAGINA,
+        }).pipe(catchError(() => { this.cargando.set(false); return EMPTY; }));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(res => {
+      this.reservas.set(res.datos);
+      this.totalRegistros.set(res.total);
+      this.totalReservado.set(res.totalReservado);
+      this.totalAsignado.set(res.totalAsignado);
+      this.totalEnCurso.set(res.totalEnCurso);
+      this.cargando.set(false);
+    });
+
+    this._reload$.next();
+
     this.configuracionSvc.getParametroOperativo().subscribe({
       next: p => this.tiempoCorte.set(p.tiempoCorte),
-      error: () => this.tiempoCorte.set(60), // fallback
+      error: () => this.tiempoCorte.set(60),
     });
   }
 
   protected cargar(): void {
-    this.cargando.set(true);
-    this.operacionesSvc.getReservas(this.fechaFiltro() || undefined).subscribe({
-      next: data => { this.reservas.set(data); this.cargando.set(false); },
-      error: ()   => this.cargando.set(false),
-    });
+    this._reload$.next();
+  }
+
+  protected limpiarFiltros(): void {
+    this.busquedaId.set('');
+    this.fechaInicio.set('');
+    this.fechaFin.set('');
+    this.paginaActual.set(1);
+    this._reload$.next();
+  }
+
+  protected setBusquedaId(v: string): void {
+    this.busquedaId.set(v);
+    this._idChange$.next(v);
+  }
+
+  protected setFechaInicio(v: string): void {
+    this.fechaInicio.set(v);
+    this.paginaActual.set(1);
+    this._reload$.next();
+  }
+
+  protected setFechaFin(v: string): void {
+    this.fechaFin.set(v);
+    this.paginaActual.set(1);
+    this._reload$.next();
   }
 
   protected cambiarTab(tab: FiltroTab): void {
     this.filtroTab.set(tab);
     this.paginaActual.set(1);
-  }
-
-  protected setBusqueda(v: string): void {
-    this.busquedaId.set(v);
-    this.paginaActual.set(1);
-  }
-
-  protected setFechaFiltro(v: string): void {
-    this.fechaFiltro.set(v);
-    this.paginaActual.set(1);
-    this.cargar();
+    this._reload$.next();
   }
 
   protected cambiarPagina(n: number): void {
     if (n < 1 || n > this.totalPaginas()) return;
     this.paginaActual.set(n);
+    this._reload$.next();
   }
 
   protected rangoMostrado(): string {
-    const total = this.reservasFiltradas().length;
+    const total = this.totalRegistros();
     if (total === 0) return '0';
     const desde = (this.paginaActual() - 1) * this.ITEMS_POR_PAGINA + 1;
-    const hasta = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
+    const hasta  = Math.min(this.paginaActual() * this.ITEMS_POR_PAGINA, total);
     return `${desde} - ${hasta}`;
   }
 
-  /**
-   * Determina si solo se puede ver el detalle (sin ejecutar acciones).
-   * - Siempre cuando está EN_CURSO.
-   * - Cuando la fecha del servicio es anterior a hoy.
-   * - Cuando la fecha es hoy pero la horaInicio está a menos de TiempoCorte minutos.
-   */
   protected soloDetalle(r: ReservaOperacion): boolean {
     if (r.estadoOperacion === 'EN_CURSO')   return true;
     if (r.estadoOperacion === 'FINALIZADO') return true;
     if (r.estadoOperacion === 'CANCELADO')  return true;
 
     const tc = this.tiempoCorte();
-    if (tc === null) return false; // aún cargando, permitir por defecto
+    if (tc === null) return false;
 
-    const fechaStr = r.fechaServicio.includes('T')
-      ? r.fechaServicio.split('T')[0]
-      : r.fechaServicio;
-
-    const [y, m, d]  = fechaStr.split('-').map(Number);
-    const [h, min]   = (r.horaInicio ?? '00:00').split(':').map(Number);
+    const [y, m, d] = r.fechaServicio.split('-').map(Number);
+    const [h, min]  = (r.horaInicio ?? '00:00').split(':').map(Number);
 
     const servicioDateTime = new Date(y, m - 1, d, h, min, 0, 0);
     const corteDateTime    = new Date();
     corteDateTime.setMinutes(corteDateTime.getMinutes() + tc);
 
     return servicioDateTime < corteDateTime;
+  }
+
+  protected formatFecha(f: string): string {
+    const [y, m, d] = f.split('-');
+    return `${d}/${m}/${y}`;
   }
 
   protected abrirAsignar(r: ReservaOperacion): void {
@@ -243,7 +278,7 @@ export class OperacionesComponent implements OnInit {
 
   protected onCerrarExito(): void {
     this.showExito.set(false);
-    this.cargar();
+    this._reload$.next();
   }
 
   protected estadoBadgeClass(estado: string): string {
@@ -255,16 +290,6 @@ export class OperacionesComponent implements OnInit {
       case 'CANCELADO':  return 'bg-[#fef2f2] text-[#c10007] border border-[#fca5a5]';
       default:           return 'bg-[#f9fafb] text-[#6a7282] border border-[#e5e7eb]';
     }
-  }
-
-  protected formatFecha(f: string): string {
-    const s = f.includes('T') ? f.split('T')[0] : f;
-    const [y, m, d] = s.split('-');
-    return `${d}/${m}/${y}`;
-  }
-
-  protected formatHora(h: string): string {
-    return h?.substring(0, 5) ?? '';
   }
 
   protected estadoLabel(estado: string): string {

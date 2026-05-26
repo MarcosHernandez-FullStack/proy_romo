@@ -74,18 +74,7 @@
     }
 
     @if (tab() === 'excepciones') {
-      @if (cargandoExcepciones()) {
-        <div class="flex items-center justify-center gap-2 py-14 text-[#6a7282]">
-          <lucide-angular [img]="LoaderIcon" class="size-5 animate-spin" color="#155dfc" [strokeWidth]="1.5" />
-          <span class="text-[14px]">Cargando excepciones...</span>
-        </div>
-      } @else {
-        <app-excepciones
-          [excepciones]="excepciones()"
-          (excepcionCreada)="onExcepcionCreada($event)"
-          (excepcionActualizada)="onExcepcionActualizada($event)"
-          (excepcionEliminada)="onExcepcionEliminada($event)" />
-      }
+      <app-excepciones />
     }
   </div>
 
