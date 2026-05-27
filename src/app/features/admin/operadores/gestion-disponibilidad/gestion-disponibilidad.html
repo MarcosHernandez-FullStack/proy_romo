@@ -187,6 +187,10 @@
           </div>
 
         </div>
+
+        @if (errorModal()) {
+          <app-error-banner [mensaje]="errorModal()!" />
+        }
       }
     </div>
 
@@ -225,10 +229,3 @@
     (cerrar)="guardar.emit()" />
 }
 
-@if (errorModal()) {
-  <app-mensaje-modal
-    tipo="error"
-    titulo="Error al guardar"
-    [mensaje]="errorModal()!"
-    (cerrar)="errorModal.set(null)" />
-}

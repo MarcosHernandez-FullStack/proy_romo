@@ -234,14 +234,14 @@ export class OperadoresComponent implements OnInit {
           const titulo = op.estado === 'ACTIVO' ? '¡Operador Dado de Baja!' : '¡Operador Reactivado!';
           this.exitoEstado.set({ titulo, id: String(op.id) });
         } else {
-          this.modalResultado.set({ tipo: 'error', titulo: 'Error al actualizar', mensaje: result.mensaje || 'No se pudo actualizar el estado del operador.' });
+          this.modalResultado.set({ tipo: 'error', titulo: 'Error', mensaje: result.mensaje || 'No se pudo actualizar el estado del operador.' });
         }
       },
       error: err => {
         this.loadingEstado.set(false);
         this.operadorEnConfirmacion.set(null);
         const msg = err?.error?.mensaje ?? 'Error al actualizar el estado.';
-        this.modalResultado.set({ tipo: 'error', titulo: 'Error al actualizar', mensaje: msg });
+        this.modalResultado.set({ tipo: 'error', titulo: 'Error', mensaje: msg });
       },
     });
   }

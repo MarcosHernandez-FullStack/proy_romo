@@ -154,16 +154,18 @@
 @if (showNuevaExcepcion()) {
   <app-nueva-excepcion
     [guardando]="guardando()"
+    [errorModal]="errorNueva()"
     (guardar)="onGuardarNueva($event)"
-    (cerrar)="showNuevaExcepcion.set(false)" />
+    (cerrar)="showNuevaExcepcion.set(false); errorNueva.set(null)" />
 }
 
 @if (showEditarExcepcion() && excepcionEditando()) {
   <app-editar-excepcion
     [excepcion]="excepcionEditando()!"
     [guardando]="guardando()"
+    [errorModal]="errorEditar()"
     (guardar)="onGuardarEdicion($event)"
-    (cerrar)="showEditarExcepcion.set(false)" />
+    (cerrar)="showEditarExcepcion.set(false); errorEditar.set(null)" />
 }
 
 @if (showExito()) {
@@ -174,4 +176,12 @@
     [detalle]="detalleExito()"
     labelCerrar="Aceptar"
     (cerrar)="onCerrarExito()" />
+}
+
+@if (errorEstado()) {
+  <app-mensaje-modal
+    [tipo]="errorEstado()!.tipo"
+    [titulo]="errorEstado()!.titulo"
+    [mensaje]="errorEstado()!.mensaje"
+    (cerrar)="errorEstado.set(null)" />
 }

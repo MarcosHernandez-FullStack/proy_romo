@@ -205,6 +205,10 @@
 
         </div>
       </div>
+
+      @if (errorModal()) {
+        <app-error-banner [mensaje]="errorModal()!" />
+      }
     </div>
 
     <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
@@ -230,10 +234,3 @@
     (cerrar)="guardar.emit()" />
 }
 
-@if (errorModal()) {
-  <app-mensaje-modal
-    tipo="error"
-    titulo="Error al actualizar"
-    [mensaje]="errorModal()!"
-    (cerrar)="errorModal.set(null)" />
-}

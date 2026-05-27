@@ -350,3 +350,11 @@
     labelCerrar="Aceptar"
     (cerrar)="exitoRetorno.set(null)" />
 }
+
+@if (errorEstado()) {
+  <app-mensaje-modal
+    [tipo]="errorEstado()!.tipo"
+    [titulo]="errorEstado()!.titulo"
+    [mensaje]="errorEstado()!.mensaje"
+    (cerrar)="errorEstado.set(null)" />
+}

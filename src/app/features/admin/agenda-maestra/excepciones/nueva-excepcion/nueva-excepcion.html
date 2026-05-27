@@ -138,6 +138,10 @@
         </div>
       </div>
 
+      @if (errorModal()) {
+        <app-error-banner [mensaje]="errorModal()!" />
+      }
+
     </div>
 
     <!-- Footer buttons -->

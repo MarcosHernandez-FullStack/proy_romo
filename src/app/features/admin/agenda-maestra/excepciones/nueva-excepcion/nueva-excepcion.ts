@@ -2,17 +2,19 @@ import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Calendar, X, AlertTriangle, Clock, Loader } from 'lucide-angular';
 import { AlcanceExcepcion, ExcepcionAgenda, TipoExcepcion } from '../../../../../models/agenda.model';
+import { ErrorBannerComponent } from '../../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-nueva-excepcion',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, ErrorBannerComponent],
   templateUrl: './nueva-excepcion.html',
 })
 export class NuevaExcepcionComponent {
-  readonly guardando = input<boolean>(false);
-  readonly guardar   = output<Omit<ExcepcionAgenda, 'id'>>();
-  readonly cerrar    = output<void>();
+  readonly guardando   = input<boolean>(false);
+  readonly errorModal  = input<string | null>(null);
+  readonly guardar     = output<Omit<ExcepcionAgenda, 'id'>>();
+  readonly cerrar      = output<void>();
 
   protected readonly CalendarIcon      = Calendar;
   protected readonly XIcon             = X;

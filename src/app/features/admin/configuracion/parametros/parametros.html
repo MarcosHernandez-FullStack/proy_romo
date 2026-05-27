@@ -213,10 +213,10 @@
     (cerrar)="showExito.set(false)" />
 }
 
-@if (showError()) {
+@if (errorEstado()) {
   <app-mensaje-modal
-    tipo="error"
-    titulo="Error al Actualizar"
-    [mensaje]="mensajeResultado()"
-    (cerrar)="showError.set(false)" />
+    [tipo]="errorEstado()!.tipo"
+    [titulo]="errorEstado()!.titulo"
+    [mensaje]="errorEstado()!.mensaje"
+    (cerrar)="errorEstado.set(null)" />
 }

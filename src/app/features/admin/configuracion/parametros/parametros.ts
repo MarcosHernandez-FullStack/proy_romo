@@ -45,15 +45,18 @@ export class ParametrosComponent implements OnInit {
   protected readonly coordLatMaps = signal('');
   protected readonly coordLonMaps = signal('');
 
+  private readonly parametroId = signal(0);
+
   // UI: modales y estado de guardado
   protected readonly guardando        = signal(false);
   protected readonly showConfirm      = signal(false);
   protected readonly showExito        = signal(false);
-  protected readonly showError        = signal(false);
   protected readonly mensajeResultado = signal('');
+  protected readonly errorEstado      = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
 
   ngOnInit(): void {
     this.configuracionSvc.getParametroOperativo().subscribe((p) => {
+      this.parametroId.set(p.id);
       this.zonaHoraria.set(p.zonaHoraria);
       this.tiempoCorte.set(p.tiempoCorte);
       this.timerAdministrativo.set(p.timerAdministrativo);
@@ -81,6 +84,7 @@ export class ParametrosComponent implements OnInit {
 
     this.guardando.set(true);
     this.configuracionSvc.actualizarParametroOperativo({
+      id:                   this.parametroId(),
       tiempoMargenManiobra: this.tiempoMargenManiobra(),
       tiempoRetornoBase:    this.tiempoRetornoBase(),
       umbralLargaDistancia: this.umbralLargaDistancia(),
@@ -97,17 +101,18 @@ export class ParametrosComponent implements OnInit {
     }).subscribe({
       next: result => {
         this.guardando.set(false);
-        this.mensajeResultado.set(result.mensaje);
         if (result.exitoso === 1) {
+          this.mensajeResultado.set(result.mensaje);
           this.showExito.set(true);
+        } else if (result.exitoso === 2) {
+          this.errorEstado.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: result.mensaje });
         } else {
-          this.showError.set(true);
+          this.errorEstado.set({ tipo: 'error', titulo: 'Error al Actualizar', mensaje: result.mensaje });
         }
       },
       error: err => {
         this.guardando.set(false);
-        this.mensajeResultado.set(err?.error?.mensaje ?? 'Error al guardar los parámetros operativos.');
-        this.showError.set(true);
+        this.errorEstado.set({ tipo: 'error', titulo: 'Error al Actualizar', mensaje: err.error?.mensaje ?? 'Error al guardar los parámetros operativos.' });
       },
     });
   }

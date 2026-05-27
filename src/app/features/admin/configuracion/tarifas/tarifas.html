@@ -244,10 +244,10 @@
     (cerrar)="showExitoGlobal.set(false)" />
 }
 
-@if (showErrorGlobal()) {
+@if (errorEstadoGlobal()) {
   <app-mensaje-modal
-    tipo="error"
-    titulo="Error al Actualizar"
-    [mensaje]="mensajeResultadoGlobal()"
-    (cerrar)="showErrorGlobal.set(false)" />
+    [tipo]="errorEstadoGlobal()!.tipo"
+    [titulo]="errorEstadoGlobal()!.titulo"
+    [mensaje]="errorEstadoGlobal()!.mensaje"
+    (cerrar)="errorEstadoGlobal.set(null)" />
 }

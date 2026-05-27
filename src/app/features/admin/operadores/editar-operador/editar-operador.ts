@@ -4,12 +4,12 @@ import { LucideAngularModule, UserCog, X, RefreshCw, AlertTriangle } from 'lucid
 import { OperadoresService } from '../../../../core/services/operadores.service';
 import { Operador } from '../../../../models/operadores.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
-import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-editar-operador',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, MensajeModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './editar-operador.html',
 })
 export class EditarOperadorComponent implements OnInit {

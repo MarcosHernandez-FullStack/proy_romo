@@ -47,11 +47,11 @@ export class TarifasComponent implements OnInit {
   protected readonly tarifaBaseGlobal = signal(0);
   protected readonly tarifaKmGlobal = signal(0);
 
-  protected readonly guardandoGlobal    = signal(false);
-  protected readonly showConfirmGuardar = signal(false);
-  protected readonly showExitoGlobal    = signal(false);
-  protected readonly showErrorGlobal    = signal(false);
+  protected readonly guardandoGlobal        = signal(false);
+  protected readonly showConfirmGuardar     = signal(false);
+  protected readonly showExitoGlobal        = signal(false);
   protected readonly mensajeResultadoGlobal = signal('');
+  protected readonly errorEstadoGlobal      = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
 
   protected readonly tarifasFiltradas = computed(() => {
     const busq = this.busqueda().toLowerCase();
@@ -154,17 +154,18 @@ export class TarifasComponent implements OnInit {
     this.configuracionSvc.actualizarTarifarioGlobal(tarifa.id, this.tarifaBaseGlobal(), this.tarifaKmGlobal()).subscribe({
       next: result => {
         this.guardandoGlobal.set(false);
-        this.mensajeResultadoGlobal.set(result.mensaje);
         if (result.exitoso === 1) {
+          this.mensajeResultadoGlobal.set(result.mensaje);
           this.showExitoGlobal.set(true);
+        } else if (result.exitoso === 2) {
+          this.errorEstadoGlobal.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: result.mensaje });
         } else {
-          this.showErrorGlobal.set(true);
+          this.errorEstadoGlobal.set({ tipo: 'error', titulo: 'Error al Actualizar', mensaje: result.mensaje });
         }
       },
       error: err => {
         this.guardandoGlobal.set(false);
-        this.mensajeResultadoGlobal.set(err?.error?.mensaje ?? 'Error al actualizar el tarifario.');
-        this.showErrorGlobal.set(true);
+        this.errorEstadoGlobal.set({ tipo: 'error', titulo: 'Error al Actualizar', mensaje: err.error?.mensaje ?? 'Error al actualizar el tarifario.' });
       },
     });
   }

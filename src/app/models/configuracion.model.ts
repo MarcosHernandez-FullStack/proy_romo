@@ -6,6 +6,7 @@ export interface TarifaGlobal {
 }
 
 export interface ParametrosOperativos {
+  id:                   number;
   umbralLargaDistancia: number;
   tiempoMargenManiobra: number;
   tiempoTolerancia:     number;

@@ -4,7 +4,7 @@ import { DIAS_SEMANA, DiaSemana, GridDisponibilidad, HoraGrid, HORAS_GRID } from
 import { DispRango, Operador, TipoDisponibilidad } from '../../../../models/operadores.model';
 import { OperadoresService } from '../../../../core/services/operadores.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
-import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 interface Template {
   label: string;
@@ -26,7 +26,7 @@ const HORAS_NEGOCIO: HoraGrid[] = [
 @Component({
   selector: 'app-gestion-disponibilidad',
   standalone: true,
-  imports: [FormsModule, ExitoModalComponent, MensajeModalComponent],
+  imports: [FormsModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './gestion-disponibilidad.html',
 })
 export class GestionDisponibilidadComponent implements OnInit {

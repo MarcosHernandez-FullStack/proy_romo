@@ -16,6 +16,7 @@ import { DetalleUnidadComponent } from './detalle-unidad/detalle-unidad';
 import { LiberarServicioComponent } from './liberar-servicio/liberar-servicio';
 import { RetornoOperativaComponent } from './retorno-operativa/retorno-operativa';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
+import { MensajeModalComponent } from '../../../shared/components/mensaje-modal/mensaje-modal';
 
 type FiltroFlota = 'Activas' | 'En Taller' | 'Bajas';
 
@@ -25,7 +26,7 @@ type FiltroFlota = 'Activas' | 'En Taller' | 'Bajas';
   imports: [
     FormsModule, LucideAngularModule,
     NuevaUnidadComponent, EditarUnidadComponent, DetalleUnidadComponent,
-    LiberarServicioComponent, RetornoOperativaComponent, ExitoModalComponent,
+    LiberarServicioComponent, RetornoOperativaComponent, ExitoModalComponent, MensajeModalComponent,
   ],
   templateUrl: './flota.html',
 })
@@ -73,8 +74,8 @@ export class FlotaComponent implements OnInit {
   protected readonly unidadDetalle  = signal<UnidadFlota | null>(null);
   protected readonly unidadLiberar  = signal<UnidadFlota | null>(null);
   protected readonly unidadRetorno  = signal<UnidadFlota | null>(null);
-  protected readonly guardando      = signal(false);
-  protected readonly errorGuardar   = signal<string | null>(null);
+  protected readonly guardando    = signal(false);
+  protected readonly errorEstado  = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
 
   protected readonly exitoBaja      = signal<string | null>(null);
   protected readonly exitoReactivar = signal<string | null>(null);
@@ -218,15 +219,23 @@ export class FlotaComponent implements OnInit {
 
   protected darDeBaja(id: number): void {
     this.guardando.set(true);
-    this.errorGuardar.set(null);
+    this.errorEstado.set(null);
     this.flotaSvc.actualizarEstadoGrua(id, 'INACTIVO').subscribe({
       next: result => {
         this.guardando.set(false);
-        if (result.exitoso === 0) { this.errorGuardar.set(result.mensaje); return; }
-        this.cargarFlota();
-        this.exitoBaja.set(String(id));
+        if (result.exitoso === 1) {
+          this.cargarFlota();
+          this.exitoBaja.set(String(id));
+        } else if (result.exitoso === 2) {
+          this.errorEstado.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: result.mensaje });
+        } else {
+          this.errorEstado.set({ tipo: 'error', titulo: 'Error al Dar de Baja', mensaje: result.mensaje });
+        }
       },
-      error: () => { this.guardando.set(false); this.errorGuardar.set('Error inesperado. Intente nuevamente.'); },
+      error: err => {
+        this.guardando.set(false);
+        this.errorEstado.set({ tipo: 'error', titulo: 'Error al Dar de Baja', mensaje: err.error?.mensaje ?? 'Error inesperado. Intente nuevamente.' });
+      },
     });
   }
 
@@ -236,9 +245,15 @@ export class FlotaComponent implements OnInit {
         if (result.exitoso === 1) {
           this.cargarFlota();
           this.exitoReactivar.set(String(id));
+        } else if (result.exitoso === 2) {
+          this.errorEstado.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: result.mensaje });
+        } else {
+          this.errorEstado.set({ tipo: 'error', titulo: 'Error al Reactivar', mensaje: result.mensaje });
         }
       },
-      error: () => {},
+      error: err => {
+        this.errorEstado.set({ tipo: 'error', titulo: 'Error al Reactivar', mensaje: err.error?.mensaje ?? 'Error inesperado. Intente nuevamente.' });
+      },
     });
   }
 

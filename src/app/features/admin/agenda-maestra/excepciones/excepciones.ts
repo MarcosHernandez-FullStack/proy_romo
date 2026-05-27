@@ -5,20 +5,19 @@ import { EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, merge, 
 import { LucideAngularModule, AlertTriangle, Plus, Pencil, Trash2, Check, X, Loader, Search, ChevronLeft, ChevronRight } from 'lucide-angular';
 import { ExcepcionAgenda } from '../../../../models/agenda.model';
 import { AgendaService } from '../../../../core/services/agenda.service';
-import { NotificationService } from '../../../../core/services/notification.service';
 import { NuevaExcepcionComponent } from './nueva-excepcion/nueva-excepcion';
 import { EditarExcepcionComponent } from './editar-excepcion/editar-excepcion';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
 @Component({
   selector: 'app-excepciones',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, NuevaExcepcionComponent, EditarExcepcionComponent, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, NuevaExcepcionComponent, EditarExcepcionComponent, ExitoModalComponent, MensajeModalComponent],
   templateUrl: './excepciones.html',
 })
 export class ExcepcionesComponent implements OnInit {
   private readonly agendaSvc  = inject(AgendaService);
-  private readonly notifSvc   = inject(NotificationService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly AlertTriangleIcon = AlertTriangle;
@@ -53,6 +52,9 @@ export class ExcepcionesComponent implements OnInit {
   protected readonly tituloExito         = signal('');
   protected readonly mensajeExito        = signal('');
   protected readonly detalleExito        = signal('');
+  protected readonly errorNueva          = signal<string | null>(null);
+  protected readonly errorEditar         = signal<string | null>(null);
+  protected readonly errorEstado         = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
 
   private readonly _motivoChange$ = new Subject<string>();
   private readonly _reload$       = new Subject<void>();
@@ -148,20 +150,21 @@ export class ExcepcionesComponent implements OnInit {
       next: (res) => {
         this.procesandoId.set(null);
         this.eliminandoId.set(null);
-        if (res.exitoso === 0) {
-          this.notifSvc.mostrar(res.mensaje, 'error');
-        } else {
+        if (res.exitoso === 1) {
           this.tituloExito.set('¡Excepción Dada de Baja!');
           this.mensajeExito.set(res.mensaje);
           this.detalleExito.set(String(id));
           this.showExito.set(true);
+        } else if (res.exitoso === 2) {
+          this.errorEstado.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: res.mensaje });
+        } else {
+          this.errorEstado.set({ tipo: 'error', titulo: 'Error al dar de baja', mensaje: res.mensaje });
         }
       },
       error: (err: any) => {
         this.procesandoId.set(null);
         this.eliminandoId.set(null);
-        const msg = err?.error?.mensaje as string | undefined;
-        this.notifSvc.mostrar(msg ?? 'Error al eliminar la excepción. Intente nuevamente.', 'error');
+        this.errorEstado.set({ tipo: 'error', titulo: 'Error al dar de baja', mensaje: err.error?.mensaje ?? 'Error al eliminar la excepción. Intente nuevamente.' });
       },
     });
   }
@@ -184,23 +187,21 @@ export class ExcepcionesComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.guardando.set(false);
-        if (res.exitoso === 0) {
-          this.notifSvc.mostrar(res.mensaje, 'error');
-        } else if (res.exitoso === 2) {
-          this.notifSvc.mostrar(res.mensaje, 'advertencia');
-        } else {
+        if (res.exitoso === 1) {
+          this.errorNueva.set(null);
           this.showNuevaExcepcion.set(false);
           this.paginaActual.set(1);
           this.tituloExito.set('¡Excepción Registrada!');
           this.mensajeExito.set(res.mensaje);
           this.detalleExito.set(String(res.idNuevo));
           this.showExito.set(true);
+        } else {
+          this.errorNueva.set(res.mensaje);
         }
       },
       error: (err: any) => {
         this.guardando.set(false);
-        const msg = err?.error?.mensaje as string | undefined;
-        this.notifSvc.mostrar(msg ?? 'Error al guardar la excepción. Intente nuevamente.', 'error');
+        this.errorNueva.set(err.error?.mensaje ?? 'Error al guardar la excepción. Intente nuevamente.');
       },
     });
   }
@@ -218,22 +219,20 @@ export class ExcepcionesComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.guardando.set(false);
-        if (res.exitoso === 0) {
-          this.notifSvc.mostrar(res.mensaje, 'error');
-        } else if (res.exitoso === 2) {
-          this.notifSvc.mostrar(res.mensaje, 'advertencia');
-        } else {
+        if (res.exitoso === 1) {
+          this.errorEditar.set(null);
           this.showEditarExcepcion.set(false);
           this.tituloExito.set('¡Excepción Actualizada!');
           this.mensajeExito.set(res.mensaje);
           this.detalleExito.set(String(data.id));
           this.showExito.set(true);
+        } else {
+          this.errorEditar.set(res.mensaje);
         }
       },
       error: (err: any) => {
         this.guardando.set(false);
-        const msg = err?.error?.mensaje as string | undefined;
-        this.notifSvc.mostrar(msg ?? 'Error al actualizar la excepción. Intente nuevamente.', 'error');
+        this.errorEditar.set(err.error?.mensaje ?? 'Error al actualizar la excepción. Intente nuevamente.');
       },
     });
   }
