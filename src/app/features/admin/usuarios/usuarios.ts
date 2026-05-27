@@ -206,7 +206,7 @@ export class UsuariosComponent implements OnInit {
           this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
         }
       },
-      error: () => this.errorEstado.set({ titulo: 'Error de conexión', mensaje: 'No se pudo conectar con el servidor. Intente nuevamente.' }),
+      error: err => this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' }),
     });
   }
 
@@ -220,7 +220,7 @@ export class UsuariosComponent implements OnInit {
           this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
         }
       },
-      error: () => this.errorEstado.set({ titulo: 'Error de conexión', mensaje: 'No se pudo conectar con el servidor. Intente nuevamente.' }),
+      error: err => this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' }),
     });
   }
 
