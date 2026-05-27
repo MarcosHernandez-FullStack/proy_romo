@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, UserCog, X, RefreshCw, AlertTriangle } from 'lucide-angular';
 import { OperadoresService } from '../../../../core/services/operadores.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-nuevo-operador',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './nuevo-operador.html',
 })
 export class NuevoOperadorComponent {

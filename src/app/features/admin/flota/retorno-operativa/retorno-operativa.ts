@@ -1,13 +1,14 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, CheckCircle, X, Truck, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, CheckCircle, X, Truck } from 'lucide-angular';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 import { UnidadFlota } from '../../../../models/flota.model';
 import { FlotaService } from '../../../../core/services/flota.service';
 
 @Component({
   selector: 'app-retorno-operativa',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, ErrorBannerComponent],
   templateUrl: './retorno-operativa.html',
 })
 export class RetornoOperativaComponent {
@@ -20,7 +21,7 @@ export class RetornoOperativaComponent {
   protected readonly CheckCircleIcon   = CheckCircle;
   protected readonly XIcon             = X;
   protected readonly TruckIcon         = Truck;
-  protected readonly AlertTriangleIcon = AlertTriangle;
+
 
   protected readonly nombreResponsable = signal('');
   protected readonly kilometraje       = signal<number | null>(null);

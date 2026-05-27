@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, AlertTriangle, X, FileText, Info } from 'lucide-angular';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 import { UnidadFlota } from '../../../../models/flota.model';
 import { ReservaALiberar } from '../../../../models/operaciones.model';
 import { FlotaService } from '../../../../core/services/flota.service';
@@ -8,7 +9,7 @@ import { FlotaService } from '../../../../core/services/flota.service';
 @Component({
   selector: 'app-liberar-servicio',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, ErrorBannerComponent],
   templateUrl: './liberar-servicio.html',
 })
 export class LiberarServicioComponent implements OnInit {

@@ -1,14 +1,15 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, UserCog, X, RefreshCw, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, UserCog, X, RefreshCw } from 'lucide-angular';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 import { RolUsuario, UsuarioAdmin } from '../../../../models/usuario.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-editar-usuario',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './editar-usuario.html',
 })
 export class EditarUsuarioComponent implements OnInit {
@@ -21,7 +22,7 @@ export class EditarUsuarioComponent implements OnInit {
   protected readonly UserCogIcon        = UserCog;
   protected readonly XIcon             = X;
   protected readonly RefreshCwIcon     = RefreshCw;
-  protected readonly AlertTriangleIcon = AlertTriangle;
+
 
   readonly roles: RolUsuario[] = ['ADMINISTRADOR', 'STAFF'];
 

@@ -1,14 +1,15 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Pencil, X, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, Pencil, X } from 'lucide-angular';
 import { FlotaService } from '../../../../core/services/flota.service';
 import { UnidadFlota } from '../../../../models/flota.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-editar-unidad',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './editar-unidad.html',
 })
 export class EditarUnidadComponent implements OnInit {
@@ -20,7 +21,7 @@ export class EditarUnidadComponent implements OnInit {
 
   protected readonly PencilIcon        = Pencil;
   protected readonly XIcon             = X;
-  protected readonly AlertTriangleIcon = AlertTriangle;
+
 
   protected readonly placa             = signal('');
   protected readonly anio              = signal('');

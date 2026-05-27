@@ -272,9 +272,17 @@
 @if (exitoEstado()) {
   <app-exito-modal
     [titulo]="exitoEstado()!.titulo"
-    mensaje="El estado del cliente fue actualizado correctamente."
+    [mensaje]="exitoEstado()!.mensaje"
     etiqueta="ID CLIENTE"
     [detalle]="exitoEstado()!.id"
     labelCerrar="Aceptar"
     (cerrar)="exitoEstado.set(null)" />
+}
+
+@if (errorEstado()) {
+  <app-mensaje-modal
+    tipo="error"
+    [titulo]="errorEstado()!.titulo"
+    [mensaje]="errorEstado()!.mensaje"
+    (cerrar)="errorEstado.set(null)" />
 }

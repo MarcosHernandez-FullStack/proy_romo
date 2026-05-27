@@ -128,10 +128,7 @@
 
     @if (errorMsg()) {
       <div class="px-6 pb-2">
-        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-2.5 flex items-center gap-2">
-          <lucide-angular [img]="AlertTriangleIcon" class="size-4 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
-          <p class="text-[#c10007] text-[13px]">{{ errorMsg() }}</p>
-        </div>
+        <app-error-banner [mensaje]="errorMsg()" />
       </div>
     }
 

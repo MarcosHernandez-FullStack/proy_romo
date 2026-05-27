@@ -1,14 +1,15 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, UserPlus, X, RefreshCw, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, UserPlus, X, RefreshCw } from 'lucide-angular';
 import { UsuarioService } from '../../../../core/services/usuario.service';
 import { RolUsuario } from '../../../../models/usuario.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-nuevo-usuario',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './nuevo-usuario.html',
 })
 export class NuevoUsuarioComponent {
@@ -20,8 +21,6 @@ export class NuevoUsuarioComponent {
   protected readonly UserPlusIcon       = UserPlus;
   protected readonly XIcon             = X;
   protected readonly RefreshCwIcon     = RefreshCw;
-  protected readonly AlertTriangleIcon = AlertTriangle;
-
   readonly roles: RolUsuario[] = ['ADMINISTRADOR', 'STAFF'];
 
   protected readonly correo     = signal('');

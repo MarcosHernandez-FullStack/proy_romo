@@ -36,6 +36,10 @@ export class ClientesService {
     return this.http.put<CrearUsuarioResult>(`${API}/clientes/${idCliente}`, data);
   }
 
+  actualizarEstadoCliente(idCliente: number, nuevoEstado: 'ACTIVO' | 'INACTIVO'): Observable<CrearUsuarioResult> {
+    return this.http.patch<CrearUsuarioResult>(`${API}/clientes/${idCliente}/estado`, { nuevoEstado });
+  }
+
   getTarifasCliente(): Observable<TarifaCliente[]> {
     return of(TARIFAS_CLIENTES).pipe(delay(200));
   }

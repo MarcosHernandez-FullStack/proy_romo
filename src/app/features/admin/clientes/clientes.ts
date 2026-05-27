@@ -25,13 +25,14 @@ import { ClienteB2B } from '../../../models/clientes.model';
 import { NuevoClienteComponent } from './nuevo-cliente/nuevo-cliente';
 import { EditarClienteComponent } from './editar-cliente/editar-cliente';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
+import { MensajeModalComponent } from '../../../shared/components/mensaje-modal/mensaje-modal';
 
 type FiltroEstado = 'Activos' | 'Bajas';
 
 @Component({
   selector: 'app-clientes',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, NuevoClienteComponent, EditarClienteComponent, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, NuevoClienteComponent, EditarClienteComponent, ExitoModalComponent, MensajeModalComponent],
   templateUrl: './clientes.html',
 })
 export class ClientesComponent implements OnInit {
@@ -71,7 +72,8 @@ export class ClientesComponent implements OnInit {
 
   protected readonly showNuevo     = signal(false);
   protected readonly clienteEditar = signal<ClienteB2B | null>(null);
-  protected readonly exitoEstado   = signal<{ titulo: string; id: string } | null>(null);
+  protected readonly exitoEstado   = signal<{ titulo: string; mensaje: string; id: string } | null>(null);
+  protected readonly errorEstado   = signal<{ titulo: string; mensaje: string } | null>(null);
 
   private readonly _idChange$       = new Subject<string>();
   private readonly _empresaChange$  = new Subject<string>();
@@ -183,10 +185,30 @@ export class ClientesComponent implements OnInit {
   }
 
   protected darDeBajaCliente(id: number): void {
-    this.exitoEstado.set({ titulo: '¡Cliente Dado de Baja!', id: String(id) });
+    this.clientesSvc.actualizarEstadoCliente(id, 'INACTIVO').subscribe({
+      next: result => {
+        if (result.exitoso === 1) {
+          this.cargarClientes();
+          this.exitoEstado.set({ titulo: '¡Cliente Dado de Baja!', mensaje: result.mensaje, id: String(id) });
+        } else {
+          this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
+        }
+      },
+      error: () => this.errorEstado.set({ titulo: 'Error de conexión', mensaje: 'No se pudo conectar con el servidor. Intente nuevamente.' }),
+    });
   }
 
   protected reactivarCliente(id: number): void {
-    this.exitoEstado.set({ titulo: '¡Cliente Reactivado!', id: String(id) });
+    this.clientesSvc.actualizarEstadoCliente(id, 'ACTIVO').subscribe({
+      next: result => {
+        if (result.exitoso === 1) {
+          this.cargarClientes();
+          this.exitoEstado.set({ titulo: '¡Cliente Reactivado!', mensaje: result.mensaje, id: String(id) });
+        } else {
+          this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
+        }
+      },
+      error: () => this.errorEstado.set({ titulo: 'Error de conexión', mensaje: 'No se pudo conectar con el servidor. Intente nuevamente.' }),
+    });
   }
 }

@@ -1,13 +1,14 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Truck, X, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, Truck, X } from 'lucide-angular';
 import { FlotaService } from '../../../../core/services/flota.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-nueva-unidad',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './nueva-unidad.html',
 })
 export class NuevaUnidadComponent {
@@ -18,7 +19,7 @@ export class NuevaUnidadComponent {
 
   protected readonly TruckIcon         = Truck;
   protected readonly XIcon             = X;
-  protected readonly AlertTriangleIcon = AlertTriangle;
+
 
   protected readonly placa             = signal('');
   protected readonly anio              = signal('');

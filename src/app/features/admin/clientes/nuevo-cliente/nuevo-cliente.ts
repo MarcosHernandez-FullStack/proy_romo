@@ -1,13 +1,14 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Users, X, RefreshCw, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, Users, X, RefreshCw } from 'lucide-angular';
 import { ClientesService } from '../../../../core/services/clientes.service';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-nuevo-cliente',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './nuevo-cliente.html',
 })
 export class NuevoClienteComponent {
@@ -19,7 +20,7 @@ export class NuevoClienteComponent {
   protected readonly UsersIcon         = Users;
   protected readonly XIcon             = X;
   protected readonly RefreshCwIcon     = RefreshCw;
-  protected readonly AlertTriangleIcon = AlertTriangle;
+
 
   protected readonly empresa    = signal('');
   protected readonly contacto   = signal('');

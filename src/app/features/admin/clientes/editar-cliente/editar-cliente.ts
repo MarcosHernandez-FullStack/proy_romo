@@ -1,14 +1,15 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Users, X, RefreshCw, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, Users, X, RefreshCw } from 'lucide-angular';
 import { ClientesService } from '../../../../core/services/clientes.service';
 import { ClienteB2B } from '../../../../models/clientes.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-editar-cliente',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, ExitoModalComponent],
+  imports: [FormsModule, LucideAngularModule, ExitoModalComponent, ErrorBannerComponent],
   templateUrl: './editar-cliente.html',
 })
 export class EditarClienteComponent implements OnInit {
@@ -21,7 +22,7 @@ export class EditarClienteComponent implements OnInit {
   protected readonly UsersIcon         = Users;
   protected readonly XIcon             = X;
   protected readonly RefreshCwIcon     = RefreshCw;
-  protected readonly AlertTriangleIcon = AlertTriangle;
+
 
   protected readonly empresa    = signal('');
   protected readonly contacto   = signal('');

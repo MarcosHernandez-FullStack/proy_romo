@@ -57,3 +57,7 @@ export interface EditarClienteRequest {
   tarifaBase:     number;
   tarifaKm:       number;
 }
+
+export interface UpdEstadoClienteRequest {
+  nuevoEstado: 'ACTIVO' | 'INACTIVO';
+}
