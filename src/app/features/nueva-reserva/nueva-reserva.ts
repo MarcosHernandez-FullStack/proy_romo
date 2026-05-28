@@ -11,7 +11,7 @@ import { SeleccionClienteComponent } from './seleccion-cliente/seleccion-cliente
 import { SeleccionAgendaComponent, FechaItem } from './seleccion-agenda/seleccion-agenda';
 import { DetallesVehiculoComponent, VehiculoDetalle } from './detalles-vehiculo/detalles-vehiculo';
 import { ConfirmacionReservaComponent, DatosReserva } from './confirmacion-reserva/confirmacion-reserva';
-import { ReservaExitosaComponent } from './reserva-exitosa/reserva-exitosa';
+import { ExitoModalComponent } from '../../shared/components/exito-modal/exito-modal';
 import { MensajeModalComponent, MensajeModalTipo } from '../../shared/components/mensaje-modal/mensaje-modal';
 
 @Component({
@@ -24,7 +24,7 @@ import { MensajeModalComponent, MensajeModalTipo } from '../../shared/components
     SeleccionAgendaComponent,
     DetallesVehiculoComponent,
     ConfirmacionReservaComponent,
-    ReservaExitosaComponent,
+    ExitoModalComponent,
     MensajeModalComponent,
   ],
   templateUrl: './nueva-reserva.html',
@@ -128,10 +128,12 @@ export class NuevaReservaComponent implements OnInit {
 
   protected readonly conflictoBloque    = signal<string | null>(null);
   protected readonly showConfirm        = signal(false);
-  protected readonly showSuccess        = signal(false);
-  protected readonly servicioCreado     = signal('');
-  protected readonly mensajeExito       = signal('');
-  protected readonly confirmExcepcion   = signal(false);
+  protected readonly showSuccess           = signal(false);
+  protected readonly servicioCreado        = signal('');
+  protected readonly mensajeExito          = signal('');
+  protected readonly errorConfirmacion     = signal<string | null>(null);
+  protected readonly guardandoConfirmacion = signal(false);
+  protected readonly confirmExcepcion      = signal(false);
   protected readonly horaExcepcionPend  = signal<string[]>([]);
 
   // Wizard state
@@ -264,7 +266,7 @@ export class NuevaReservaComponent implements OnInit {
         const mensaje = body?.horasConflicto
           ? `${base}\n\nHoras sin disponibilidad: ${body.horasConflicto}`
           : base;
-        this.modal.set({ tipo: 'error', titulo: 'Horario no disponible', mensaje });
+        this.modal.set({ tipo: 'error', titulo: 'Error al verificar disponibilidad', mensaje });
       },
     });
   }
@@ -291,12 +293,6 @@ export class NuevaReservaComponent implements OnInit {
       this.cargarHorarios(fecha, capacidad);
     });
 
-    // Auto-redirect 3 seg después de creación exitosa
-    effect(() => {
-      if (this.showSuccess()) {
-        setTimeout(() => this.onNuevaReserva(), 3000);
-      }
-    });
   }
 
   ngOnInit(): void {
@@ -413,7 +409,8 @@ export class NuevaReservaComponent implements OnInit {
     const timerId  = this.idTimerReserva();
     if (!session || !timerId) return;
 
-    this.showConfirm.set(false);
+    this.guardandoConfirmacion.set(true);
+    this.errorConfirmacion.set(null);
 
     const dto = {
       idTimerReserva: timerId,
@@ -428,23 +425,22 @@ export class NuevaReservaComponent implements OnInit {
 
     this.reservasSvc.crearReserva(dto).subscribe({
       next: result => {
+        this.guardandoConfirmacion.set(false);
         if (result.exitoso === 1) {
+          this.showConfirm.set(false);
           this.servicioCreado.set(`SRV-${result.id ?? ''}`);
           this.mensajeExito.set(result.mensaje);
           this.showSuccess.set(true);
         } else {
-          this.modal.set({ tipo: 'error', titulo: 'Error al Guardar Reserva', mensaje: result.mensaje });
+          this.errorConfirmacion.set(result.mensaje);
         }
       },
       error: err => {
-        const body = err.error;
+        this.guardandoConfirmacion.set(false);
+        const body    = err.error;
         const mensaje = body?.mensaje ?? (typeof body === 'string' ? body : 'Ocurrió un error inesperado al guardar la reserva.');
         const detalle = body?.horasConflicto ? ` Horas comprometidas: ${body.horasConflicto}.` : '';
-        this.modal.set({
-          tipo: 'error',
-          titulo: 'Error al Guardar Reserva',
-          mensaje: mensaje + detalle,
-        });
+        this.errorConfirmacion.set(mensaje + detalle);
       },
     });
   }

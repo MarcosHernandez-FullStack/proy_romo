@@ -14,6 +14,12 @@
       <p class="text-blue-200 text-[13px]">Configure los horarios en los que el operador está disponible para servicios</p>
     </div>
 
+    @if (errorModal()) {
+      <div class="px-6 pt-4">
+        <app-error-banner [mensaje]="errorModal()!" />
+      </div>
+    }
+
     <!-- Body scrollable -->
     <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
 
@@ -188,9 +194,6 @@
 
         </div>
 
-        @if (errorModal()) {
-          <app-error-banner [mensaje]="errorModal()!" />
-        }
       }
     </div>
 

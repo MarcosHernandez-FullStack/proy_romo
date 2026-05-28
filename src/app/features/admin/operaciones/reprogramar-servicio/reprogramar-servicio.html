@@ -12,6 +12,12 @@
       </div>
     </div>
 
+    @if (error()) {
+      <div class="px-6 pt-4">
+        <app-error-banner [mensaje]="error()!" />
+      </div>
+    }
+
     <div class="p-6 flex flex-col gap-5">
 
       <!-- KPI cards -->
@@ -157,14 +163,6 @@
           <p class="text-[#9a3412] text-[13px] font-semibold">Excepción operativa</p>
           <p class="text-[#9a3412] text-[12px] mt-0.5">{{ advertencia() }}</p>
         </div>
-      </div>
-    }
-
-    <!-- Error duro: corte de tiempo o sin disponibilidad (rojo) -->
-    @if (error()) {
-      <div class="mx-6 mb-2 bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-3 flex items-start gap-2">
-        <lucide-angular [img]="XCircleIcon" class="size-4 mt-0.5 shrink-0" color="#c10007" [strokeWidth]="1.5" />
-        <p class="text-[#c10007] text-[13px]">{{ error() }}</p>
       </div>
     }
 

@@ -12,19 +12,19 @@
       </div>
     </div>
 
+    @if (error()) {
+      <div class="px-6 pt-4">
+        <app-error-banner [mensaje]="error()!" />
+      </div>
+    }
+
     <div class="p-6 flex flex-col gap-4">
 
-      <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-3">
+      <div class="bg-[#f3f4f6] border border-[#e5e7eb] rounded-[10px] px-4 py-3">
         <p class="text-[#364153] text-[13px]">Reserva: <strong class="text-[#101828]">#{{ reserva().id }}</strong></p>
         <p class="text-[#364153] text-[13px]">Origen: <strong class="text-[#101828]">{{ reserva().direccionOrigen }}</strong></p>
         <p class="text-[#364153] text-[13px]">Destino: <strong class="text-[#101828]">{{ reserva().direccionDestino }}</strong></p>
       </div>
-
-      @if (error()) {
-        <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-3 text-[#c10007] text-[13px]">
-          {{ error() }}
-        </div>
-      }
 
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Motivo de Cancelación *</label>

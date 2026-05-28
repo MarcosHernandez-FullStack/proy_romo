@@ -114,15 +114,19 @@
 @if (showConfirm()) {
   <app-confirmacion-reserva
     [datos]="datosReserva()"
+    [error]="errorConfirmacion()"
+    [guardando]="guardandoConfirmacion()"
     (confirmar)="onConfirmarReserva()"
-    (cerrar)="showConfirm.set(false)" />
+    (cerrar)="showConfirm.set(false); errorConfirmacion.set(null)" />
 }
 
 @if (showSuccess()) {
-  <app-reserva-exitosa
-    [servicioId]="servicioCreado()"
+  <app-exito-modal
+    titulo="¡Reserva Creada!"
     [mensaje]="mensajeExito()"
-    (nuevaReserva)="onNuevaReserva()" />
+    etiqueta="Código de Servicio"
+    [detalle]="servicioCreado()"
+    (cerrar)="onNuevaReserva()" />
 }
 
 @if (confirmExcepcion()) {

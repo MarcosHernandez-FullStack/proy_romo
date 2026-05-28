@@ -16,6 +16,7 @@ import { ReservasService } from '../../../../core/services/reservas.service';
 import { OperacionesService } from '../../../../core/services/operaciones.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 interface SlotReprogramar {
   hora:           string;
@@ -32,7 +33,7 @@ export interface ReprogramacionData {
 @Component({
   selector: 'app-reprogramar-servicio',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MensajeModalComponent],
+  imports: [FormsModule, LucideAngularModule, MensajeModalComponent, ErrorBannerComponent],
   templateUrl: './reprogramar-servicio.html',
 })
 export class ReprogramarServicioComponent implements OnInit {

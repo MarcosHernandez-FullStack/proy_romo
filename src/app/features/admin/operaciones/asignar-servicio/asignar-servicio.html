@@ -19,6 +19,12 @@
       </div>
     </div>
 
+    @if (error()) {
+      <div class="px-6 pt-4">
+        <app-error-banner [mensaje]="error()!" />
+      </div>
+    }
+
     <!-- Body -->
     <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
 
@@ -199,12 +205,6 @@
           </div>
         }
 
-        <!-- Error -->
-        @if (error()) {
-          <div class="bg-[#fef2f2] border border-[#fca5a5] rounded-[10px] px-4 py-3 text-[#c10007] text-[13px]">
-            {{ error() }}
-          </div>
-        }
 
         <!-- Sugerencias -->
         <div class="border-t border-[#e5e7eb] pt-4 flex flex-col gap-4">

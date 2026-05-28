@@ -196,7 +196,7 @@
     @for (s of servicios(); track s.id) {
       <div class="grid grid-cols-[0.6fr_1fr_1.4fr_1.2fr_0.9fr_0.9fr_1fr] gap-3 items-center px-5 py-4 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[750px]">
         <!-- ID -->
-        <p class="text-[#101828] text-[13px] font-bold font-mono">SRV-{{ s.id }}</p>
+        <p class="text-[#101828] text-[13px] font-bold font-mono">#{{ s.id }}</p>
         <!-- Fecha -->
         <p class="text-[#4a5565] text-[12px]">{{ s.fechaCompleta }}</p>
         <!-- Cliente -->
@@ -320,7 +320,7 @@
     titulo="¡Servicio Facturado!"
     [mensaje]="mensajeResultado()"
     etiqueta="SERVICIO"
-    [detalle]="'SRV-' + servicioResultado()?.id"
+    [detalle]="'#' + servicioResultado()?.id"
     labelCerrar="Aceptar"
     (cerrar)="showExitoFactura.set(false); servicioResultado.set(null)" />
 }
@@ -330,7 +330,7 @@
     titulo="¡Pago Registrado!"
     [mensaje]="mensajeResultado()"
     etiqueta="SERVICIO"
-    [detalle]="'SRV-' + servicioResultado()?.id"
+    [detalle]="'#' + servicioResultado()?.id"
     labelCerrar="Aceptar"
     (cerrar)="showExitoPago.set(false); servicioResultado.set(null)" />
 }

@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
-import { LucideAngularModule, Phone, Navigation, CalendarDays, DollarSign, CheckCircle, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, Phone, Navigation, CalendarDays, DollarSign, CheckCircle, AlertTriangle, RefreshCw } from 'lucide-angular';
+import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner';
 
 export interface VehiculoResumen {
   tipo:        string;
@@ -28,13 +29,15 @@ export interface DatosReserva {
 @Component({
   selector: 'app-confirmacion-reserva',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, ErrorBannerComponent],
   templateUrl: './confirmacion-reserva.html',
 })
 export class ConfirmacionReservaComponent {
-  readonly datos = input.required<DatosReserva>();
+  readonly datos     = input.required<DatosReserva>();
+  readonly error     = input<string | null>(null);
+  readonly guardando = input<boolean>(false);
   readonly confirmar = output<void>();
-  readonly cerrar = output<void>();
+  readonly cerrar    = output<void>();
 
   protected readonly PhoneIcon         = Phone;
   protected readonly NavigationIcon    = Navigation;
@@ -42,4 +45,5 @@ export class ConfirmacionReservaComponent {
   protected readonly DollarSignIcon    = DollarSign;
   protected readonly CheckCircleIcon   = CheckCircle;
   protected readonly AlertTriangleIcon = AlertTriangle;
+  protected readonly RefreshCwIcon     = RefreshCw;
 }

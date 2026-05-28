@@ -15,6 +15,12 @@
       </button>
     </div>
 
+    @if (errorMsg()) {
+      <div class="px-6 pt-4">
+        <app-error-banner [mensaje]="errorMsg()" />
+      </div>
+    }
+
     <div class="p-6 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
 
       <!-- DATOS DE CONTACTO -->
@@ -220,12 +226,6 @@
         </div>
       </div>
     </div>
-
-    @if (errorMsg()) {
-      <div class="px-6 pb-2">
-        <app-error-banner [mensaje]="errorMsg()" />
-      </div>
-    }
 
     <div class="px-6 py-4 border-t border-[#e5e7eb] flex gap-3">
       <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"

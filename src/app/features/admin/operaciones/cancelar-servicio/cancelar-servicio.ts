@@ -4,11 +4,12 @@ import { LucideAngularModule, XCircle } from 'lucide-angular';
 import { OperacionesService } from '../../../../core/services/operaciones.service';
 import { ReservaOperacion } from '../../../../models/operaciones.model';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-cancelar-servicio',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, MensajeModalComponent],
+  imports: [FormsModule, LucideAngularModule, MensajeModalComponent, ErrorBannerComponent],
   templateUrl: './cancelar-servicio.html',
 })
 export class CancelarServicioComponent {

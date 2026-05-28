@@ -14,6 +14,12 @@
       </div>
     </div>
 
+    @if (error()) {
+      <div class="px-6 pt-4">
+        <app-error-banner [mensaje]="error()!" />
+      </div>
+    }
+
     <div class="p-6 flex flex-col gap-5">
 
       <!-- Banner excepción -->
@@ -160,10 +166,15 @@
         class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-11 hover:bg-[#f9fafb] transition-colors cursor-pointer">
         Cancelar
       </button>
-      <button type="button" (click)="confirmar.emit()"
-        class="flex-1 bg-[#00a63e] hover:bg-[#008236] text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer flex items-center justify-center gap-2">
-        <lucide-angular [img]="CheckCircleIcon" class="size-4" color="white" [strokeWidth]="1.5" />
-        Guardar Reserva
+      <button type="button" (click)="confirmar.emit()" [disabled]="guardando()"
+        class="flex-1 bg-[#00a63e] hover:bg-[#008236] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-11 transition-colors cursor-pointer flex items-center justify-center gap-2">
+        @if (guardando()) {
+          <lucide-angular [img]="RefreshCwIcon" class="size-4 animate-spin" color="white" [strokeWidth]="1.5" />
+          Guardando...
+        } @else {
+          <lucide-angular [img]="CheckCircleIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+          Guardar Reserva
+        }
       </button>
     </div>
 

@@ -15,11 +15,12 @@ import {
 import { OperacionesService } from '../../../../core/services/operaciones.service';
 import { ReservaOperacion, Sugerencias } from '../../../../models/operaciones.model';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
+import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
 @Component({
   selector: 'app-asignar-servicio',
   standalone: true,
-  imports: [LucideAngularModule, FormsModule, MensajeModalComponent],
+  imports: [LucideAngularModule, FormsModule, MensajeModalComponent, ErrorBannerComponent],
   templateUrl: './asignar-servicio.html',
 })
 export class AsignarServicioComponent implements OnInit {
