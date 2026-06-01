@@ -26,7 +26,7 @@
         <option [ngValue]="0">Seleccionar cliente...</option>
         @for (c of clientes(); track c.id) {
           @if (c.estado === 'ACTIVO') {
-            <option [ngValue]="c.id">{{ c.id }} - {{ c.empresa }} (Tarifa personalizada: ${{ c.tarifaBase + c.tarifaKm}} USD/km)</option>
+            <option [ngValue]="c.id">{{ c.id }} - {{ c.empresa }} (Base: ${{ c.tarifaBase }} / Km: ${{ c.tarifaKm }})</option>
           }
         }
       </select>
@@ -57,14 +57,14 @@
               </button>
               @if (tarifaEfectiva()) {
                 <span class="text-[#364153] text-[13px]">
-                  = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
+                  = <strong class="text-[#155dfc]">Base: ${{ tarifaEfectiva()!.tarifaBase }} / Km: ${{ tarifaEfectiva()!.tarifaKm }}</strong>
                 </span>
               }
             </div>
           } @else if (tarifaEfectiva()) {
             <span class="text-[#364153] text-[13px]">
               Tarifa <span class="font-semibold text-[#6a7282]">({{ tarifaEfectiva()!.tipo }})</span>
-              = <strong class="text-[#155dfc]">${{ tarifaEfectiva()!.valor }} USD/km</strong>
+              = <strong class="text-[#155dfc]">Base: ${{ tarifaEfectiva()!.tarifaBase }} / Km: ${{ tarifaEfectiva()!.tarifaKm }}</strong>
             </span>
           } @else {
             <span class="text-[#6a7282] text-[13px] italic">Cargando tarifa...</span>

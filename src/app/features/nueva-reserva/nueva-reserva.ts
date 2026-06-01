@@ -114,8 +114,9 @@ export class NuevaReservaComponent implements OnInit {
   });
 
   protected readonly costoTotal = computed(() => {
-    if (!this.tarifaData() || this.distanciaKm() === 0) return 0;
-    return Math.max(25, +(this.distanciaKm() * this.tarifaEfectivaKm()).toFixed(2));
+    const t = this.tarifaData();
+    if (!t || this.distanciaKm() === 0) return 0;
+    return +((t.tarifaKm * this.distanciaKm() + t.tarifaBase) * this.capacidadEfectiva()).toFixed(2);
   });
 
   protected readonly mensajeExcepcion = computed(() => {
@@ -162,8 +163,10 @@ export class NuevaReservaComponent implements OnInit {
     tiempoMin: this.tiempoMin(),
     margenManiobra: this.parametroData()?.tiempoMargenManiobra ?? this.margenManiobra,
     bloques: this.bloques(),
-    costoTotal:   this.costoTotal(),
-    tarifaKm:     this.tarifaEfectivaKm(),
+    costoTotal:    this.costoTotal(),
+    tarifaKm:      this.tarifaData()?.tarifaKm  ?? 0,
+    tarifaBase:    this.tarifaData()?.tarifaBase ?? 0,
+    cantidadCarga: this.capacidadEfectiva(),
     tipoHorario:    this.tipoHorarioSel(),
     horasExcepcion: this.slots()
       .filter(s => (s.estado === 'seleccionado' || s.estado === 'rango') && s.estadoOriginal === 'excepcion')

@@ -88,7 +88,7 @@
         <div class="flex items-center justify-between px-4 py-3 bg-[#f0fdf4]">
           <div>
             <p class="text-[#0d542b] text-[13px] font-semibold">Cálculo de Precio</p>
-            <p class="text-[#008236] text-[11px]">{{ datos().distanciaKm }} km × ${{ datos().tarifaKm }} USD</p>
+            <p class="text-[#008236] text-[11px]">(${{ datos().tarifaKm }} × {{ datos().distanciaKm }} km + ${{ datos().tarifaBase }}) × {{ datos().cantidadCarga }} veh.</p>
           </div>
           <span class="text-[#008236] text-[18px] font-bold">$ {{ datos().costoTotal }} USD</span>
         </div>

@@ -9,19 +9,21 @@ export interface VehiculoResumen {
 }
 
 export interface DatosReserva {
-  cliente:       string;
-  origen:        string;
-  destino:       string;
-  fechaLabel:    string;
-  horaSlot:      string;
-  tipoCarga:     string;
-  vehiculos:     VehiculoResumen[];
-  distanciaKm:   number;
-  tiempoMin:     number;
+  cliente:        string;
+  origen:         string;
+  destino:        string;
+  fechaLabel:     string;
+  horaSlot:       string;
+  tipoCarga:      string;
+  vehiculos:      VehiculoResumen[];
+  distanciaKm:    number;
+  tiempoMin:      number;
   margenManiobra: number;
-  bloques:       number;
-  costoTotal:    number;
-  tarifaKm:      number;
+  bloques:        number;
+  costoTotal:     number;
+  tarifaKm:       number;
+  tarifaBase:     number;
+  cantidadCarga:  number;
   tipoHorario:    string;
   horasExcepcion: string[];
 }
