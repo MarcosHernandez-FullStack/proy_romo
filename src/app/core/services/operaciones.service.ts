@@ -17,6 +17,9 @@ export class OperacionesService {
     if (params.fechaInicio)           p['fechaInicio']     = params.fechaInicio;
     if (params.fechaFin)              p['fechaFin']        = params.fechaFin;
     if (params.idGrua != null)        p['idGrua']          = String(params.idGrua);
+    if (params.nombreOperador)        p['nombreOperador']  = params.nombreOperador;
+    if (params.placaGrua)             p['placaGrua']       = params.placaGrua;
+    if (params.nombreCliente)         p['nombreCliente']   = params.nombreCliente;
     if (params.pagina != null)        p['pagina']          = String(params.pagina);
     if (params.tamano != null)        p['tamano']          = String(params.tamano);
     return this.http.get<ReservaPagedDto | null>(`${API}/operaciones`, { params: p }).pipe(

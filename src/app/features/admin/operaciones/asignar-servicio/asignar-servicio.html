@@ -75,6 +75,14 @@
               <span class="text-[#364153] text-[13px]">{{ formatHora(reserva().horaInicio) }} – {{ formatHora(reserva().horaFin) }}</span>
             </div>
           </div>
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-[#f3f4f6]">
+            <div>
+              <p class="text-[#364153] text-[13px] font-semibold">Costo del Servicio</p>
+              <p class="text-[#6a7282] text-[11px]">(${{ reserva().costoBase }} + ${{ reserva().costoKm }}/km × {{ reserva().distanciaKm }} km) × {{ reserva().cantidadCarga }} veh.</p>
+              <p class="text-[#9ca3af] text-[10px] mt-0.5">Tarifa base + costo por distancia, multiplicado por cantidad de vehículos</p>
+            </div>
+            <span class="text-[#008236] text-[16px] font-bold">${{ reserva().costo }}</span>
+          </div>
         </div>
 
         <!-- Asignación actual (si está ASIGNADO o EN_CURSO con datos) -->
@@ -183,6 +191,14 @@
               <span class="text-[#364153] text-[13px]">Destino: <strong>{{ reserva().direccionDestino }}</strong></span>
             </div>
           </div>
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-[#f3f4f6]">
+            <div>
+              <p class="text-[#364153] text-[13px] font-semibold">Costo del Servicio</p>
+              <p class="text-[#6a7282] text-[11px]">(${{ reserva().costoBase }} + ${{ reserva().costoKm }}/km × {{ reserva().distanciaKm }} km) × {{ reserva().cantidadCarga }} veh.</p>
+              <p class="text-[#9ca3af] text-[10px] mt-0.5">Tarifa base + costo por distancia, multiplicado por cantidad de vehículos</p>
+            </div>
+            <span class="text-[#008236] text-[16px] font-bold">${{ reserva().costo }}</span>
+          </div>
         </div>
 
         <!-- Asignación actual para estado ASIGNADO -->
@@ -224,8 +240,9 @@
               <div class="relative">
                 <button type="button" (click)="toggleGruasPanel()"
                   class="w-full flex items-center justify-between px-3 py-2.5 border rounded-[10px] text-[14px] transition-colors cursor-pointer"
-                  [class.border-[#155dfc]]="showGruasPanel() || idGrua() !== null"
-                  [class.border-[#d1d5dc]]="!showGruasPanel() && idGrua() === null">
+                  [class.border-[#e7000b]]="errores().idGrua"
+                  [class.border-[#155dfc]]="!errores().idGrua && (showGruasPanel() || idGrua() !== null)"
+                  [class.border-[#d1d5dc]]="!errores().idGrua && !showGruasPanel() && idGrua() === null">
                   @if (gruaSeleccionada()) {
                     <div class="flex items-center gap-2 min-w-0">
                       <span class="text-[#101828] font-semibold text-[13px]">{{ gruaSeleccionada()!.placa }}</span>
@@ -282,6 +299,10 @@
               </div>
             </div>
 
+            @if (errores().idGrua) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().idGrua }}</p>
+            }
+
             <!-- Dropdown Operadores -->
             <div>
               <label class="text-[#364153] text-[13px] font-medium mb-1 block">Seleccionar Operador *</label>
@@ -291,8 +312,9 @@
               <div class="relative">
                 <button type="button" (click)="toggleOperadoresPanel()"
                   class="w-full flex items-center justify-between px-3 py-2.5 border rounded-[10px] text-[14px] transition-colors cursor-pointer"
-                  [class.border-[#155dfc]]="showOperadoresPanel() || idOperador() !== null"
-                  [class.border-[#d1d5dc]]="!showOperadoresPanel() && idOperador() === null">
+                  [class.border-[#e7000b]]="errores().idOperador"
+                  [class.border-[#155dfc]]="!errores().idOperador && (showOperadoresPanel() || idOperador() !== null)"
+                  [class.border-[#d1d5dc]]="!errores().idOperador && !showOperadoresPanel() && idOperador() === null">
                   @if (operadorSeleccionado()) {
                     <div class="flex items-center gap-2 min-w-0">
                       <span class="text-[#101828] font-semibold text-[13px]">{{ operadorSeleccionado()!.nombres }} {{ operadorSeleccionado()!.apellidos }}</span>
@@ -348,6 +370,11 @@
             </div>
 
           }
+
+            @if (errores().idOperador) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().idOperador }}</p>
+            }
+
         </div>
 
       }
@@ -361,8 +388,8 @@
         {{ soloDetalle() ? 'Cerrar' : 'Cancelar' }}
       </button>
       @if (!soloDetalle()) {
-        <button type="button" (click)="showConfirmacion.set(true)"
-          [disabled]="!puedeConfirmar()"
+        <button type="button" (click)="onGuardar()"
+          [disabled]="guardando()"
           class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
           {{ guardando() ? 'Guardando...' : (tieneAsignacion ? 'Reasignar' : 'Guardar Asignación') }}
         </button>

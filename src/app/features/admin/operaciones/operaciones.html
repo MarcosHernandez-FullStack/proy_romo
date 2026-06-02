@@ -61,6 +61,33 @@
             class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 h-9 text-[13px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc] cursor-pointer" />
         </div>
       </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Cliente</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="nombreCliente()" (ngModelChange)="setNombreCliente($event)" name="nombreCliente"
+            placeholder="Buscar cliente..."
+            class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 h-9 text-[13px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Operador</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="nombreOperador()" (ngModelChange)="setNombreOperador($event)" name="nombreOperador"
+            placeholder="Buscar operador..."
+            class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 h-9 text-[13px] text-[#101828] w-44 focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Placa Grúa</label>
+        <div class="relative">
+          <lucide-angular [img]="SearchIcon" class="size-4 absolute left-3 top-1/2 -translate-y-1/2" color="#9ca3af" [strokeWidth]="1.5" />
+          <input type="text" [ngModel]="placaGrua()" (ngModelChange)="setPlacaGrua($event)" name="placaGrua"
+            placeholder="Buscar placa..."
+            class="border border-[#d1d5dc] rounded-[10px] pl-9 pr-3 h-9 text-[13px] text-[#101828] w-36 focus:outline-none focus:border-[#155dfc]" />
+        </div>
+      </div>
        <div class="flex flex-col gap-1">
          <label class="text-[#6a7282] text-[11px] font-semibold uppercase tracking-wider">Estado Operación</label>
         <div class="flex items-center gap-1 bg-[#f9fafb] border border-[#e5e7eb] rounded-[10px] p-1">
@@ -92,8 +119,8 @@
 
     <div class="overflow-x-auto">
       <!-- Header tabla -->
-      <div class="grid grid-cols-[0.6fr_1.8fr_1.8fr_0.7fr_0.9fr_1.2fr_0.6fr_0.9fr_0.9fr_0.8fr] gap-2 bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5 min-w-[1100px]">
-        @for (col of ['ID', 'ORIGEN', 'DESTINO', 'CARGA', 'FECHA', 'HORARIO', 'BLOQUES','MONTO','ESTADO', 'ACCIONES']; track col) {
+      <div class="grid grid-cols-[0.5fr_2.2fr_1.1fr_0.6fr_1.3fr_1.3fr_0.8fr_0.8fr_0.9fr_0.7fr] gap-2 bg-[#f9fafb] border-b border-[#e5e7eb] px-4 py-2.5 min-w-[1200px]">
+        @for (col of ['ID', 'LUGAR', 'FECHA / HORA', 'CARGA', 'CLIENTE', 'OPERADOR', 'GRÚA', 'MONTO', 'ESTADO', 'ACCIONES']; track col) {
           <span class="text-[#6a7282] text-[11px] font-bold uppercase tracking-wider">{{ col }}</span>
         }
       </div>
@@ -113,38 +140,52 @@
 
       <!-- Filas -->
       @for (r of reservas(); track r.id) {
-        <div class="grid grid-cols-[0.6fr_1.8fr_1.8fr_0.7fr_0.9fr_1.2fr_0.6fr_0.9fr_0.9fr_0.8fr] gap-2 items-center px-4 py-3.5 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[1100px]">
+        <div class="grid grid-cols-[0.5fr_2.2fr_1.1fr_0.6fr_1.3fr_1.3fr_0.8fr_0.8fr_0.9fr_0.7fr] gap-2 items-center px-4 py-3.5 border-b border-[#f3f4f6] last:border-0 hover:bg-[#fafafa] transition-colors min-w-[1200px]">
+          <!-- ID -->
           <p class="text-[#101828] text-[13px] font-bold font-mono">#{{ r.id }}</p>
-          <div class="flex items-start gap-1.5">
-            <lucide-angular [img]="MapPinIcon" class="size-3.5 mt-0.5 shrink-0" color="#00a63e" [strokeWidth]="1.5" />
-            <span class="text-[#4a5565] text-[12px] leading-snug">{{ r.direccionOrigen }}</span>
+          <!-- LUGAR -->
+          <div class="flex flex-col gap-0.5 min-w-0">
+            <div class="flex items-start gap-1">
+              <lucide-angular [img]="MapPinIcon" class="size-3 mt-0.5 shrink-0" color="#00a63e" [strokeWidth]="1.5" />
+              <span class="text-[#4a5565] text-[11px] leading-snug line-clamp-1">{{ r.direccionOrigen }}</span>
+            </div>
+            <div class="flex items-start gap-1">
+              <lucide-angular [img]="MapPinIcon" class="size-3 mt-0.5 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
+              <span class="text-[#4a5565] text-[11px] leading-snug line-clamp-1">{{ r.direccionDestino }}</span>
+            </div>
           </div>
-          <div class="flex items-start gap-1.5">
-            <lucide-angular [img]="MapPinIcon" class="size-3.5 mt-0.5 shrink-0" color="#e7000b" [strokeWidth]="1.5" />
-            <span class="text-[#4a5565] text-[12px] leading-snug">{{ r.direccionDestino }}</span>
+          <!-- FECHA / HORA -->
+          <div class="flex flex-col gap-0.5">
+            <div class="flex items-center gap-1">
+              <lucide-angular [img]="CalendarIcon" class="size-3 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#364153] text-[11px]">{{ formatFecha(r.fechaServicio) }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <lucide-angular [img]="ClockIcon" class="size-3 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#364153] text-[11px]">{{ r.horaInicio }} - {{ r.horaFin }}</span>
+            </div>
           </div>
-          <div class="flex items-center gap-1">
-            <div class="bg-[#eff6ff] border border-[#bedbff] rounded-lg px-2 py-0.5 flex items-center gap-1">
+          <!-- CARGA -->
+          <div>
+            <div class="bg-[#eff6ff] border border-[#bedbff] rounded-lg px-2 py-0.5 inline-flex items-center gap-1">
               <lucide-angular [img]="TruckIcon" class="size-3" color="#155dfc" [strokeWidth]="1.5" />
               <span class="text-[#155dfc] text-[11px] font-semibold">x{{ r.cantidadCarga }}</span>
             </div>
           </div>
-          <div class="flex items-center gap-1">
-            <lucide-angular [img]="CalendarIcon" class="size-3.5 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
-            <span class="text-[#364153] text-[12px]">{{ formatFecha(r.fechaServicio) }}</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-1">
-              <lucide-angular [img]="ClockIcon" class="size-3.5" color="#6a7282" [strokeWidth]="1.5" />
-              <span class="text-[#364153] text-[12px]">{{ r.horaInicio }} - {{ r.horaFin }}</span>
-            </div>
-          </div>
-          <p class="text-[#364153] text-[12px]">{{ r.nroBloques }}</p>
+          <!-- CLIENTE -->
+          <span class="text-[#364153] text-[12px] line-clamp-2">{{ r.nombreCliente ?? '—' }}</span>
+          <!-- OPERADOR -->
+          <span class="text-[#364153] text-[12px] line-clamp-2">{{ r.nombreCompletoOperador ?? '—' }}</span>
+          <!-- GRÚA -->
+          <span class="text-[#364153] text-[12px] font-mono">{{ r.placaGrua ?? '—' }}</span>
+          <!-- MONTO -->
           <p class="text-[#101828] text-[13px] font-mono">${{ r.costo }}</p>
+          <!-- ESTADO -->
           <span class="inline-block text-[11px] font-semibold rounded-full px-2.5 py-0.5 border w-fit"
             [class]="estadoBadgeClass(r.estadoOperacion)">
             {{ estadoLabel(r.estadoOperacion) }}
           </span>
+          <!-- ACCIONES -->
           <div class="flex items-center gap-1">
             @if (soloDetalle(r)) {
               <button type="button" (click)="abrirAsignar(r)"

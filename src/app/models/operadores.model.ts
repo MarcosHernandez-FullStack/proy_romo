@@ -93,3 +93,14 @@ export interface DispResult {
   exitoso: number;
   mensaje: string;
 }
+
+export interface ErroresOperador {
+  alias?:       string;
+  contrasena?:  string;
+  nombres?:     string;
+  apellidos?:   string;
+  telefono?:    string;
+  correo?:      string;
+  nroLicencia?: string;
+  fecVenLic?:   string;
+}

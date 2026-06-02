@@ -61,3 +61,14 @@ export interface EditarClienteRequest {
 export interface UpdEstadoClienteRequest {
   nuevoEstado: 'ACTIVO' | 'INACTIVO';
 }
+
+export interface ErroresCliente {
+  empresa?:    string;
+  contacto?:   string;
+  telefono?:   string;
+  correo?:     string;
+  loginId?:    string;
+  password?:   string;
+  tarifaBase?: string;
+  tarifaKm?:   string;
+}

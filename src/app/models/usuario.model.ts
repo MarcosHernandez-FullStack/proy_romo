@@ -53,3 +53,11 @@ export interface UsuarioPagedApiResponse {
   totalStaff:           number;
   datos:                UsuarioAdmin[];
 }
+
+export interface ErroresUsuario {
+  correo?:    string;
+  contrasena?: string;
+  nombres?:   string;
+  apellidos?: string;
+  telefono?:  string;
+}

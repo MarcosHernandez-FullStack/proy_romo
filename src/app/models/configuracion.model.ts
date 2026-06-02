@@ -21,3 +21,24 @@ export interface ParametrosOperativos {
   coordLonMaps:         string;
   metrosCercania:       number;
 }
+
+export interface ErroresParametros {
+  zonaHoraria?:          string;
+  tiempoCorte?:          string;
+  timerAdministrativo?:  string;
+  timerCliente?:         string;
+  tiempoTolerancia?:     string;
+  tiempoMargenManiobra?: string;
+  tiempoRetornoBase?:    string;
+  umbralLargaDistancia?: string;
+  minutosCerca?:         string;
+  minutosMedio?:         string;
+  metrosCercania?:       string;
+  coordLatMaps?:         string;
+  coordLonMaps?:         string;
+}
+
+export interface ErroresTarifaGlobal {
+  tarifaBaseGlobal?: string;
+  tarifaKmGlobal?:   string;
+}

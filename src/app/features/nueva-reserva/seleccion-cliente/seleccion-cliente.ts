@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Building2, MapPin, Navigation, Clock, DollarSign } from 'lucide-angular';
 import { ClienteB2B } from '../../../models/clientes.model';
 import { TarifaGlobal, ParametrosOperativos } from '../../../models/configuracion.model';
+import { ErroresSeleccionCliente } from '../../../models/reservas.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ConfiguracionService } from '../../../core/services/configuracion.service';
 
@@ -30,7 +31,6 @@ export class SeleccionClienteComponent implements AfterViewInit {
   private readonly configuracionSvc = inject(ConfiguracionService);
 
   constructor() {
-    // Auto-calcular ruta
     let timer: ReturnType<typeof setTimeout> | null = null;
     effect(() => {
       const o = this.origen().trim();
@@ -45,9 +45,8 @@ export class SeleccionClienteComponent implements AfterViewInit {
       }
     });
 
-    // Cargar tarifario global siempre que haya un cliente seleccionado o sea modo cliente
     effect(() => {
-      const cliente    = this.clienteSeleccionado();
+      const cliente     = this.clienteSeleccionado();
       const modoCliente = this.modoCliente();
       if (!cliente && !modoCliente) return;
       if (this.tarifaGlobal() === null) {
@@ -56,13 +55,11 @@ export class SeleccionClienteComponent implements AfterViewInit {
       }
     });
 
-    // Emitir tarifaChange cuando cambie la tarifa efectiva
     effect(() => {
       const t = this.tarifaEfectiva();
       this.tarifaChange.emit(t ? { tarifaKm: t.tarifaKm, tarifaBase: t.tarifaBase } : null);
     });
 
-    // Cargar parámetro operativo al inicializar
     this.configuracionSvc.getParametroOperativo()
       .subscribe({ next: (p: ParametrosOperativos) => {
         this.parametroOperativo.set(p);
@@ -103,69 +100,38 @@ export class SeleccionClienteComponent implements AfterViewInit {
   protected readonly ruta                = signal<RutaOptima | null>(null);
   protected readonly tarifaGlobal        = signal<TarifaGlobal | null>(null);
   protected readonly parametroOperativo  = signal<ParametrosOperativos | null>(null);
-
-  // Override de tarifa por cliente: almacena el id del cliente y el tipo elegido
-  protected readonly tarifaOverride = signal<{ id: number; tipo: 'personalizada' | 'global' } | null>(null);
+  protected readonly tarifaOverride      = signal<{ id: number; tipo: 'personalizada' | 'global' } | null>(null);
+  protected readonly intentoGuardar      = signal(false);
 
   protected readonly clienteTienePersonalizada = computed(() => {
     const c = this.clienteSeleccionado();
     return !!c && (c.tarifaKm ?? 0) + (c.tarifaBase ?? 0) > 0;
   });
 
-  /** Tarifa efectiva: respeta la selección manual del usuario, si no auto-elige */
   protected readonly tarifaEfectiva = computed(() => {
     if (this.modoCliente()) {
-      const session   = this.authSvc.session();
-      const tarifaKm  = session?.tarifaKm  ?? 0;
+      const session    = this.authSvc.session();
+      const tarifaKm   = session?.tarifaKm  ?? 0;
       const tarifaBase = session?.tarifaBase ?? 0;
       const suma = tarifaKm + tarifaBase;
-      if (suma > 0) {
-        return { valor: suma, tipo: 'personalizada' as const, tarifaKm, tarifaBase };
-      }
+      if (suma > 0) return { valor: suma, tipo: 'personalizada' as const, tarifaKm, tarifaBase };
       const global = this.tarifaGlobal();
       if (!global) return null;
-      return {
-        valor:     (global.tarifaKm ?? 0) + (global.tarifaBase ?? 0),
-        tipo:      'global' as const,
-        tarifaKm:  global.tarifaKm  ?? 0,
-        tarifaBase: global.tarifaBase ?? 0,
-      };
+      return { valor: (global.tarifaKm ?? 0) + (global.tarifaBase ?? 0), tipo: 'global' as const, tarifaKm: global.tarifaKm ?? 0, tarifaBase: global.tarifaBase ?? 0 };
     }
-
     const cliente = this.clienteSeleccionado();
     if (!cliente) return null;
-
-    const sumaCliente = (cliente.tarifaKm ?? 0) + (cliente.tarifaBase ?? 0);
+    const sumaCliente    = (cliente.tarifaKm ?? 0) + (cliente.tarifaBase ?? 0);
     const tienePersonalizada = sumaCliente > 0;
-
-    const override = this.tarifaOverride();
-    const seleccion = override?.id === cliente.id
-      ? override.tipo
-      : (tienePersonalizada ? 'personalizada' : 'global');
-
-    if (seleccion === 'personalizada' && tienePersonalizada) {
-      return {
-        valor:     sumaCliente,
-        tipo:      'personalizada' as const,
-        tarifaKm:  cliente.tarifaKm  ?? 0,
-        tarifaBase: cliente.tarifaBase ?? 0,
-      };
-    }
-
+    const override       = this.tarifaOverride();
+    const seleccion      = override?.id === cliente.id ? override.tipo : (tienePersonalizada ? 'personalizada' : 'global');
+    if (seleccion === 'personalizada' && tienePersonalizada)
+      return { valor: sumaCliente, tipo: 'personalizada' as const, tarifaKm: cliente.tarifaKm ?? 0, tarifaBase: cliente.tarifaBase ?? 0 };
     const global = this.tarifaGlobal();
     if (!global) return null;
     const sumaGlobal = (global.tarifaKm ?? 0) + (global.tarifaBase ?? 0);
-    return {
-      valor:     sumaGlobal,
-      tipo:      'global' as const,
-      tarifaKm:  global.tarifaKm  ?? 0,
-      tarifaBase: global.tarifaBase ?? 0,
-    };
+    return { valor: sumaGlobal, tipo: 'global' as const, tarifaKm: global.tarifaKm ?? 0, tarifaBase: global.tarifaBase ?? 0 };
   });
-
-  protected seleccionarTarifa(tipo: 'personalizada' | 'global'): void {
-    this.tarifaOverride.set({ id: this.clienteId(), tipo });
-  }
 
   protected readonly costoEstimado = computed(() => {
     const r = this.ruta();
@@ -178,12 +144,28 @@ export class SeleccionClienteComponent implements AfterViewInit {
     const r = this.ruta();
     if (!r) return null;
     const margen = this.parametroOperativo()?.tiempoMargenManiobra ?? 0;
-    return {calculo: Math.ceil((r.tiempoMin + margen) / 60), maniobra: margen};
+    return { calculo: Math.ceil((r.tiempoMin + margen) / 60), maniobra: margen };
   });
 
   protected readonly bloquesArray = computed(() =>
     Array.from({ length: this.bloquesOperativos()?.calculo ?? 0 }, (_, i) => i)
   );
+
+  protected readonly errores = computed<ErroresSeleccionCliente>(() => {
+    const e: ErroresSeleccionCliente = {};
+    if (!this.intentoGuardar()) return e;
+    if (!this.modoCliente() && this.clienteId() === 0) e.clienteId = 'Debe seleccionar un cliente.';
+    const o = this.origen().trim();
+    const d = this.destino().trim();
+    if (!o) e.origen = 'Debe ingresar la dirección de origen.';
+    if (!d) {
+      e.destino = 'Debe ingresar la dirección de destino.';
+    } else if (o && o.toLowerCase() === d.toLowerCase()) {
+      e.destino = 'El destino no puede ser igual al origen.';
+    }
+    if (!this.ruta()) e.ruta = 'Debe calcular la ruta antes de continuar.';
+    return e;
+  });
 
   private directionsService!: any;
   private map!:               any;
@@ -196,23 +178,21 @@ export class SeleccionClienteComponent implements AfterViewInit {
     });
     this.directionsService = new google.maps.DirectionsService();
 
-    // Places Autocomplete — origen
-    const acOrigen = new google.maps.places.Autocomplete(this.origenInput.nativeElement, {
-      types: ['geocode'],
-    });
+    const acOrigen = new google.maps.places.Autocomplete(this.origenInput.nativeElement, { types: ['geocode'] });
     acOrigen.addListener('place_changed', () => {
       const place = acOrigen.getPlace();
       if (place?.formatted_address) this.origenChange.emit(place.formatted_address);
     });
 
-    // Places Autocomplete — destino
-    const acDestino = new google.maps.places.Autocomplete(this.destinoInput.nativeElement, {
-      types: ['geocode'],
-    });
+    const acDestino = new google.maps.places.Autocomplete(this.destinoInput.nativeElement, { types: ['geocode'] });
     acDestino.addListener('place_changed', () => {
       const place = acDestino.getPlace();
       if (place?.formatted_address) this.destinoChange.emit(place.formatted_address);
     });
+  }
+
+  protected seleccionarTarifa(tipo: 'personalizada' | 'global'): void {
+    this.tarifaOverride.set({ id: this.clienteId(), tipo });
   }
 
   protected calcularRuta(): void {
@@ -226,27 +206,19 @@ export class SeleccionClienteComponent implements AfterViewInit {
     if (this.renderer) { this.renderer.setMap(null); this.renderer = null; }
 
     this.directionsService.route(
-      {
-        origin: origen,
-        destination: destino,
-        travelMode: google.maps.TravelMode.DRIVING,
-        provideRouteAlternatives: false,
-      },
+      { origin: origen, destination: destino, travelMode: google.maps.TravelMode.DRIVING, provideRouteAlternatives: false },
       (result: any, status: any) => {
         this.cargando.set(false);
         if (status === 'OK') {
           const leg         = result.routes[0].legs[0];
           const distanciaKm = +(leg.distance.value / 1000).toFixed(1);
           const tiempoMin   = Math.round(leg.duration.value / 60);
-
           const coordLatOrigen  = String(leg.start_location.lat());
           const coordLonOrigen  = String(leg.start_location.lng());
           const coordLatDestino = String(leg.end_location.lat());
           const coordLonDestino = String(leg.end_location.lng());
-
           this.ruta.set({ distanciaKm, tiempoMin, distanciaTexto: leg.distance.text, tiempoTexto: leg.duration.text });
           this.rutaChange.emit({ distanciaKm, tiempoMin, coordLatOrigen, coordLonOrigen, coordLatDestino, coordLonDestino });
-
           this.renderer = new google.maps.DirectionsRenderer({
             map: this.map,
             polylineOptions: { strokeColor: '#155dfc', strokeOpacity: 1, strokeWeight: 5 },
@@ -258,5 +230,11 @@ export class SeleccionClienteComponent implements AfterViewInit {
         }
       }
     );
+  }
+
+  protected onSiguiente(): void {
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0) return;
+    this.siguiente.emit();
   }
 }

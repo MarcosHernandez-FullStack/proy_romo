@@ -41,6 +41,6 @@ export class AdminSidebarComponent {
     { label: 'Unidades (Flota)', path: '/admin/flota', icon: Wrench },
     { label: 'Usuarios', path: '/admin/usuarios', icon: UserCog },
     { label: 'Configuración', path: '/admin/configuracion', icon: Settings },
-    { label: 'Reportes', path: '/admin/reportes', icon: ChartBar },
+    { label: 'Cobranzas', path: '/admin/reportes', icon: ChartBar },
   ];
 }

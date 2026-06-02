@@ -87,3 +87,14 @@ export interface ReservaResultado {
   horasConflicto: string | null;
   id:             number | null;
 }
+
+export interface ErroresSeleccionCliente {
+  clienteId?: string;
+  origen?:    string;
+  destino?:   string;
+  ruta?:      string;
+}
+
+export interface ErroresDetallesVehiculo {
+  vehiculos?: string;
+}

@@ -47,7 +47,12 @@
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Seleccionar Nueva Fecha *</label>
         <input type="date" [ngModel]="nuevaFecha()" (ngModelChange)="onFechaChange($event)" name="nuevaFecha"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] cursor-pointer" />
+          class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#155dfc] cursor-pointer"
+          [class.border-[#e7000b]]="errores().nuevaFecha"
+          [class.border-[#d1d5dc]]="!errores().nuevaFecha" />
+        @if (errores().nuevaFecha) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().nuevaFecha }}</p>
+        }
       </div>
 
       <!-- Slot grid -->
@@ -98,6 +103,10 @@
           </div>
         }
       </div>
+
+      @if (errores().slotSeleccionado) {
+        <p class="text-[#e7000b] text-[11px] -mt-2">{{ errores().slotSeleccionado }}</p>
+      }
 
       <!-- Conflicto de bloques -->
       @if (conflictoBloque()) {
@@ -179,7 +188,7 @@
         <lucide-angular [img]="XCircleIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
         Limpiar
       </button>
-      <button type="button" (click)="onGuardar()" [disabled]="!puedeConfirmar() || guardando()"
+      <button type="button" (click)="onGuardar()" [disabled]="guardando()"
         class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[13px] font-semibold rounded-[10px] h-10 flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
         @if (guardando()) {
           <lucide-angular [img]="RefreshCwIcon" class="size-4 animate-spin" color="white" [strokeWidth]="1.5" />

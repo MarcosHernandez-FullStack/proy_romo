@@ -29,14 +29,23 @@
       <div>
         <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Motivo de Cancelación *</label>
         <input type="text" [ngModel]="motivo()" (ngModelChange)="motivo.set($event)" name="motivo"
-          maxlength="50"
+          maxlength="255"
           placeholder="Indique el motivo..."
-          class="w-full border border-[#fca5a5] rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#e7000b]" />
-        <p class="text-[11px] text-right mt-1"
-          [class.text-red-500]="motivo().length >= 50"
-          [class.text-[#9ca3af]]="motivo().length < 50">
-          {{ motivo().length }}/50
-        </p>
+          class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none focus:border-[#e7000b]"
+          [class.border-[#e7000b]]="errores().motivo"
+          [class.border-[#fca5a5]]="!errores().motivo" />
+        <div class="flex items-center justify-between mt-1">
+          <span class="text-[11px]">
+            @if (errores().motivo) {
+              <span class="text-[#e7000b]">{{ errores().motivo }}</span>
+            }
+          </span>
+          <span class="text-[11px]"
+            [class.text-[#e7000b]]="motivo().length >= 230"
+            [class.text-[#9ca3af]]="motivo().length < 230">
+            {{ motivo().length }}/255
+          </span>
+        </div>
       </div>
 
     </div>
@@ -46,7 +55,7 @@
         class="flex-1 border border-[#d1d5dc] text-[#364153] text-[14px] font-medium rounded-[10px] h-10 hover:bg-[#f9fafb] transition-colors cursor-pointer">
         Volver
       </button>
-      <button type="button" (click)="showConfirmacion.set(true)" [disabled]="!motivo() || guardando()"
+      <button type="button" (click)="onGuardar()" [disabled]="guardando()"
         class="flex-1 bg-[#e7000b] hover:bg-[#c10007] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
         {{ guardando() ? 'Cancelando...' : 'Confirmar Cancelación' }}
       </button>

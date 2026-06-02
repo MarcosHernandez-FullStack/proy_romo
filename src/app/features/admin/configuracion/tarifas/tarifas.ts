@@ -4,7 +4,7 @@ import { LucideAngularModule, DollarSign, Plus, Pencil, Trash2, Search, Save, X 
 import { ConfiguracionService } from '../../../../core/services/configuracion.service';
 import { ClientesService } from '../../../../core/services/clientes.service';
 import { ClienteB2B, TarifaCliente } from '../../../../models/clientes.model';
-import { TarifaGlobal } from '../../../../models/configuracion.model';
+import { ErroresTarifaGlobal, TarifaGlobal } from '../../../../models/configuracion.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 
@@ -47,11 +47,20 @@ export class TarifasComponent implements OnInit {
   protected readonly tarifaBaseGlobal = signal(0);
   protected readonly tarifaKmGlobal = signal(0);
 
-  protected readonly guardandoGlobal        = signal(false);
-  protected readonly showConfirmGuardar     = signal(false);
-  protected readonly showExitoGlobal        = signal(false);
-  protected readonly mensajeResultadoGlobal = signal('');
-  protected readonly errorEstadoGlobal      = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
+  protected readonly guardandoGlobal         = signal(false);
+  protected readonly showConfirmGuardar      = signal(false);
+  protected readonly showExitoGlobal         = signal(false);
+  protected readonly mensajeResultadoGlobal  = signal('');
+  protected readonly errorEstadoGlobal       = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
+  protected readonly intentoGuardarGlobal    = signal(false);
+
+  protected readonly erroresGlobal = computed<ErroresTarifaGlobal>(() => {
+    const e: ErroresTarifaGlobal = {};
+    if (!this.intentoGuardarGlobal()) return e;
+    if (this.tarifaBaseGlobal() <= 0) e.tarifaBaseGlobal = 'Debe ser mayor a 0.';
+    if (this.tarifaKmGlobal() <= 0)   e.tarifaKmGlobal   = 'Debe ser mayor a 0.';
+    return e;
+  });
 
   protected readonly tarifasFiltradas = computed(() => {
     const busq = this.busqueda().toLowerCase();
@@ -142,6 +151,8 @@ export class TarifasComponent implements OnInit {
   }
 
   protected onSolicitarGuardarGlobal(): void {
+    this.intentoGuardarGlobal.set(true);
+    if (Object.keys(this.erroresGlobal()).length > 0) return;
     this.showConfirmGuardar.set(true);
   }
 

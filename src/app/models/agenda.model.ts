@@ -68,3 +68,10 @@ export interface AgendaExcepcionResult {
   idNuevo: number;
 }
 
+export interface ErroresExcepcion {
+  fecha?:             string;
+  descripcionMotivo?: string;
+  tiempoInicio?:      string;
+  tiempoFinal?:       string;
+}
+

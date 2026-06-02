@@ -11,7 +11,7 @@ import {
   RefreshCw,
   OctagonAlert,
 } from 'lucide-angular';
-import { ReservaOperacion } from '../../../../models/operaciones.model';
+import { ErroresReprogramarServicio, ReservaOperacion } from '../../../../models/operaciones.model';
 import { ReservasService } from '../../../../core/services/reservas.service';
 import { OperacionesService } from '../../../../core/services/operaciones.service';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -62,6 +62,7 @@ export class ReprogramarServicioComponent implements OnInit {
   protected readonly showConfirmacion  = signal(false);
   protected readonly slots             = signal<SlotReprogramar[]>([]);
   protected readonly conflictoBloque   = signal<string | null>(null);
+  protected readonly intentoGuardar    = signal(false);
 
   protected readonly slotSeleccionado = computed(
     () => this.slots().find(s => s.estado === 'seleccionado') ?? null
@@ -80,9 +81,13 @@ export class ReprogramarServicioComponent implements OnInit {
       .join(', ')
   );
 
-  protected readonly puedeConfirmar = computed(
-    () => !!this.nuevaFecha() && this.slotSeleccionado() !== null
-  );
+  protected readonly errores = computed<ErroresReprogramarServicio>(() => {
+    const e: ErroresReprogramarServicio = {};
+    if (!this.intentoGuardar()) return e;
+    if (!this.nuevaFecha()) e.nuevaFecha = 'Debe seleccionar una fecha';
+    if (!this.slotSeleccionado()) e.slotSeleccionado = 'Debe seleccionar un horario';
+    return e;
+  });
 
   protected readonly mensajeConfirmacion =
     'Este cambio liberará los bloques de la fecha original y reservará los nuevos bloques seleccionados. ' +
@@ -197,20 +202,19 @@ export class ReprogramarServicioComponent implements OnInit {
     }
   }
 
-  /** "2026-05-01T00:00:00" → "01/05/2026" */
   protected get fechaServicioFormateada(): string {
     const raw  = this.reserva().fechaServicio;
     const date = new Date(raw.includes('T') ? raw : raw + 'T00:00:00');
     return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
-  /** "12:00:00" → "12:00" */
   protected get horaInicioFormateada(): string {
     return this.reserva().horaInicio?.slice(0, 5) ?? this.reserva().horaInicio;
   }
 
   protected onGuardar(): void {
-    if (!this.puedeConfirmar()) return;
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0) return;
     this.error.set(null);
     this.showConfirmacion.set(true);
   }

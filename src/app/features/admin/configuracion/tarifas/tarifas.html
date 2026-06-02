@@ -22,12 +22,24 @@
       <div>
         <label class="text-[#dbeafe] text-[13px] font-semibold mb-2 block">Tarifa Base (USD)</label>
         <input type="number" [ngModel]="tarifaBaseGlobal()" (ngModelChange)="tarifaBaseGlobal.set(+$event)" name="tarifaBase"
-          class="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.3)] rounded-[10px] px-4 py-3.5 text-white text-[24px] font-bold focus:outline-none focus:border-white" />
+          class="w-full bg-[rgba(255,255,255,0.1)] border rounded-[10px] px-4 py-3.5 text-white text-[24px] font-bold focus:outline-none"
+          [class.border-[#e7000b]]="erroresGlobal().tarifaBaseGlobal"
+          [class.border-[rgba(255,255,255,0.3)]]="!erroresGlobal().tarifaBaseGlobal"
+          [class.focus:border-white]="!erroresGlobal().tarifaBaseGlobal" />
+        @if (erroresGlobal().tarifaBaseGlobal) {
+          <p class="text-[#fca5a5] text-[11px] mt-1">{{ erroresGlobal().tarifaBaseGlobal }}</p>
+        }
       </div>
       <div>
         <label class="text-[#dbeafe] text-[13px] font-semibold mb-2 block">Tarifa por Km (USD)</label>
         <input type="number" [ngModel]="tarifaKmGlobal()" (ngModelChange)="tarifaKmGlobal.set(+$event)" name="tarifaKm"
-          class="w-full bg-[rgba(255,255,255,0.1)] border border-[rgba(255,255,255,0.3)] rounded-[10px] px-4 py-3.5 text-white text-[24px] font-bold focus:outline-none focus:border-white" />
+          class="w-full bg-[rgba(255,255,255,0.1)] border rounded-[10px] px-4 py-3.5 text-white text-[24px] font-bold focus:outline-none"
+          [class.border-[#e7000b]]="erroresGlobal().tarifaKmGlobal"
+          [class.border-[rgba(255,255,255,0.3)]]="!erroresGlobal().tarifaKmGlobal"
+          [class.focus:border-white]="!erroresGlobal().tarifaKmGlobal" />
+        @if (erroresGlobal().tarifaKmGlobal) {
+          <p class="text-[#fca5a5] text-[11px] mt-1">{{ erroresGlobal().tarifaKmGlobal }}</p>
+        }
       </div>
     </div>
 

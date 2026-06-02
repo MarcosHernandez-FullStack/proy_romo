@@ -40,12 +40,12 @@
             </div>
             <input type="text" [ngModel]="empresa()" (ngModelChange)="empresa.set($event)" name="empresa" maxlength="100"
               class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-              [class.border-[#e7000b]]="mostrarErrores() && errorEmpresa"
-              [class.focus:border-[#e7000b]]="mostrarErrores() && errorEmpresa"
-              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorEmpresa)"
-              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorEmpresa)" />
-            @if (mostrarErrores() && errorEmpresa) {
-              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorEmpresa }}</p>
+              [class.border-[#e7000b]]="errores().empresa"
+              [class.focus:border-[#e7000b]]="errores().empresa"
+              [class.border-[#d1d5dc]]="!errores().empresa"
+              [class.focus:border-[#155dfc]]="!errores().empresa" />
+            @if (errores().empresa) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().empresa }}</p>
             }
           </div>
 
@@ -56,20 +56,20 @@
               <div class="flex justify-between items-center mb-1.5">
                 <label class="text-[#364153] text-[13px] font-medium">Contacto *</label>
                 <span class="text-[11px]"
-                  [class.text-[#e7000b]]="contacto().length > 50"
-                  [class.text-[#e17100]]="contacto().length > 40 && contacto().length <= 50"
-                  [class.text-[#9ca3af]]="contacto().length <= 40">
-                  {{ contacto().length }}/50
+                  [class.text-[#e7000b]]="contacto().length > 100"
+                  [class.text-[#e17100]]="contacto().length > 80 && contacto().length <= 100"
+                  [class.text-[#9ca3af]]="contacto().length <= 80">
+                  {{ contacto().length }}/100
                 </span>
               </div>
-              <input type="text" [ngModel]="contacto()" (ngModelChange)="contacto.set($event)" name="contacto" maxlength="50"
+              <input type="text" [ngModel]="contacto()" (ngModelChange)="contacto.set($event)" name="contacto" maxlength="100"
                 class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-                [class.border-[#e7000b]]="mostrarErrores() && errorContacto"
-                [class.focus:border-[#e7000b]]="mostrarErrores() && errorContacto"
-                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorContacto)"
-                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorContacto)" />
-              @if (mostrarErrores() && errorContacto) {
-                <p class="text-[#e7000b] text-[11px] mt-1">{{ errorContacto }}</p>
+                [class.border-[#e7000b]]="errores().contacto"
+                [class.focus:border-[#e7000b]]="errores().contacto"
+                [class.border-[#d1d5dc]]="!errores().contacto"
+                [class.focus:border-[#155dfc]]="!errores().contacto" />
+              @if (errores().contacto) {
+                <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().contacto }}</p>
               }
             </div>
 
@@ -86,12 +86,12 @@
               </div>
               <input type="tel" [ngModel]="telefono()" (ngModelChange)="telefono.set($event)" name="telefono" maxlength="20"
                 class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-                [class.border-[#e7000b]]="mostrarErrores() && errorTelefono"
-                [class.focus:border-[#e7000b]]="mostrarErrores() && errorTelefono"
-                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorTelefono)"
-                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorTelefono)" />
-              @if (mostrarErrores() && errorTelefono) {
-                <p class="text-[#e7000b] text-[11px] mt-1">{{ errorTelefono }}</p>
+                [class.border-[#e7000b]]="errores().telefono"
+                [class.focus:border-[#e7000b]]="errores().telefono"
+                [class.border-[#d1d5dc]]="!errores().telefono"
+                [class.focus:border-[#155dfc]]="!errores().telefono" />
+              @if (errores().telefono) {
+                <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().telefono }}</p>
               }
             </div>
 
@@ -110,12 +110,12 @@
             </div>
             <input type="email" [ngModel]="correo()" (ngModelChange)="correo.set($event)" name="correo" maxlength="100"
               class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-              [class.border-[#e7000b]]="mostrarErrores() && errorCorreo"
-              [class.focus:border-[#e7000b]]="mostrarErrores() && errorCorreo"
-              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorCorreo)"
-              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorCorreo)" />
-            @if (mostrarErrores() && errorCorreo) {
-              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorCorreo }}</p>
+              [class.border-[#e7000b]]="errores().correo"
+              [class.focus:border-[#e7000b]]="errores().correo"
+              [class.border-[#d1d5dc]]="!errores().correo"
+              [class.focus:border-[#155dfc]]="!errores().correo" />
+            @if (errores().correo) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().correo }}</p>
             }
           </div>
 
@@ -151,19 +151,20 @@
             </div>
             <div class="flex gap-2">
               <input type="text" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password" maxlength="20"
+                placeholder="Mín. 8 caracteres si se modifica"
                 class="flex-1 border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-                [class.border-[#e7000b]]="mostrarErrores() && errorPassword"
-                [class.focus:border-[#e7000b]]="mostrarErrores() && errorPassword"
-                [class.border-[#d1d5dc]]="!(mostrarErrores() && errorPassword)"
-                [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorPassword)" />
+                [class.border-[#e7000b]]="errores().password"
+                [class.focus:border-[#e7000b]]="errores().password"
+                [class.border-[#d1d5dc]]="!errores().password"
+                [class.focus:border-[#155dfc]]="!errores().password" />
               <button type="button" (click)="generarPassword()"
                 class="flex items-center gap-1.5 bg-[#e17100] text-white text-[13px] font-semibold rounded-[10px] px-3 h-10 hover:bg-[#bb4d00] transition-colors cursor-pointer shrink-0">
                 <lucide-angular [img]="RefreshCwIcon" class="size-4" color="white" [strokeWidth]="1.5" />
                 Generar
               </button>
             </div>
-            @if (mostrarErrores() && errorPassword) {
-              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorPassword }}</p>
+            @if (errores().password) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().password }}</p>
             }
           </div>
 
@@ -182,11 +183,11 @@
             <input type="number" [ngModel]="tarifaBase()" (ngModelChange)="tarifaBase.set(+$event)" name="tarifaBase"
               min="0" step="0.01"
               class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-              [class.border-[#e7000b]]="mostrarErrores() && errorTarifaBase"
-              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorTarifaBase)"
-              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorTarifaBase)" />
-            @if (mostrarErrores() && errorTarifaBase) {
-              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorTarifaBase }}</p>
+              [class.border-[#e7000b]]="errores().tarifaBase"
+              [class.border-[#d1d5dc]]="!errores().tarifaBase"
+              [class.focus:border-[#155dfc]]="!errores().tarifaBase" />
+            @if (errores().tarifaBase) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().tarifaBase }}</p>
             }
           </div>
 
@@ -196,11 +197,11 @@
             <input type="number" [ngModel]="tarifaKm()" (ngModelChange)="tarifaKm.set(+$event)" name="tarifaKm"
               min="0" step="0.01"
               class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-              [class.border-[#e7000b]]="mostrarErrores() && errorTarifaKm"
-              [class.border-[#d1d5dc]]="!(mostrarErrores() && errorTarifaKm)"
-              [class.focus:border-[#155dfc]]="!(mostrarErrores() && errorTarifaKm)" />
-            @if (mostrarErrores() && errorTarifaKm) {
-              <p class="text-[#e7000b] text-[11px] mt-1">{{ errorTarifaKm }}</p>
+              [class.border-[#e7000b]]="errores().tarifaKm"
+              [class.border-[#d1d5dc]]="!errores().tarifaKm"
+              [class.focus:border-[#155dfc]]="!errores().tarifaKm" />
+            @if (errores().tarifaKm) {
+              <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().tarifaKm }}</p>
             }
           </div>
 

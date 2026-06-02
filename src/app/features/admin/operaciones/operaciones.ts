@@ -78,7 +78,10 @@ export class OperacionesComponent implements OnInit {
   protected readonly fechaInicio  = signal('');
   protected readonly fechaFin     = signal('');
   protected readonly paginaActual = signal(1);
-  protected readonly tiempoCorte  = signal<number | null>(null);
+  protected readonly tiempoCorte      = signal<number | null>(null);
+  protected readonly nombreCliente    = signal('');
+  protected readonly nombreOperador   = signal('');
+  protected readonly placaGrua        = signal('');
 
   protected readonly filtroTabs: FiltroTab[] = ['TODOS', 'RESERVADO', 'ASIGNADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'];
   protected readonly tabLabel: Record<FiltroTab, string> = {
@@ -106,8 +109,9 @@ export class OperacionesComponent implements OnInit {
   protected readonly exitoEtiqueta = signal('');
   protected readonly exitoDetalle  = signal('');
 
-  private readonly _idChange$ = new Subject<string>();
-  private readonly _reload$   = new Subject<void>();
+  private readonly _idChange$         = new Subject<string>();
+  private readonly _reload$           = new Subject<void>();
+  private readonly _filtroTextChange$ = new Subject<void>();
 
   protected readonly totalPaginas = computed(() =>
     Math.max(1, Math.ceil(this.totalRegistros() / this.ITEMS_POR_PAGINA))
@@ -122,12 +126,14 @@ export class OperacionesComponent implements OnInit {
   });
 
   protected readonly hasFiltros = computed(() =>
-    !!this.busquedaId() || !!this.fechaInicio() || !!this.fechaFin()
+    !!this.busquedaId()      || !!this.fechaInicio()     || !!this.fechaFin() ||
+    !!this.nombreCliente()   || !!this.nombreOperador()  || !!this.placaGrua()
   );
 
   ngOnInit(): void {
     merge(
       this._idChange$.pipe(debounceTime(600), distinctUntilChanged(), tap(() => this.paginaActual.set(1))),
+      this._filtroTextChange$.pipe(debounceTime(500), tap(() => this.paginaActual.set(1))),
       this._reload$,
     ).pipe(
       switchMap(() => {
@@ -137,8 +143,11 @@ export class OperacionesComponent implements OnInit {
         return this.operacionesSvc.getReservas({
           estadoOperacion: tab === 'TODOS' ? undefined : tab,
           id:              idStr ? parseInt(idStr, 10) : undefined,
-          fechaInicio:     this.fechaInicio() || undefined,
-          fechaFin:        this.fechaFin()    || undefined,
+          fechaInicio:     this.fechaInicio()    || undefined,
+          fechaFin:        this.fechaFin()       || undefined,
+          nombreCliente:   this.nombreCliente()  || undefined,
+          nombreOperador:  this.nombreOperador() || undefined,
+          placaGrua:       this.placaGrua()      || undefined,
           pagina:          this.paginaActual(),
           tamano:          this.ITEMS_POR_PAGINA,
         }).pipe(catchError(() => { this.cargando.set(false); return EMPTY; }));
@@ -169,6 +178,9 @@ export class OperacionesComponent implements OnInit {
     this.busquedaId.set('');
     this.fechaInicio.set('');
     this.fechaFin.set('');
+    this.nombreCliente.set('');
+    this.nombreOperador.set('');
+    this.placaGrua.set('');
     this.paginaActual.set(1);
     this._reload$.next();
   }
@@ -188,6 +200,21 @@ export class OperacionesComponent implements OnInit {
     this.fechaFin.set(v);
     this.paginaActual.set(1);
     this._reload$.next();
+  }
+
+  protected setNombreCliente(v: string): void {
+    this.nombreCliente.set(v);
+    this._filtroTextChange$.next();
+  }
+
+  protected setNombreOperador(v: string): void {
+    this.nombreOperador.set(v);
+    this._filtroTextChange$.next();
+  }
+
+  protected setPlacaGrua(v: string): void {
+    this.placaGrua.set(v);
+    this._filtroTextChange$.next();
   }
 
   protected cambiarTab(tab: FiltroTab): void {

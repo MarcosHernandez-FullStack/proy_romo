@@ -2,6 +2,7 @@ import { Component, computed, effect, input, output, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Check, Truck, ChevronDown, ChevronUp } from 'lucide-angular';
 import { TipoCarga } from '../tipo-carga/tipo-carga';
+import { ErroresDetallesVehiculo } from '../../../models/reservas.model';
 
 export interface VehiculoDetalle {
   tipo:          string;
@@ -32,11 +33,11 @@ export class DetallesVehiculoComponent {
   protected readonly ChevronDownIcon = ChevronDown;
   protected readonly ChevronUpIcon   = ChevronUp;
 
-  protected readonly vehiculos   = signal<VehiculoDetalle[]>([vehiculoVacio()]);
-  protected readonly expandedIdx = signal<number>(0);
+  protected readonly vehiculos      = signal<VehiculoDetalle[]>([vehiculoVacio()]);
+  protected readonly expandedIdx    = signal<number>(0);
+  protected readonly intentoGuardar = signal(false);
 
   constructor() {
-    // Sincronizar el array de vehículos cuando cambia cantidadVehiculos o tipoCarga
     effect(() => {
       const n = this.tipoCarga() === 'multiple' ? this.cantidadVehiculos() : 1;
       this.vehiculos.update(prev => {
@@ -44,14 +45,19 @@ export class DetallesVehiculoComponent {
         if (prev.length < n) return [...prev, ...Array.from({ length: n - prev.length }, vehiculoVacio)];
         return prev.slice(0, n);
       });
-      // Asegurar que el expandido sea válido
       if (this.expandedIdx() >= n) this.expandedIdx.set(0);
     }, { allowSignalWrites: true });
   }
 
-  protected readonly puedeConfirmar = computed(() =>
-    this.step1Complete() && this.step2Complete() && this.vehiculos().every(v => v.tipo !== '')
-  );
+  protected readonly errores = computed<ErroresDetallesVehiculo>(() => {
+    const e: ErroresDetallesVehiculo = {};
+    if (!this.intentoGuardar()) return e;
+    if (!this.step1Complete() || !this.step2Complete())
+      e.vehiculos = 'Complete los pasos anteriores antes de confirmar.';
+    else if (!this.vehiculos().every(v => v.tipo !== ''))
+      e.vehiculos = 'Todos los vehículos deben tener tipo seleccionado.';
+    return e;
+  });
 
   protected updateVehiculo(idx: number, field: keyof VehiculoDetalle, value: string): void {
     this.vehiculos.update(prev =>
@@ -64,6 +70,8 @@ export class DetallesVehiculoComponent {
   }
 
   protected onConfirmar(): void {
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0) return;
     this.confirmar.emit(this.vehiculos());
   }
 }

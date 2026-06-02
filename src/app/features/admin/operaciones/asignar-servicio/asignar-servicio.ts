@@ -13,7 +13,7 @@ import {
   Eye,
 } from 'lucide-angular';
 import { OperacionesService } from '../../../../core/services/operaciones.service';
-import { ReservaOperacion, Sugerencias } from '../../../../models/operaciones.model';
+import { ErroresAsignarServicio, ReservaOperacion, Sugerencias } from '../../../../models/operaciones.model';
 import { MensajeModalComponent } from '../../../../shared/components/mensaje-modal/mensaje-modal';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
@@ -50,8 +50,10 @@ export class AsignarServicioComponent implements OnInit {
 
   protected readonly showGruasPanel      = signal(false);
   protected readonly showOperadoresPanel = signal(false);
-  protected readonly filtroGrua      = signal('');
-  protected readonly filtroOperador  = signal('');
+  protected readonly filtroGrua          = signal('');
+  protected readonly filtroOperador      = signal('');
+  protected readonly intentoGuardar      = signal(false);
+  protected readonly showConfirmacion    = signal(false);
 
   protected readonly gruaSeleccionada = computed(() =>
     this.sugerencias()?.gruas?.find(g => g.id === this.idGrua()) ?? null
@@ -82,12 +84,14 @@ export class AsignarServicioComponent implements OnInit {
       : ops;
   });
 
-  protected readonly puedeConfirmar    = computed(
-    () => !this.guardando() && this.idGrua() !== null && this.idOperador() !== null
-  );
-  protected readonly showConfirmacion  = signal(false);
+  protected readonly errores = computed<ErroresAsignarServicio>(() => {
+    const e: ErroresAsignarServicio = {};
+    if (!this.intentoGuardar()) return e;
+    if (this.idGrua() === null) e.idGrua = 'Debe seleccionar una grúa';
+    if (this.idOperador() === null) e.idOperador = 'Debe seleccionar un operador';
+    return e;
+  });
 
-  /** Verdadero si la reserva tiene al menos un recurso asignado en BD */
   protected get tieneAsignacion(): boolean {
     const r = this.reserva();
     return !!(r.gruaAsignada || r.operadorAsignado);
@@ -100,7 +104,6 @@ export class AsignarServicioComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // En modo soloDetalle o EN_CURSO no se necesitan sugerencias
     if (this.soloDetalle()) {
       this.cargando.set(false);
       return;
@@ -132,6 +135,12 @@ export class AsignarServicioComponent implements OnInit {
   protected toggleOperadoresPanel(): void {
     this.showOperadoresPanel.update(v => !v);
     this.showGruasPanel.set(false);
+  }
+
+  protected onGuardar(): void {
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0) return;
+    this.showConfirmacion.set(true);
   }
 
   protected onConfirmar(): void {

@@ -100,8 +100,12 @@ export interface ReservaOperacion {
   vehiculos?:           VehiculoDetalle[];
   fechaHoraFormateada:  string;
   cantidadVehiculos:    number;
-  estadoAdministrativo: string;
-  costo:                number;
+  estadoAdministrativo:      string;
+  costo:                     number;
+  nombreCompletoOperador?:   string | null;
+  placaGrua?:                string | null;
+  costoKm:                   number;
+  costoBase:                 number;
 }
 
 export interface ReservaPagedDto {
@@ -122,6 +126,9 @@ export interface GetReservasParams {
   idOperador?:           number;
   idGrua?:               number;
   estadoAdministrativo?: string;
+  nombreOperador?:       string;
+  placaGrua?:            string;
+  nombreCliente?:        string;
   pagina?:               number;
   tamano?:               number;
 }
@@ -143,4 +150,18 @@ export interface ReservaALiberar {
   horaInicio:      string;
   nombreCliente:   string;
   estadoOperacion: string;
+}
+
+export interface ErroresAsignarServicio {
+  idGrua?:     string;
+  idOperador?: string;
+}
+
+export interface ErroresCancelarServicio {
+  motivo?: string;
+}
+
+export interface ErroresReprogramarServicio {
+  nuevaFecha?:       string;
+  slotSeleccionado?: string;
 }

@@ -1,7 +1,7 @@
-import { Component, OnInit, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Calendar, X, AlertTriangle, Clock, Loader } from 'lucide-angular';
-import { AlcanceExcepcion, ExcepcionAgenda, TipoExcepcion } from '../../../../../models/agenda.model';
+import { AlcanceExcepcion, ErroresExcepcion, ExcepcionAgenda, TipoExcepcion } from '../../../../../models/agenda.model';
 import { ErrorBannerComponent } from '../../../../../shared/components/error-banner/error-banner';
 
 @Component({
@@ -29,6 +29,7 @@ export class EditarExcepcionComponent implements OnInit {
   protected readonly tiempoInicio      = signal('');
   protected readonly tiempoFinal       = signal('');
   protected readonly descripcionMotivo = signal('');
+  protected readonly intentoGuardar    = signal(false);
 
   protected readonly tiposExcepcion: TipoExcepcion[] = ['Feriado', 'Mantenimiento', 'Bloqueo'];
 
@@ -48,16 +49,23 @@ export class EditarExcepcionComponent implements OnInit {
     this.descripcionMotivo.set(exc.descripcionMotivo);
   }
 
-  protected get esValido(): boolean {
-    if (!this.fecha() || !this.descripcionMotivo()) return false;
+  protected readonly errores = computed<ErroresExcepcion>(() => {
+    const e: ErroresExcepcion = {};
+    if (!this.intentoGuardar()) return e;
+    if (!this.fecha()) e['fecha'] = 'La fecha de la excepción es obligatoria';
+    if (!this.descripcionMotivo().trim()) e['descripcionMotivo'] = 'La descripción del motivo es obligatoria';
     if (this.alcance() === 'Rango de Horas Específico') {
-      return !!this.tiempoInicio() && !!this.tiempoFinal();
+      if (!this.tiempoInicio()) e['tiempoInicio'] = 'Debe seleccionar la hora de inicio';
+      if (!this.tiempoFinal()) e['tiempoFinal'] = 'Debe seleccionar la hora de fin';
+      else if (this.tiempoInicio() && this.tiempoFinal() <= this.tiempoInicio())
+        e['tiempoFinal'] = 'La hora de fin debe ser posterior a la hora de inicio';
     }
-    return true;
-  }
+    return e;
+  });
 
   protected onGuardar(): void {
-    if (!this.esValido) return;
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0) return;
     this.guardar.emit({
       id:                this.excepcion().id,
       fechaFormatCorta:  this.fecha(),

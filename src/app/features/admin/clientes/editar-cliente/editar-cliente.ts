@@ -1,8 +1,8 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Users, X, RefreshCw } from 'lucide-angular';
 import { ClientesService } from '../../../../core/services/clientes.service';
-import { ClienteB2B } from '../../../../models/clientes.model';
+import { ClienteB2B, ErroresCliente } from '../../../../models/clientes.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
@@ -19,10 +19,9 @@ export class EditarClienteComponent implements OnInit {
   readonly guardar = output<void>();
   readonly cerrar  = output<void>();
 
-  protected readonly UsersIcon         = Users;
-  protected readonly XIcon             = X;
-  protected readonly RefreshCwIcon     = RefreshCw;
-
+  protected readonly UsersIcon     = Users;
+  protected readonly XIcon         = X;
+  protected readonly RefreshCwIcon = RefreshCw;
 
   protected readonly empresa    = signal('');
   protected readonly contacto   = signal('');
@@ -36,7 +35,7 @@ export class EditarClienteComponent implements OnInit {
   protected readonly guardando      = signal(false);
   protected readonly errorMsg       = signal('');
   protected readonly showExito      = signal(false);
-  protected readonly mostrarErrores = signal(false);
+  protected readonly intentoGuardar = signal(false);
 
   ngOnInit(): void {
     const c = this.cliente();
@@ -49,54 +48,30 @@ export class EditarClienteComponent implements OnInit {
     this.tarifaKm.set(c.tarifaKm);
   }
 
-  // ── Validaciones por campo ────────────────────────────────
-  protected get errorEmpresa(): string {
-    if (!this.empresa().trim()) return 'La razón social es obligatoria.';
-    if (this.empresa().length > 100) return 'Máximo 100 caracteres.';
-    return '';
-  }
+  protected readonly errores = computed<ErroresCliente>(() => {
+    const e: ErroresCliente = {};
+    if (!this.intentoGuardar()) return e;
 
-  protected get errorContacto(): string {
-    if (!this.contacto().trim()) return 'El nombre de contacto es obligatorio.';
-    if (this.contacto().length > 50) return 'Máximo 50 caracteres.';
-    return '';
-  }
+    if (!this.empresa().trim()) e.empresa = 'La razón social es obligatoria.';
 
-  protected get errorTelefono(): string {
-    if (!this.telefono().trim()) return 'El teléfono es obligatorio.';
-    if (this.telefono().length > 20) return 'Máximo 20 caracteres.';
-    return '';
-  }
+    if (!this.contacto().trim()) e.contacto = 'El nombre de contacto es obligatorio.';
 
-  protected get errorCorreo(): string {
-    if (!this.correo().trim()) return 'El correo electrónico es obligatorio.';
-    if (this.correo().length > 100) return 'Máximo 100 caracteres.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correo())) return 'Ingrese un correo válido.';
-    return '';
-  }
+    if (!this.telefono().trim()) e.telefono = 'El teléfono es obligatorio.';
 
-  protected get errorPassword(): string {
-    if (this.password().length > 20) return 'Máximo 20 caracteres.';
-    return '';
-  }
+    if (!this.correo().trim()) e.correo = 'El correo electrónico es obligatorio.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.correo())) e.correo = 'Ingrese un correo válido.';
 
-  protected get errorTarifaBase(): string {
-    if (this.tarifaBase() < 0) return 'La tarifa no puede ser negativa.';
-    if (this.tarifaBase() > 99999999.99) return 'Valor fuera de rango.';
-    return '';
-  }
+    if (this.password().trim() && this.password().length < 8)
+      e.password = 'Mínimo 8 caracteres.';
 
-  protected get errorTarifaKm(): string {
-    if (this.tarifaKm() < 0) return 'La tarifa no puede ser negativa.';
-    if (this.tarifaKm() > 99999999.99) return 'Valor fuera de rango.';
-    return '';
-  }
+    if (this.tarifaBase() < 0) e.tarifaBase = 'La tarifa no puede ser negativa.';
+    else if (this.tarifaBase() > 99999999.99) e.tarifaBase = 'Valor fuera de rango.';
 
-  protected get esValido(): boolean {
-    return !this.errorEmpresa && !this.errorContacto && !this.errorTelefono &&
-           !this.errorCorreo && !this.errorPassword &&
-           !this.errorTarifaBase && !this.errorTarifaKm;
-  }
+    if (this.tarifaKm() < 0) e.tarifaKm = 'La tarifa no puede ser negativa.';
+    else if (this.tarifaKm() > 99999999.99) e.tarifaKm = 'Valor fuera de rango.';
+
+    return e;
+  });
 
   protected generarPassword(): void {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -105,8 +80,8 @@ export class EditarClienteComponent implements OnInit {
   }
 
   protected onGuardar(): void {
-    this.mostrarErrores.set(true);
-    if (!this.esValido || this.guardando()) return;
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0 || this.guardando()) return;
 
     this.errorMsg.set('');
     this.guardando.set(true);

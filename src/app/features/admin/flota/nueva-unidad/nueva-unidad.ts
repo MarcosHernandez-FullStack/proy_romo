@@ -1,7 +1,8 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Truck, X } from 'lucide-angular';
 import { FlotaService } from '../../../../core/services/flota.service';
+import { ErroresUnidad } from '../../../../models/flota.model';
 import { ExitoModalComponent } from '../../../../shared/components/exito-modal/exito-modal';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
 
@@ -17,9 +18,8 @@ export class NuevaUnidadComponent {
   readonly guardar = output<void>();
   readonly cerrar  = output<void>();
 
-  protected readonly TruckIcon         = Truck;
-  protected readonly XIcon             = X;
-
+  protected readonly TruckIcon = Truck;
+  protected readonly XIcon     = X;
 
   protected readonly placa             = signal('');
   protected readonly anio              = signal('');
@@ -32,7 +32,7 @@ export class NuevaUnidadComponent {
   protected readonly errorMsg       = signal('');
   protected readonly showExito      = signal(false);
   protected readonly idNuevo        = signal(0);
-  protected readonly mostrarErrores = signal(false);
+  protected readonly intentoGuardar = signal(false);
 
   protected get idNuevoFormato(): string {
     return `GRU-${String(this.idNuevo()).padStart(3, '0')}`;
@@ -40,61 +40,41 @@ export class NuevaUnidadComponent {
 
   private readonly anioActual = new Date().getFullYear();
 
-  // ── Validaciones por campo ────────────────────────────────
-  protected get errorPlaca(): string {
-    if (!this.placa().trim()) return 'La placa es obligatoria.';
-    if (this.placa().length > 10) return 'Máximo 10 caracteres.';
-    return '';
-  }
-
-  protected get errorMarca(): string {
-    if (!this.marca().trim()) return 'La marca es obligatoria.';
-    if (this.marca().length > 30) return 'Máximo 30 caracteres.';
-    return '';
-  }
-
-  protected get errorModelo(): string {
-    if (!this.modelo().trim()) return 'El modelo es obligatorio.';
-    if (this.modelo().length > 30) return 'Máximo 30 caracteres.';
-    return '';
-  }
-
-  protected get errorAnio(): string {
-    if (!this.anio()) return 'El año de fabricación es obligatorio.';
-    const n = Number(this.anio());
-    if (!Number.isInteger(n) || n < 1900 || n > this.anioActual) return `Ingrese un año entre 1900 y ${this.anioActual}.`;
-    return '';
-  }
-
-  protected get errorCapacidad(): string {
-    if (this.capacidad() < 1) return 'La capacidad mínima es 1.';
-    return '';
-  }
-
-  protected get errorVencimiento(): string {
-    if (!this.vencimientoSeguro()) return 'La fecha de vencimiento del seguro es obligatoria.';
-    return '';
-  }
-
-  protected get esValido(): boolean {
-    return !this.errorPlaca && !this.errorMarca && !this.errorModelo &&
-           !this.errorAnio && !this.errorCapacidad && !this.errorVencimiento;
-  }
+  protected readonly errores = computed<ErroresUnidad>(() => {
+    const e: ErroresUnidad = {};
+    if (!this.intentoGuardar()) return e;
+    if (!this.placa().trim())              e.placa             = 'La placa es obligatoria.';
+    else if (this.placa().length > 10)     e.placa             = 'Máximo 10 caracteres.';
+    if (!this.marca().trim())              e.marca             = 'La marca es obligatoria.';
+    else if (this.marca().length > 30)     e.marca             = 'Máximo 30 caracteres.';
+    if (!this.modelo().trim())             e.modelo            = 'El modelo es obligatorio.';
+    else if (this.modelo().length > 30)    e.modelo            = 'Máximo 30 caracteres.';
+    if (!this.anio()) {
+      e.anio = 'El año de fabricación es obligatorio.';
+    } else {
+      const n = Number(this.anio());
+      if (!Number.isInteger(n) || n < 1900 || n > this.anioActual)
+        e.anio = `Ingrese un año entre 1900 y ${this.anioActual}.`;
+    }
+    if (this.capacidad() < 1)             e.capacidad         = 'La capacidad mínima es 1.';
+    if (!this.vencimientoSeguro())        e.vencimientoSeguro = 'La fecha de vencimiento del seguro es obligatoria.';
+    return e;
+  });
 
   protected onGuardar(): void {
-    this.mostrarErrores.set(true);
-    if (!this.esValido || this.guardando()) return;
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0 || this.guardando()) return;
 
     this.errorMsg.set('');
     this.guardando.set(true);
 
     this.flotaSvc.crearGrua({
-      placa:          this.placa(),
-      marca:          this.marca(),
-      modelo:         this.modelo(),
+      placa:           this.placa(),
+      marca:           this.marca(),
+      modelo:          this.modelo(),
       anioFabricacion: Number(this.anio()),
-      capacidad:      this.capacidad(),
-      fecVenSeg:      this.vencimientoSeguro(),
+      capacidad:       this.capacidad(),
+      fecVenSeg:       this.vencimientoSeguro(),
     }).subscribe({
       next: result => {
         this.guardando.set(false);

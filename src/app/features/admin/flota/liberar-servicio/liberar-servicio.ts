@@ -1,8 +1,8 @@
-import { Component, OnInit, inject, input, output, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, AlertTriangle, X, FileText, Info } from 'lucide-angular';
 import { ErrorBannerComponent } from '../../../../shared/components/error-banner/error-banner';
-import { UnidadFlota } from '../../../../models/flota.model';
+import { ErroresBitacora, UnidadFlota } from '../../../../models/flota.model';
 import { ReservaALiberar } from '../../../../models/operaciones.model';
 import { FlotaService } from '../../../../core/services/flota.service';
 
@@ -32,28 +32,23 @@ export class LiberarServicioComponent implements OnInit {
   nombreResponsable = signal('');
   kilometraje       = signal<number | null>(null);
   nota              = signal('');
-  mostrarErrores    = signal(false);
 
-  get errorNombreResponsable(): string {
-    if (!this.nombreResponsable().trim()) return 'El nombre del responsable es obligatorio.';
-    if (this.nombreResponsable().length > 50) return 'Máximo 50 caracteres.';
-    return '';
-  }
+  protected readonly intentoGuardar = signal(false);
 
-  get errorKilometraje(): string {
+  protected readonly errores = computed<ErroresBitacora>(() => {
+    const e: ErroresBitacora = {};
+    if (!this.intentoGuardar()) return e;
+    if (!this.nombreResponsable().trim())            e.nombreResponsable = 'El nombre del responsable es obligatorio.';
+    else if (this.nombreResponsable().length > 50)   e.nombreResponsable = 'Máximo 50 caracteres.';
     const km = this.kilometraje();
-    if (km === null || km === 0) return 'El kilometraje es obligatorio.';
-    if (km < 1 || !Number.isInteger(km)) return 'Ingrese un valor entero mayor a 0.';
-    return '';
-  }
-
-  get esValido(): boolean {
-    return !this.errorNombreResponsable && !this.errorKilometraje;
-  }
+    if (km === null || km === 0)                     e.kilometraje       = 'El kilometraje es obligatorio.';
+    else if (km < 1 || !Number.isInteger(km))        e.kilometraje       = 'Ingrese un valor entero mayor a 0.';
+    return e;
+  });
 
   onConfirmar(): void {
-    this.mostrarErrores.set(true);
-    if (!this.esValido || this.guardando()) return;
+    this.intentoGuardar.set(true);
+    if (Object.keys(this.errores()).length > 0 || this.guardando()) return;
 
     this.errorMsg.set(null);
     this.guardando.set(true);

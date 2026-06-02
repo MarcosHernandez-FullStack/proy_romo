@@ -66,3 +66,18 @@ export interface RetornoOperativaRequest {
   kilometraje:       number;
   nota?:             string;
 }
+
+export interface ErroresUnidad {
+  placa?:             string;
+  anio?:              string;
+  marca?:             string;
+  modelo?:            string;
+  capacidad?:         string;
+  vencimientoSeguro?: string;
+}
+
+export interface ErroresBitacora {
+  nombreResponsable?: string;
+  kilometraje?:       string;
+  nota?:              string;
+}

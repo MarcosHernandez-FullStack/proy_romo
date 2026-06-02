@@ -46,11 +46,11 @@
         <input type="text" [ngModel]="nombreResponsable()" (ngModelChange)="nombreResponsable.set($event)" name="nombreResponsable"
           placeholder="Ej: Carlos Gómez" maxlength="50"
           class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-          [class.border-[#e7000b]]="mostrarErrores() && errorNombreResponsable"
-          [class.border-[#d1d5dc]]="!(mostrarErrores() && errorNombreResponsable)"
-          [class.focus:border-[#16a34a]]="!(mostrarErrores() && errorNombreResponsable)" />
-        @if (mostrarErrores() && errorNombreResponsable) {
-          <p class="text-[#e7000b] text-[11px] mt-1">{{ errorNombreResponsable }}</p>
+          [class.border-[#e7000b]]="errores().nombreResponsable"
+          [class.border-[#d1d5dc]]="!errores().nombreResponsable"
+          [class.focus:border-[#16a34a]]="!errores().nombreResponsable" />
+        @if (errores().nombreResponsable) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().nombreResponsable }}</p>
         }
       </div>
 
@@ -62,11 +62,11 @@
         <input type="number" [ngModel]="kilometraje()" (ngModelChange)="kilometraje.set(+$event || null)" name="kilometraje"
           placeholder="45320" min="1" step="1"
           class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-          [class.border-[#e7000b]]="mostrarErrores() && errorKilometraje"
-          [class.border-[#d1d5dc]]="!(mostrarErrores() && errorKilometraje)"
-          [class.focus:border-[#16a34a]]="!(mostrarErrores() && errorKilometraje)" />
-        @if (mostrarErrores() && errorKilometraje) {
-          <p class="text-[#e7000b] text-[11px] mt-1">{{ errorKilometraje }}</p>
+          [class.border-[#e7000b]]="errores().kilometraje"
+          [class.border-[#d1d5dc]]="!errores().kilometraje"
+          [class.focus:border-[#16a34a]]="!errores().kilometraje" />
+        @if (errores().kilometraje) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().kilometraje }}</p>
         } @else {
           <p class="text-[#6a7282] text-[12px] mt-1">Registre el kilometraje exacto del odómetro</p>
         }
@@ -80,11 +80,11 @@
         <textarea [ngModel]="nota()" (ngModelChange)="nota.set($event)" name="nota" rows="4"
           placeholder="Ej: Cambio de aceite, revisión de frenos, alineación y balanceo completado"
           class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors resize-none"
-          [class.border-[#e7000b]]="mostrarErrores() && errorNota"
-          [class.border-[#d1d5dc]]="!(mostrarErrores() && errorNota)"
-          [class.focus:border-[#16a34a]]="!(mostrarErrores() && errorNota)"></textarea>
-        @if (mostrarErrores() && errorNota) {
-          <p class="text-[#e7000b] text-[11px] mt-1">{{ errorNota }}</p>
+          [class.border-[#e7000b]]="errores().nota"
+          [class.border-[#d1d5dc]]="!errores().nota"
+          [class.focus:border-[#16a34a]]="!errores().nota"></textarea>
+        @if (errores().nota) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().nota }}</p>
         }
       </div>
 

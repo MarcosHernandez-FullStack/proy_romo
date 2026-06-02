@@ -20,14 +20,30 @@
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Zona Horaria</label>
         <input type="text" [ngModel]="zonaHoraria()" (ngModelChange)="zonaHoraria.set($event)" name="zonaHoraria"
           placeholder="America/Lima"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3 text-[15px] font-semibold text-[#101828] placeholder:font-normal placeholder:text-[#9ca3af] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Identificador IANA (ej. America/Lima, America/Bogota)</p>
+          class="w-full border rounded-[10px] px-4 py-3 text-[15px] font-semibold text-[#101828] placeholder:font-normal placeholder:text-[#9ca3af] focus:outline-none"
+          [class.border-[#e7000b]]="errores().zonaHoraria"
+          [class.focus:border-[#e7000b]]="errores().zonaHoraria"
+          [class.border-[#d1d5dc]]="!errores().zonaHoraria"
+          [class.focus:border-[#155dfc]]="!errores().zonaHoraria" />
+        @if (errores().zonaHoraria) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().zonaHoraria }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Identificador IANA (ej. America/Lima, America/Bogota)</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tiempo de Corte (horas)</label>
         <input type="number" [ngModel]="tiempoCorte()" (ngModelChange)="tiempoCorte.set(+$event)" name="tiempoCorte"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Anticipación mínima para realizar una reserva</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().tiempoCorte"
+          [class.focus:border-[#e7000b]]="errores().tiempoCorte"
+          [class.border-[#d1d5dc]]="!errores().tiempoCorte"
+          [class.focus:border-[#155dfc]]="!errores().tiempoCorte" />
+        @if (errores().tiempoCorte) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().tiempoCorte }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Anticipación mínima para realizar una reserva</p>
+        }
       </div>
     </div>
   </div>
@@ -47,20 +63,44 @@
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Timer Administrativo (min)</label>
         <input type="number" [ngModel]="timerAdministrativo()" (ngModelChange)="timerAdministrativo.set(+$event)" name="timerAdministrativo"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo máximo para gestión interna del servicio</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().timerAdministrativo"
+          [class.focus:border-[#e7000b]]="errores().timerAdministrativo"
+          [class.border-[#d1d5dc]]="!errores().timerAdministrativo"
+          [class.focus:border-[#155dfc]]="!errores().timerAdministrativo" />
+        @if (errores().timerAdministrativo) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().timerAdministrativo }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Tiempo máximo para gestión interna del servicio</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Timer Cliente (min)</label>
         <input type="number" [ngModel]="timerCliente()" (ngModelChange)="timerCliente.set(+$event)" name="timerCliente"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo máximo de espera visible para el cliente</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().timerCliente"
+          [class.focus:border-[#e7000b]]="errores().timerCliente"
+          [class.border-[#d1d5dc]]="!errores().timerCliente"
+          [class.focus:border-[#155dfc]]="!errores().timerCliente" />
+        @if (errores().timerCliente) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().timerCliente }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Tiempo máximo de espera visible para el cliente</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tolerancia (min)</label>
         <input type="number" [ngModel]="tiempoTolerancia()" (ngModelChange)="tiempoTolerancia.set(+$event)" name="tiempoTolerancia"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Margen de minutos para redondeo de horarios</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().tiempoTolerancia"
+          [class.focus:border-[#e7000b]]="errores().tiempoTolerancia"
+          [class.border-[#d1d5dc]]="!errores().tiempoTolerancia"
+          [class.focus:border-[#155dfc]]="!errores().tiempoTolerancia" />
+        @if (errores().tiempoTolerancia) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().tiempoTolerancia }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Margen de minutos para redondeo de horarios</p>
+        }
       </div>
     </div>
   </div>
@@ -80,20 +120,44 @@
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Umbral Larga Distancia (km)</label>
         <input type="number" [ngModel]="umbralLargaDistancia()" (ngModelChange)="umbralLargaDistancia.set(+$event)" name="umbralLargaDistancia"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">A partir de este valor se aplica tiempo de retorno</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().umbralLargaDistancia"
+          [class.focus:border-[#e7000b]]="errores().umbralLargaDistancia"
+          [class.border-[#d1d5dc]]="!errores().umbralLargaDistancia"
+          [class.focus:border-[#155dfc]]="!errores().umbralLargaDistancia" />
+        @if (errores().umbralLargaDistancia) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().umbralLargaDistancia }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">A partir de este valor se aplica tiempo de retorno</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Margen de Maniobra (min)</label>
         <input type="number" [ngModel]="tiempoMargenManiobra()" (ngModelChange)="tiempoMargenManiobra.set(+$event)" name="tiempoMargenManiobra"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Minutos adicionales para carga y descarga</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().tiempoMargenManiobra"
+          [class.focus:border-[#e7000b]]="errores().tiempoMargenManiobra"
+          [class.border-[#d1d5dc]]="!errores().tiempoMargenManiobra"
+          [class.focus:border-[#155dfc]]="!errores().tiempoMargenManiobra" />
+        @if (errores().tiempoMargenManiobra) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().tiempoMargenManiobra }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Minutos adicionales para carga y descarga</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Tiempo de Retorno Base (min)</label>
         <input type="number" [ngModel]="tiempoRetornoBase()" (ngModelChange)="tiempoRetornoBase.set(+$event)" name="tiempoRetornoBase"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Minutos de reposicionamiento en viajes cortos</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().tiempoRetornoBase"
+          [class.focus:border-[#e7000b]]="errores().tiempoRetornoBase"
+          [class.border-[#d1d5dc]]="!errores().tiempoRetornoBase"
+          [class.focus:border-[#155dfc]]="!errores().tiempoRetornoBase" />
+        @if (errores().tiempoRetornoBase) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().tiempoRetornoBase }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Minutos de reposicionamiento en viajes cortos</p>
+        }
       </div>
     </div>
   </div>
@@ -113,20 +177,44 @@
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Minutos Cerca</label>
         <input type="number" [ngModel]="minutosCerca()" (ngModelChange)="minutosCerca.set(+$event)" name="minutosCerca"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo para clasificar una grúa como "Cerca"</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().minutosCerca"
+          [class.focus:border-[#e7000b]]="errores().minutosCerca"
+          [class.border-[#d1d5dc]]="!errores().minutosCerca"
+          [class.focus:border-[#155dfc]]="!errores().minutosCerca" />
+        @if (errores().minutosCerca) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().minutosCerca }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Tiempo para clasificar una grúa como "Cerca"</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Minutos Medio</label>
         <input type="number" [ngModel]="minutosMedio()" (ngModelChange)="minutosMedio.set(+$event)" name="minutosMedio"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Tiempo para clasificar una grúa como "Medio"</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().minutosMedio"
+          [class.focus:border-[#e7000b]]="errores().minutosMedio"
+          [class.border-[#d1d5dc]]="!errores().minutosMedio"
+          [class.focus:border-[#155dfc]]="!errores().minutosMedio" />
+        @if (errores().minutosMedio) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().minutosMedio }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Tiempo para clasificar una grúa como "Medio"</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Metros de Cercanía</label>
         <input type="number" [ngModel]="metrosCercania()" (ngModelChange)="metrosCercania.set(+$event)" name="metrosCercania"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Radio en metros de cercanía al punto destino de la grúa</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().metrosCercania"
+          [class.focus:border-[#e7000b]]="errores().metrosCercania"
+          [class.border-[#d1d5dc]]="!errores().metrosCercania"
+          [class.focus:border-[#155dfc]]="!errores().metrosCercania" />
+        @if (errores().metrosCercania) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().metrosCercania }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Radio en metros de cercanía al punto destino de la grúa</p>
+        }
       </div>
     </div>
   </div>
@@ -146,14 +234,30 @@
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Latitud</label>
         <input type="text" [ngModel]="coordLatMaps()" (ngModelChange)="coordLatMaps.set($event)" name="coordLatMaps"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Coordenada de latitud en grados decimales</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().coordLatMaps"
+          [class.focus:border-[#e7000b]]="errores().coordLatMaps"
+          [class.border-[#d1d5dc]]="!errores().coordLatMaps"
+          [class.focus:border-[#155dfc]]="!errores().coordLatMaps" />
+        @if (errores().coordLatMaps) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().coordLatMaps }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Coordenada de latitud en grados decimales</p>
+        }
       </div>
       <div>
         <label class="text-[#364153] text-[13px] font-semibold mb-1.5 block">Longitud</label>
         <input type="text" [ngModel]="coordLonMaps()" (ngModelChange)="coordLonMaps.set($event)" name="coordLonMaps"
-          class="w-full border border-[#d1d5dc] rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none focus:border-[#155dfc]" />
-        <p class="text-[#6a7282] text-[12px] mt-1">Coordenada de longitud en grados decimales</p>
+          class="w-full border rounded-[10px] px-4 py-3.5 text-[18px] font-semibold text-[#101828] focus:outline-none"
+          [class.border-[#e7000b]]="errores().coordLonMaps"
+          [class.focus:border-[#e7000b]]="errores().coordLonMaps"
+          [class.border-[#d1d5dc]]="!errores().coordLonMaps"
+          [class.focus:border-[#155dfc]]="!errores().coordLonMaps" />
+        @if (errores().coordLonMaps) {
+          <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().coordLonMaps }}</p>
+        } @else {
+          <p class="text-[#6a7282] text-[12px] mt-1">Coordenada de longitud en grados decimales</p>
+        }
       </div>
     </div>
   </div>
