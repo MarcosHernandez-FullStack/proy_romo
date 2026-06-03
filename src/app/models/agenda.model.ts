@@ -75,3 +75,12 @@ export interface ErroresExcepcion {
   tiempoFinal?:       string;
 }
 
+export interface ErrorFilaHorario {
+  horaInicio?: string;
+  horaFinal?:  string;
+}
+
+export interface ErroresHorariosRegulares {
+  editados?: ErrorFilaHorario[];
+}
+

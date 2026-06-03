@@ -29,7 +29,7 @@
         <option [ngValue]="0">Seleccionar cliente...</option>
         @for (c of clientes(); track c.id) {
           @if (c.estado === 'ACTIVO') {
-            <option [ngValue]="c.id">{{ c.id }} - {{ c.empresa }} (Base: ${{ c.tarifaBase }} / Km: ${{ c.tarifaKm }})</option>
+            <option [ngValue]="c.id">{{ c.id }} - {{ c.empresa }}</option>
           }
         }
       </select>

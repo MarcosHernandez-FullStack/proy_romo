@@ -57,8 +57,8 @@ export class TarifasComponent implements OnInit {
   protected readonly erroresGlobal = computed<ErroresTarifaGlobal>(() => {
     const e: ErroresTarifaGlobal = {};
     if (!this.intentoGuardarGlobal()) return e;
-    if (this.tarifaBaseGlobal() <= 0) e.tarifaBaseGlobal = 'Debe ser mayor a 0.';
-    if (this.tarifaKmGlobal() <= 0)   e.tarifaKmGlobal   = 'Debe ser mayor a 0.';
+    if (this.tarifaBaseGlobal() < 0.01) e.tarifaBaseGlobal = 'Debe ser mayor a 0.';
+    if (this.tarifaKmGlobal() < 0.01)   e.tarifaKmGlobal   = 'Debe ser mayor a 0.';
     return e;
   });
 

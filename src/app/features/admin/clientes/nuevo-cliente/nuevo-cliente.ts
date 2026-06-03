@@ -59,10 +59,10 @@ export class NuevoClienteComponent {
     if (!this.password().trim()) e.password = 'La contraseña es obligatoria.';
     else if (this.password().length < 8) e.password = 'Mínimo 8 caracteres.';
 
-    if (this.tarifaBase() < 0) e.tarifaBase = 'La tarifa no puede ser negativa.';
+    if (this.tarifaBase() < 0.01) e.tarifaBase = 'La tarifa base debe ser mayor a 0.';
     else if (this.tarifaBase() > 99999999.99) e.tarifaBase = 'Valor fuera de rango.';
 
-    if (this.tarifaKm() < 0) e.tarifaKm = 'La tarifa no puede ser negativa.';
+    if (this.tarifaKm() < 0.01) e.tarifaKm = 'La tarifa por km debe ser mayor a 0.';
     else if (this.tarifaKm() > 99999999.99) e.tarifaKm = 'Valor fuera de rango.';
 
     return e;
