@@ -7,7 +7,7 @@
         <lucide-angular [img]="UserCogIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
           <h2 class="text-white text-[20px] font-bold">Editar Usuario</h2>
-          <p class="text-[#bedbff] text-[13px]">{{ usuario().id }}</p>
+          <p class="text-[#bedbff] text-[13px]">#{{ usuario().id }}</p>
         </div>
       </div>
       <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"

@@ -5,7 +5,7 @@
         <lucide-angular [img]="UserCogIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
           <h2 class="text-white text-[20px] font-bold">Editar Operador</h2>
-          <p class="text-[rgba(255,255,255,0.7)] text-[13px]">{{ operador().id }}</p>
+          <p class="text-[rgba(255,255,255,0.7)] text-[13px]">#{{ operador().id }}</p>
         </div>
       </div>
       <button type="button" (click)="cerrar.emit()" [disabled]="loading()"
