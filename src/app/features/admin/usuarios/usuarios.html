@@ -165,19 +165,19 @@
             <!-- ACCIONES -->
             <div class="flex items-center gap-1">
               @if (u.estado === 'ACTIVO') {
-                <button type="button" (click)="usuarioEditar.set(u)"
-                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
+                <button type="button" (click)="usuarioEditar.set(u)" [disabled]="loadingEstado()"
+                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer disabled:opacity-50"
                   title="Editar">
                   <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
                 </button>
-                <button type="button" (click)="darDeBajaUsuario(u.id)"
-                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+                <button type="button" (click)="onCambiarEstado(u)" [disabled]="loadingEstado()"
+                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer disabled:opacity-50"
                   title="Dar de baja">
                   <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
                 </button>
               } @else {
-                <button type="button" (click)="reactivarUsuario(u.id)"
-                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer"
+                <button type="button" (click)="onCambiarEstado(u)" [disabled]="loadingEstado()"
+                  class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer disabled:opacity-50"
                   title="Reactivar">
                   <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
                 </button>
@@ -247,6 +247,20 @@
     [detalle]="exitoEstado()!.id"
     labelCerrar="Aceptar"
     (cerrar)="exitoEstado.set(null)" />
+}
+
+@if (showConfirmEstado() && usuarioEnConfirmacion()) {
+  <app-mensaje-modal
+    [tipo]="usuarioEnConfirmacion()!.estado === 'ACTIVO' ? 'advertencia' : 'info'"
+    [titulo]="usuarioEnConfirmacion()!.estado === 'ACTIVO' ? 'Desactivar usuario' : 'Reactivar usuario'"
+    [mensaje]="usuarioEnConfirmacion()!.estado === 'ACTIVO'
+      ? '¿Está seguro de que desea desactivar a ' + usuarioEnConfirmacion()!.nombres + ' ' + usuarioEnConfirmacion()!.apellidos + '?\nSu acceso al sistema quedará bloqueado.'
+      : '¿Está seguro de que desea reactivar a ' + usuarioEnConfirmacion()!.nombres + ' ' + usuarioEnConfirmacion()!.apellidos + '?\nRecuperará acceso al sistema.'"
+    [confirmable]="true"
+    labelCancelar="Cancelar"
+    [labelConfirmar]="usuarioEnConfirmacion()!.estado === 'ACTIVO' ? 'Sí, desactivar' : 'Sí, reactivar'"
+    (cerrar)="showConfirmEstado.set(false); usuarioEnConfirmacion.set(null)"
+    (confirmar)="confirmarCambioEstado()" />
 }
 
 @if (errorEstado()) {

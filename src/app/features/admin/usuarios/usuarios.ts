@@ -70,10 +70,13 @@ export class UsuariosComponent implements OnInit {
   protected readonly filtroRol      = signal('');
 
   protected readonly paginaActual   = signal(1);
-  protected readonly showNuevo      = signal(false);
-  protected readonly usuarioEditar  = signal<UsuarioAdmin | null>(null);
-  protected readonly exitoEstado    = signal<{ titulo: string; mensaje: string; id: string } | null>(null);
-  protected readonly errorEstado    = signal<{ titulo: string; mensaje: string } | null>(null);
+  protected readonly showNuevo             = signal(false);
+  protected readonly usuarioEditar         = signal<UsuarioAdmin | null>(null);
+  protected readonly showConfirmEstado     = signal(false);
+  protected readonly usuarioEnConfirmacion = signal<UsuarioAdmin | null>(null);
+  protected readonly loadingEstado         = signal(false);
+  protected readonly exitoEstado           = signal<{ titulo: string; mensaje: string; id: string } | null>(null);
+  protected readonly errorEstado           = signal<{ titulo: string; mensaje: string } | null>(null);
 
   private readonly _idChange$     = new Subject<string>();
   private readonly _nombreChange$ = new Subject<string>();
@@ -196,31 +199,34 @@ export class UsuariosComponent implements OnInit {
     this.cargarUsuarios();
   }
 
-  protected darDeBajaUsuario(id: number): void {
-    this.usuarioSvc.actualizarEstadoUsuario(id, 'INACTIVO').subscribe({
-      next: result => {
-        if (result.exitoso === 1) {
-          this.cargarUsuarios();
-          this.exitoEstado.set({ titulo: '¡Usuario Dado de Baja!', mensaje: result.mensaje, id: String(id) });
-        } else {
-          this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
-        }
-      },
-      error: err => this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' }),
-    });
+  protected onCambiarEstado(u: UsuarioAdmin): void {
+    this.usuarioEnConfirmacion.set(u);
+    this.showConfirmEstado.set(true);
   }
 
-  protected reactivarUsuario(id: number): void {
-    this.usuarioSvc.actualizarEstadoUsuario(id, 'ACTIVO').subscribe({
+  protected confirmarCambioEstado(): void {
+    const u = this.usuarioEnConfirmacion();
+    if (!u) return;
+    this.showConfirmEstado.set(false);
+    this.loadingEstado.set(true);
+    const nuevoEstado = u.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+    this.usuarioSvc.actualizarEstadoUsuario(u.id, nuevoEstado).subscribe({
       next: result => {
+        this.loadingEstado.set(false);
+        this.usuarioEnConfirmacion.set(null);
         if (result.exitoso === 1) {
           this.cargarUsuarios();
-          this.exitoEstado.set({ titulo: '¡Usuario Reactivado!', mensaje: result.mensaje, id: String(id) });
+          const titulo = u.estado === 'ACTIVO' ? '¡Usuario Dado de Baja!' : '¡Usuario Reactivado!';
+          this.exitoEstado.set({ titulo, mensaje: result.mensaje, id: String(u.id) });
         } else {
           this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
         }
       },
-      error: err => this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' }),
+      error: err => {
+        this.loadingEstado.set(false);
+        this.usuarioEnConfirmacion.set(null);
+        this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' });
+      },
     });
   }
 

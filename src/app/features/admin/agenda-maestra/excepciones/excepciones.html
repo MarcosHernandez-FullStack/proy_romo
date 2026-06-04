@@ -88,31 +88,18 @@
 
         <!-- Acciones -->
         <div class="flex items-center justify-end gap-1">
-          @if (eliminandoId() === exc.id) {
-            <!-- Confirmación inline -->
-            <span class="text-[#dc2626] text-[12px] font-medium mr-1 whitespace-nowrap">¿Eliminar?</span>
-            <button type="button" (click)="onConfirmarEliminar(exc.id)" [disabled]="procesandoId() === exc.id"
-              class="size-8 flex items-center justify-center rounded-lg bg-[#fef2f2] hover:bg-[#fee2e2] transition-colors cursor-pointer disabled:opacity-50">
-              @if (procesandoId() === exc.id) {
-                <lucide-angular [img]="LoaderIcon" class="size-4 animate-spin" color="#dc2626" [strokeWidth]="1.5" />
-              } @else {
-                <lucide-angular [img]="CheckIcon" class="size-4" color="#dc2626" [strokeWidth]="2" />
-              }
-            </button>
-            <button type="button" (click)="onCancelarEliminar()" [disabled]="procesandoId() === exc.id"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f1f5f9] transition-colors cursor-pointer disabled:opacity-50">
-              <lucide-angular [img]="XIcon" class="size-4" color="#6a7282" [strokeWidth]="1.5" />
-            </button>
-          } @else {
-            <button type="button" (click)="onEditar(exc)" [disabled]="!!procesandoId()"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer disabled:opacity-40">
-              <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
-            </button>
-            <button type="button" (click)="onEliminar(exc.id)" [disabled]="!!procesandoId()"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer disabled:opacity-40">
+          <button type="button" (click)="onEditar(exc)" [disabled]="desactivandoId() === exc.id"
+            class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer disabled:opacity-40">
+            <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
+          </button>
+          <button type="button" (click)="onDesactivar(exc)" [disabled]="desactivandoId() === exc.id"
+            class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer disabled:opacity-40">
+            @if (desactivandoId() === exc.id) {
+              <lucide-angular [img]="LoaderIcon" class="size-4 animate-spin" color="#dc2626" [strokeWidth]="1.5" />
+            } @else {
               <lucide-angular [img]="TrashIcon" class="size-4" color="#dc2626" [strokeWidth]="1.5" />
-            </button>
-          }
+            }
+          </button>
         </div>
 
       </div>
@@ -176,6 +163,18 @@
     [detalle]="detalleExito()"
     labelCerrar="Aceptar"
     (cerrar)="onCerrarExito()" />
+}
+
+@if (showConfirmDesactivar() && excepcionEnConfirmacion()) {
+  <app-mensaje-modal
+    tipo="advertencia"
+    titulo="Desactivar excepción"
+    [mensaje]="'¿Está seguro de que desea desactivar la excepción del ' + (excepcionEnConfirmacion()!.fechaFormatLarga ?? excepcionEnConfirmacion()!.fechaFormatCorta) + '?\nEsta acción no se puede deshacer.'"
+    [confirmable]="true"
+    labelCancelar="Cancelar"
+    labelConfirmar="Sí, desactivar"
+    (cerrar)="showConfirmDesactivar.set(false); excepcionEnConfirmacion.set(null)"
+    (confirmar)="onConfirmarDesactivar()" />
 }
 
 @if (errorEstado()) {

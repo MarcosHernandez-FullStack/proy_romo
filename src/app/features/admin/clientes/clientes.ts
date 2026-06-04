@@ -70,10 +70,13 @@ export class ClientesComponent implements OnInit {
   protected readonly busquedaContacto = signal('');
   protected readonly paginaActual    = signal(1);
 
-  protected readonly showNuevo     = signal(false);
-  protected readonly clienteEditar = signal<ClienteB2B | null>(null);
-  protected readonly exitoEstado   = signal<{ titulo: string; mensaje: string; id: string } | null>(null);
-  protected readonly errorEstado   = signal<{ titulo: string; mensaje: string } | null>(null);
+  protected readonly showNuevo             = signal(false);
+  protected readonly clienteEditar         = signal<ClienteB2B | null>(null);
+  protected readonly showConfirmEstado     = signal(false);
+  protected readonly clienteEnConfirmacion = signal<ClienteB2B | null>(null);
+  protected readonly loadingEstado         = signal(false);
+  protected readonly exitoEstado           = signal<{ titulo: string; mensaje: string; id: string } | null>(null);
+  protected readonly errorEstado           = signal<{ titulo: string; mensaje: string } | null>(null);
 
   private readonly _idChange$       = new Subject<string>();
   private readonly _empresaChange$  = new Subject<string>();
@@ -184,31 +187,34 @@ export class ClientesComponent implements OnInit {
     this._reload$.next();
   }
 
-  protected darDeBajaCliente(id: number): void {
-    this.clientesSvc.actualizarEstadoCliente(id, 'INACTIVO').subscribe({
-      next: result => {
-        if (result.exitoso === 1) {
-          this.cargarClientes();
-          this.exitoEstado.set({ titulo: '¡Cliente Dado de Baja!', mensaje: result.mensaje, id: String(id) });
-        } else {
-          this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
-        }
-      },
-      error: err => this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' }),
-    });
+  protected onCambiarEstado(c: ClienteB2B): void {
+    this.clienteEnConfirmacion.set(c);
+    this.showConfirmEstado.set(true);
   }
 
-  protected reactivarCliente(id: number): void {
-    this.clientesSvc.actualizarEstadoCliente(id, 'ACTIVO').subscribe({
+  protected confirmarCambioEstado(): void {
+    const c = this.clienteEnConfirmacion();
+    if (!c) return;
+    this.showConfirmEstado.set(false);
+    this.loadingEstado.set(true);
+    const nuevoEstado = c.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+    this.clientesSvc.actualizarEstadoCliente(c.id, nuevoEstado).subscribe({
       next: result => {
+        this.loadingEstado.set(false);
+        this.clienteEnConfirmacion.set(null);
         if (result.exitoso === 1) {
           this.cargarClientes();
-          this.exitoEstado.set({ titulo: '¡Cliente Reactivado!', mensaje: result.mensaje, id: String(id) });
+          const titulo = c.estado === 'ACTIVO' ? '¡Cliente Dado de Baja!' : '¡Cliente Reactivado!';
+          this.exitoEstado.set({ titulo, mensaje: result.mensaje, id: String(c.id) });
         } else {
           this.errorEstado.set({ titulo: 'No se pudo actualizar el estado', mensaje: result.mensaje });
         }
       },
-      error: err => this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' }),
+      error: err => {
+        this.loadingEstado.set(false);
+        this.clienteEnConfirmacion.set(null);
+        this.errorEstado.set({ titulo: 'Error', mensaje: err.error?.mensaje ?? 'No se pudo conectar con el servidor. Intente nuevamente.' });
+      },
     });
   }
 }

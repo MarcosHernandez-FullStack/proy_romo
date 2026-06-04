@@ -431,7 +431,7 @@ export class NuevaReservaComponent implements OnInit {
         this.guardandoConfirmacion.set(false);
         if (result.exitoso === 1) {
           this.showConfirm.set(false);
-          this.servicioCreado.set(`SRV-${result.id ?? ''}`);
+          this.servicioCreado.set(`${result.id ?? ''}`);
           this.mensajeExito.set(result.mensaje);
           this.showSuccess.set(true);
         } else {

@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, catchError, debounceTime, distinctUntilChanged, merge, switchMap, tap } from 'rxjs';
-import { LucideAngularModule, AlertTriangle, Plus, Pencil, Trash2, Check, X, Loader, Search, ChevronLeft, ChevronRight } from 'lucide-angular';
+import { LucideAngularModule, AlertTriangle, Plus, Pencil, Trash2, Loader, Search, ChevronLeft, ChevronRight } from 'lucide-angular';
 import { ExcepcionAgenda } from '../../../../models/agenda.model';
 import { AgendaService } from '../../../../core/services/agenda.service';
 import { NuevaExcepcionComponent } from './nueva-excepcion/nueva-excepcion';
@@ -24,8 +24,6 @@ export class ExcepcionesComponent implements OnInit {
   protected readonly PlusIcon          = Plus;
   protected readonly PencilIcon        = Pencil;
   protected readonly TrashIcon         = Trash2;
-  protected readonly CheckIcon         = Check;
-  protected readonly XIcon             = X;
   protected readonly LoaderIcon        = Loader;
   protected readonly SearchIcon        = Search;
   protected readonly ChevronLeftIcon   = ChevronLeft;
@@ -46,8 +44,9 @@ export class ExcepcionesComponent implements OnInit {
   protected readonly showNuevaExcepcion  = signal(false);
   protected readonly showEditarExcepcion = signal(false);
   protected readonly excepcionEditando   = signal<ExcepcionAgenda | null>(null);
-  protected readonly eliminandoId        = signal<number | null>(null);
-  protected readonly procesandoId        = signal<number | null>(null);
+  protected readonly showConfirmDesactivar   = signal(false);
+  protected readonly excepcionEnConfirmacion = signal<ExcepcionAgenda | null>(null);
+  protected readonly desactivandoId         = signal<number | null>(null);
   protected readonly showExito           = signal(false);
   protected readonly tituloExito         = signal('');
   protected readonly mensajeExito        = signal('');
@@ -136,35 +135,35 @@ export class ExcepcionesComponent implements OnInit {
     this.cargarExcepciones();
   }
 
-  protected onEliminar(id: number): void {
-    this.eliminandoId.set(id);
+  protected onDesactivar(exc: ExcepcionAgenda): void {
+    this.excepcionEnConfirmacion.set(exc);
+    this.showConfirmDesactivar.set(true);
   }
 
-  protected onCancelarEliminar(): void {
-    this.eliminandoId.set(null);
-  }
-
-  protected onConfirmarEliminar(id: number): void {
-    this.procesandoId.set(id);
-    this.agendaSvc.updEstadoExcepcion(id, 'INACTIVO').subscribe({
+  protected onConfirmarDesactivar(): void {
+    const exc = this.excepcionEnConfirmacion();
+    if (!exc) return;
+    this.showConfirmDesactivar.set(false);
+    this.desactivandoId.set(exc.id);
+    this.agendaSvc.updEstadoExcepcion(exc.id, 'INACTIVO').subscribe({
       next: (res) => {
-        this.procesandoId.set(null);
-        this.eliminandoId.set(null);
+        this.desactivandoId.set(null);
+        this.excepcionEnConfirmacion.set(null);
         if (res.exitoso === 1) {
           this.tituloExito.set('¡Excepción Dada de Baja!');
           this.mensajeExito.set(res.mensaje);
-          this.detalleExito.set(String(id));
+          this.detalleExito.set(String(exc.id));
           this.showExito.set(true);
         } else if (res.exitoso === 2) {
           this.errorEstado.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: res.mensaje });
         } else {
-          this.errorEstado.set({ tipo: 'error', titulo: 'Error al dar de baja', mensaje: res.mensaje });
+          this.errorEstado.set({ tipo: 'error', titulo: 'Error al desactivar', mensaje: res.mensaje });
         }
       },
       error: (err: any) => {
-        this.procesandoId.set(null);
-        this.eliminandoId.set(null);
-        this.errorEstado.set({ tipo: 'error', titulo: 'Error al dar de baja', mensaje: err.error?.mensaje ?? 'Error al eliminar la excepción. Intente nuevamente.' });
+        this.desactivandoId.set(null);
+        this.excepcionEnConfirmacion.set(null);
+        this.errorEstado.set({ tipo: 'error', titulo: 'Error al desactivar', mensaje: err.error?.mensaje ?? 'Error al desactivar la excepción. Intente nuevamente.' });
       },
     });
   }

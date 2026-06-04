@@ -74,8 +74,10 @@ export class FlotaComponent implements OnInit {
   protected readonly unidadDetalle  = signal<UnidadFlota | null>(null);
   protected readonly unidadLiberar  = signal<UnidadFlota | null>(null);
   protected readonly unidadRetorno  = signal<UnidadFlota | null>(null);
-  protected readonly guardando    = signal(false);
-  protected readonly errorEstado  = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
+  protected readonly showConfirmEstado    = signal(false);
+  protected readonly unidadEnConfirmacion = signal<UnidadFlota | null>(null);
+  protected readonly loadingEstado        = signal(false);
+  protected readonly errorEstado          = signal<{ tipo: 'error' | 'advertencia'; titulo: string; mensaje: string } | null>(null);
 
   protected readonly exitoBaja      = signal<string | null>(null);
   protected readonly exitoReactivar = signal<string | null>(null);
@@ -217,42 +219,41 @@ export class FlotaComponent implements OnInit {
     this.exitoRetorno.set(String(u.id));
   }
 
-  protected darDeBaja(id: number): void {
-    this.guardando.set(true);
-    this.errorEstado.set(null);
-    this.flotaSvc.actualizarEstadoGrua(id, 'INACTIVO').subscribe({
-      next: result => {
-        this.guardando.set(false);
-        if (result.exitoso === 1) {
-          this.cargarFlota();
-          this.exitoBaja.set(String(id));
-        } else if (result.exitoso === 2) {
-          this.errorEstado.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: result.mensaje });
-        } else {
-          this.errorEstado.set({ tipo: 'error', titulo: 'Error al Dar de Baja', mensaje: result.mensaje });
-        }
-      },
-      error: err => {
-        this.guardando.set(false);
-        this.errorEstado.set({ tipo: 'error', titulo: 'Error al Dar de Baja', mensaje: err.error?.mensaje ?? 'Error inesperado. Intente nuevamente.' });
-      },
-    });
+  protected onCambiarEstado(u: UnidadFlota): void {
+    this.unidadEnConfirmacion.set(u);
+    this.showConfirmEstado.set(true);
   }
 
-  protected reactivar(id: number): void {
-    this.flotaSvc.actualizarEstadoGrua(id, 'ACTIVO').subscribe({
+  protected confirmarCambioEstado(): void {
+    const u = this.unidadEnConfirmacion();
+    if (!u) return;
+    this.showConfirmEstado.set(false);
+    this.loadingEstado.set(true);
+    this.errorEstado.set(null);
+    const nuevoEstado = u.estado === 'INACTIVO' ? 'ACTIVO' : 'INACTIVO';
+    this.flotaSvc.actualizarEstadoGrua(u.id, nuevoEstado).subscribe({
       next: result => {
+        this.loadingEstado.set(false);
+        this.unidadEnConfirmacion.set(null);
         if (result.exitoso === 1) {
           this.cargarFlota();
-          this.exitoReactivar.set(String(id));
+          if (nuevoEstado === 'INACTIVO') {
+            this.exitoBaja.set(String(u.id));
+          } else {
+            this.exitoReactivar.set(String(u.id));
+          }
         } else if (result.exitoso === 2) {
           this.errorEstado.set({ tipo: 'advertencia', titulo: 'Tiempo de espera agotado', mensaje: result.mensaje });
         } else {
-          this.errorEstado.set({ tipo: 'error', titulo: 'Error al Reactivar', mensaje: result.mensaje });
+          const titulo = nuevoEstado === 'INACTIVO' ? 'Error al Dar de Baja' : 'Error al Reactivar';
+          this.errorEstado.set({ tipo: 'error', titulo, mensaje: result.mensaje });
         }
       },
       error: err => {
-        this.errorEstado.set({ tipo: 'error', titulo: 'Error al Reactivar', mensaje: err.error?.mensaje ?? 'Error inesperado. Intente nuevamente.' });
+        this.loadingEstado.set(false);
+        this.unidadEnConfirmacion.set(null);
+        const titulo = nuevoEstado === 'INACTIVO' ? 'Error al Dar de Baja' : 'Error al Reactivar';
+        this.errorEstado.set({ tipo: 'error', titulo, mensaje: err.error?.mensaje ?? 'Error inesperado. Intente nuevamente.' });
       },
     });
   }

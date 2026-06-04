@@ -39,7 +39,7 @@ export class LoginAdminComponent {
           this.error.set('Acceso solo para administradores.');
           return;
         }
-        this.router.navigate(['/admin/dashboard']);
+        this.router.navigate(['/admin/agenda-maestra']);
       },
       error: (err) => {
         this.loading.set(false);

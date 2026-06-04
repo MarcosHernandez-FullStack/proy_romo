@@ -214,26 +214,26 @@
         <!-- ACCIONES -->
         <div class="flex items-center gap-1">
           @if (u.estado !== 'INACTIVO') {
-            <button type="button" (click)="unidadEditar.set(u)"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer"
+            <button type="button" (click)="unidadEditar.set(u)" [disabled]="loadingEstado()"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#eff6ff] transition-colors cursor-pointer disabled:opacity-50"
               title="Editar">
               <lucide-angular [img]="PencilIcon" class="size-4" color="#155dfc" [strokeWidth]="1.5" />
             </button>
           }
-          <button type="button" (click)="unidadDetalle.set(u)"
-            class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+          <button type="button" (click)="unidadDetalle.set(u)" [disabled]="loadingEstado()"
+            class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer disabled:opacity-50"
             title="Ver detalle">
             <lucide-angular [img]="FileTextIcon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
           </button>
           @if (u.estado !== 'INACTIVO') {
-            <button type="button" (click)="darDeBaja(u.id)"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer"
+            <button type="button" (click)="onCambiarEstado(u)" [disabled]="loadingEstado()"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#fef2f2] transition-colors cursor-pointer disabled:opacity-50"
               title="Dar de baja">
               <lucide-angular [img]="Trash2Icon" class="size-4" color="#e7000b" [strokeWidth]="1.5" />
             </button>
           } @else {
-            <button type="button" (click)="reactivar(u.id)"
-              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer"
+            <button type="button" (click)="onCambiarEstado(u)" [disabled]="loadingEstado()"
+              class="size-8 flex items-center justify-center rounded-lg hover:bg-[#f0fdf4] transition-colors cursor-pointer disabled:opacity-50"
               title="Reactivar">
               <lucide-angular [img]="RotateCcwIcon" class="size-4" color="#008236" [strokeWidth]="1.5" />
             </button>
@@ -349,6 +349,20 @@
     [detalle]="exitoRetorno()!"
     labelCerrar="Aceptar"
     (cerrar)="exitoRetorno.set(null)" />
+}
+
+@if (showConfirmEstado() && unidadEnConfirmacion()) {
+  <app-mensaje-modal
+    [tipo]="unidadEnConfirmacion()!.estado !== 'INACTIVO' ? 'advertencia' : 'info'"
+    [titulo]="unidadEnConfirmacion()!.estado !== 'INACTIVO' ? 'Desactivar unidad' : 'Reactivar unidad'"
+    [mensaje]="unidadEnConfirmacion()!.estado !== 'INACTIVO'
+      ? '¿Está seguro de que desea desactivar la unidad ' + unidadEnConfirmacion()!.placa + '?\nSerá retirada de la flota operativa.'
+      : '¿Está seguro de que desea reactivar la unidad ' + unidadEnConfirmacion()!.placa + '?\nRetornará a la flota operativa.'"
+    [confirmable]="true"
+    labelCancelar="Cancelar"
+    [labelConfirmar]="unidadEnConfirmacion()!.estado !== 'INACTIVO' ? 'Sí, desactivar' : 'Sí, reactivar'"
+    (cerrar)="showConfirmEstado.set(false); unidadEnConfirmacion.set(null)"
+    (confirmar)="confirmarCambioEstado()" />
 }
 
 @if (errorEstado()) {
