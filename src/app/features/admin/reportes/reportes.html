@@ -6,10 +6,14 @@
       <h1 class="text-[#101828] text-[30px] font-bold">Reportes de Cobranzas</h1>
       <p class="text-[#4a5565] text-[14px] mt-0.5">Gestión administrativa de servicios finalizados y cancelados</p>
     </div>
-    <button type="button"
-      class="flex items-center gap-2 bg-[#155dfc] text-white text-[14px] font-semibold rounded-[10px] px-4 h-10 hover:bg-[#1447e6] transition-colors cursor-pointer">
-      <lucide-angular [img]="DownloadIcon" class="size-4" color="white" [strokeWidth]="1.5" />
-      Exportar Excel
+    <button type="button" (click)="onExportarExcel()" [disabled]="exportando()"
+      class="flex items-center gap-2 bg-[#155dfc] text-white text-[14px] font-semibold rounded-[10px] px-4 h-10 hover:bg-[#1447e6] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+      @if (exportando()) {
+        <div class="size-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+      } @else {
+        <lucide-angular [img]="DownloadIcon" class="size-4" color="white" [strokeWidth]="1.5" />
+      }
+      {{ exportando() ? 'Exportando...' : 'Exportar Excel' }}
     </button>
   </div>
 

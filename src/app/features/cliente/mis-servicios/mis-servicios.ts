@@ -1,4 +1,5 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import ExcelJS from 'exceljs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, merge } from 'rxjs';
@@ -78,6 +79,8 @@ export class MisServiciosComponent implements OnInit {
     const fin    = Math.min(total, actual + 2);
     return Array.from({ length: fin - inicio + 1 }, (_, i) => inicio + i);
   };
+
+  protected readonly exportando = signal(false);
 
   // ── Detalle modal ──────────────────────────────────────────
   protected readonly detalle        = signal<DetalleServicio | null>(null);
@@ -214,5 +217,172 @@ export class MisServiciosComponent implements OnInit {
 
   protected formatCosto(n: number): string {
     return '$' + n.toLocaleString('es-AR');
+  }
+
+  protected onExportarExcel(): void {
+    if (this.exportando()) return;
+    this.exportando.set(true);
+    const idStr = this.filtroId().trim();
+    const op    = this.filtroOp();
+    const adm   = this.filtroAdmin();
+    this.reservasSvc.getServicios({
+      id:                   idStr ? Number(idStr) : undefined,
+      estadoOperacion:      op  !== 'TODOS' ? op  : undefined,
+      estadoAdministrativo: adm !== 'TODOS' ? adm : undefined,
+      fechaInicio:          this.fechaDesde()             || undefined,
+      fechaFin:             this.fechaHasta()             || undefined,
+      direccion:            this.filtroDireccion().trim() || undefined,
+    }).subscribe({
+      next:  data => this.generarExcel(data).finally(() => this.exportando.set(false)),
+      error: ()   => this.exportando.set(false),
+    });
+  }
+
+  private async generarExcel(data: ReservaPagedDto): Promise<void> {
+    const { datos, total, totalAsignado, totalEnCurso, montoPendiente, montoLiquidado } = data;
+
+    const wb   = new ExcelJS.Workbook();
+    wb.creator = 'ROMO Sistema';
+    wb.created = new Date();
+
+    const ws = wb.addWorksheet('Mis Servicios');
+
+    // ── Fila 1: Título ─────────────────────────────────────────────
+    ws.mergeCells(1, 1, 1, 13);
+    const celdaTitulo     = ws.getCell('A1');
+    const fechaHoy        = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    celdaTitulo.value     = `Mis Servicios — ROMO | Generado: ${fechaHoy}`;
+    celdaTitulo.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 13 };
+    celdaTitulo.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00A63E' } };
+    celdaTitulo.alignment = { horizontal: 'center', vertical: 'middle' };
+    ws.getRow(1).height   = 28;
+
+    // ── Filas 2-4: KPIs ────────────────────────────────────────────
+    const setKpi = (
+      labelRow: number, valueRow: number, descRow: number,
+      c1: number, c2: number,
+      label: string, value: string | number, desc: string,
+      bg: string, fg: string
+    ) => {
+      ws.mergeCells(labelRow, c1, labelRow, c2);
+      ws.mergeCells(valueRow, c1, valueRow, c2);
+      ws.mergeCells(descRow,  c1, descRow,  c2);
+
+      const lc     = ws.getCell(labelRow, c1);
+      lc.value     = label;
+      lc.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+      lc.font      = { size: 9, color: { argb: fg } };
+      lc.alignment = { horizontal: 'center', vertical: 'bottom' };
+
+      const vc     = ws.getCell(valueRow, c1);
+      vc.value     = value;
+      vc.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+      vc.font      = { size: 18, bold: true, color: { argb: fg } };
+      vc.alignment = { horizontal: 'center', vertical: 'middle' };
+
+      const dc     = ws.getCell(descRow, c1);
+      dc.value     = desc;
+      dc.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+      dc.font      = { size: 8, italic: true, color: { argb: fg } };
+      dc.alignment = { horizontal: 'center', vertical: 'top' };
+    };
+
+    const montoStr = (n: number) => '$' + n.toLocaleString('es-AR');
+
+    setKpi(2, 3, 4, 1,  3,  'Total Servicios', total,                        'Servicios registrados', 'FFEFF6FF', 'FF155DFC');
+    setKpi(2, 3, 4, 4,  6,  'En Operación',    totalAsignado + totalEnCurso, 'Asignados + En Curso',  'FFEFF6FF', 'FF1447E6');
+    setKpi(2, 3, 4, 7,  9,  'Monto Pendiente', montoStr(montoPendiente),     'Pendiente + Facturado', 'FFFFFBEB', 'FFBB4D00');
+    setKpi(2, 3, 4, 10, 13, 'Liquidado',       montoStr(montoLiquidado),     'Servicios pagados',     'FFF0FDF4', 'FF008236');
+    ws.getRow(2).height = 16;
+    ws.getRow(3).height = 36;
+    ws.getRow(4).height = 16;
+
+    ws.getRow(5).height = 8;
+
+    // ── Fila 6: Encabezados tabla ──────────────────────────────────
+    const filaHeaders = ws.addRow([
+      'ID', 'Fecha', 'Hora Inicio', 'Hora Fin', 'Origen', 'Destino',
+      'Distancia (km)', 'Vehículos', 'Monto (USD)',
+      'Grúa', 'Operador', 'Est. Operativo', 'Est. Administrativo',
+    ]);
+    filaHeaders.eachCell(c => {
+      c.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+      c.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+      c.alignment = { horizontal: 'center', vertical: 'middle' };
+      c.border    = { bottom: { style: 'thin', color: { argb: 'FF93C5FD' } } };
+    });
+    ws.getRow(6).height = 22;
+
+    // ── Filas 7+: Datos ────────────────────────────────────────────
+    datos.forEach((s, i) => {
+      const fila  = ws.addRow([
+        s.id,
+        s.fechaServicio        || null,
+        s.horaInicio           || null,
+        s.horaFin              || null,
+        s.direccionOrigen      || null,
+        s.direccionDestino     || null,
+        s.distanciaKm,
+        s.cantidadVehiculos,
+        s.costo,
+        s.gruaAsignada         || null,
+        s.operadorAsignado     || null,
+        s.estadoOperacion      || null,
+        s.estadoAdministrativo || null,
+      ]);
+      const bgArgb = i % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
+      fila.eachCell(c => {
+        c.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgArgb } };
+        c.font      = { size: 10, color: { argb: 'FF101828' } };
+        c.alignment = { vertical: 'middle' };
+      });
+      fila.getCell(9).numFmt = '#,##0.00';
+      this.colorEstadoOpExcel(fila.getCell(12), s.estadoOperacion);
+      this.colorEstadoAdmExcel(fila.getCell(13), s.estadoAdministrativo);
+      fila.height = 20;
+    });
+
+    // ── Anchos de columna ──────────────────────────────────────────
+    const anchos = [8, 12, 11, 11, 35, 35, 14, 10, 12, 25, 25, 16, 20];
+    anchos.forEach((w, idx) => { ws.getColumn(idx + 1).width = w; });
+
+    // ── Descargar ──────────────────────────────────────────────────
+    const fecha  = new Date().toISOString().split('T')[0];
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    a.href       = url;
+    a.download   = `mis_servicios_${fecha}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private colorEstadoOpExcel(cell: ExcelJS.Cell, estado: string): void {
+    const estilos: Record<string, { bg: string; text: string }> = {
+      FINALIZADO: { bg: 'FFF0FDF4', text: 'FF008236' },
+      ENCURSO:    { bg: 'FFFFF7ED', text: 'FFCA3500' },
+      ASIGNADO:   { bg: 'FFEFF6FF', text: 'FF1447E6' },
+      RESERVADO:  { bg: 'FFFFFBEB', text: 'FFBB4D00' },
+      CANCELADO:  { bg: 'FFFEF2F2', text: 'FFC10007' },
+    };
+    const e = estilos[estado];
+    if (!e) return;
+    cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: e.bg } };
+    cell.font      = { size: 10, bold: true, color: { argb: e.text } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  }
+
+  private colorEstadoAdmExcel(cell: ExcelJS.Cell, estado: string): void {
+    const estilos: Record<string, { bg: string; text: string }> = {
+      PAGADO:    { bg: 'FFF0FDF4', text: 'FF008236' },
+      FACTURADO: { bg: 'FFEFF6FF', text: 'FF1447E6' },
+      PENDIENTE: { bg: 'FFFFFBEB', text: 'FFBB4D00' },
+    };
+    const e = estilos[estado];
+    if (!e) return;
+    cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: e.bg } };
+    cell.font      = { size: 10, bold: true, color: { argb: e.text } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
   }
 }
