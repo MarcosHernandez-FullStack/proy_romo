@@ -34,15 +34,10 @@
               {{ placa().length }}/10
             </span>
           </div>
-          <input type="text" [ngModel]="placa()" (ngModelChange)="placa.set($event)" name="placa"
+          <input type="text" [ngModel]="placa()" (ngModelChange)="placa.set($event)" name="placa" disabled
             maxlength="10"
-            class="w-full border rounded-[10px] px-3 py-2.5 text-[14px] text-[#101828] focus:outline-none transition-colors"
-            [class.border-[#e7000b]]="errores().placa"
-            [class.border-[#d1d5dc]]="!errores().placa"
-            [class.focus:border-[#155dfc]]="!errores().placa" />
-          @if (errores().placa) {
-            <p class="text-[#e7000b] text-[11px] mt-1">{{ errores().placa }}</p>
-          }
+            class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#6a7282] bg-[#f9fafb] cursor-not-allowed"/>
+            <p class="text-[#9ca3af] text-[12px] mt-1">La placa no puede modificarse.</p>
         </div>
         <div>
           <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Año *</label>

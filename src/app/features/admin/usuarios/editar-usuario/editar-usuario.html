@@ -7,7 +7,7 @@
         <lucide-angular [img]="UserCogIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
           <h2 class="text-white text-[20px] font-bold">Editar Usuario</h2>
-          <p class="text-[#bedbff] text-[13px]">#{{ usuario().id }}</p>
+          <p class="text-[#bedbff] text-[13px]">Usuario con Id #{{ usuario().id }}</p>
         </div>
       </div>
       <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"
@@ -158,14 +158,14 @@
               <option [value]="r">{{ r }}</option>
             }
           </select>
-          <div class="mt-2.5 flex flex-col gap-1">
+          <!-- <div class="mt-2.5 flex flex-col gap-1">
             <p class="text-[#364153] text-[12px]">
               <strong class="text-[#101828]">Administrador:</strong> Acceso total al sistema, gestión de usuarios y configuración
             </p>
             <p class="text-[#364153] text-[12px]">
               <strong class="text-[#101828]">Staff:</strong> Acceso a operaciones, reservas, clientes y reportes
             </p>
-          </div>
+          </div> -->
         </div>
       </div>
 
@@ -178,7 +178,7 @@
       </button>
       <button type="button" (click)="onGuardar()" [disabled]="guardando()"
         class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
-        @if (guardando()) { Actualizando... } @else { Actualizar Usuario }
+        @if (guardando()) { Guardando... } @else { Guardar Cambios }
       </button>
     </div>
   </div>

@@ -5,7 +5,7 @@
         <lucide-angular [img]="UserCogIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
           <h2 class="text-white text-[20px] font-bold">Editar Operador</h2>
-          <p class="text-[rgba(255,255,255,0.7)] text-[13px]">#{{ operador().id }}</p>
+          <p class="text-[rgba(255,255,255,0.7)] text-[13px]">Operador con Id #{{ operador().id }}</p>
         </div>
       </div>
       <button type="button" (click)="cerrar.emit()" [disabled]="loading()"
@@ -29,7 +29,7 @@
 
           <!-- Login (read-only) -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">ID de Usuario (Login)</label>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Alias</label>
             <input type="text" [value]="operador().alias" disabled
               class="w-full border border-[#e5e7eb] rounded-[10px] px-3 py-2.5 text-[14px] text-[#9ca3af] bg-[#f9fafb] cursor-not-allowed" />
             <p class="text-[11px] text-[#9ca3af] mt-1">El alias no puede modificarse.</p>

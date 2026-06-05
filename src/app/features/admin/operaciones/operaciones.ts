@@ -28,7 +28,7 @@ import { CancelarServicioComponent } from './cancelar-servicio/cancelar-servicio
 import { ReprogramarServicioComponent } from './reprogramar-servicio/reprogramar-servicio';
 import { ExitoModalComponent } from '../../../shared/components/exito-modal/exito-modal';
 
-type FiltroTab = 'TODOS' | 'RESERVADO' | 'ASIGNADO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELADO';
+type FiltroTab = 'TODOS' | 'RESERVADO' | 'ASIGNADO' | 'ENCURSO' | 'FINALIZADO' | 'CANCELADO';
 
 @Component({
   selector: 'app-operaciones',
@@ -83,12 +83,12 @@ export class OperacionesComponent implements OnInit {
   protected readonly nombreOperador   = signal('');
   protected readonly placaGrua        = signal('');
 
-  protected readonly filtroTabs: FiltroTab[] = ['TODOS', 'RESERVADO', 'ASIGNADO', 'EN_CURSO', 'FINALIZADO', 'CANCELADO'];
+  protected readonly filtroTabs: FiltroTab[] = ['TODOS', 'RESERVADO', 'ASIGNADO', 'ENCURSO', 'FINALIZADO', 'CANCELADO'];
   protected readonly tabLabel: Record<FiltroTab, string> = {
     TODOS:      'Todos',
     RESERVADO:  'Reservado',
     ASIGNADO:   'Asignado',
-    EN_CURSO:   'En Curso',
+    ENCURSO:   'En Curso',
     FINALIZADO: 'Finalizado',
     CANCELADO:  'Cancelado',
   };
@@ -238,7 +238,7 @@ export class OperacionesComponent implements OnInit {
   }
 
   protected soloDetalle(r: ReservaOperacion): boolean {
-    if (r.estadoOperacion === 'EN_CURSO')   return true;
+    if (r.estadoOperacion === 'ENCURSO')   return true;
     if (r.estadoOperacion === 'FINALIZADO') return true;
     if (r.estadoOperacion === 'CANCELADO')  return true;
 
@@ -312,7 +312,7 @@ export class OperacionesComponent implements OnInit {
     switch (estado) {
       case 'RESERVADO':  return 'bg-[#fffbeb] text-[#bb4d00] border border-[#ffd230]';
       case 'ASIGNADO':   return 'bg-[#eff6ff] text-[#1447e6] border border-[#bedbff]';
-      case 'EN_CURSO':   return 'bg-[#fff7ed] text-[#ca3500] border border-[#fdba74]';
+      case 'ENCURSO':   return 'bg-[#fff7ed] text-[#ca3500] border border-[#fdba74]';
       case 'FINALIZADO': return 'bg-[#f0fdf4] text-[#008236] border border-[#b9f8cf]';
       case 'CANCELADO':  return 'bg-[#fef2f2] text-[#c10007] border border-[#fca5a5]';
       default:           return 'bg-[#f9fafb] text-[#6a7282] border border-[#e5e7eb]';
@@ -321,7 +321,7 @@ export class OperacionesComponent implements OnInit {
 
   protected estadoLabel(estado: string): string {
     const labels: Record<string, string> = {
-      RESERVADO: 'Reservado', ASIGNADO: 'Asignado', EN_CURSO: 'En Curso',
+      RESERVADO: 'Reservado', ASIGNADO: 'Asignado', ENCURSO: 'En Curso',
       FINALIZADO: 'Finalizado', CANCELADO: 'Cancelado',
     };
     return labels[estado] ?? estado;

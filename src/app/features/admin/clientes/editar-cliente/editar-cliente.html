@@ -5,7 +5,7 @@
         <lucide-angular [img]="UsersIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
           <h2 class="text-white text-[20px] font-bold">Editar Cliente B2B</h2>
-          <p class="text-[#bedbff] text-[13px]">#{{ cliente().id }}</p>
+          <p class="text-[#bedbff] text-[13px]">Cliente con Id #{{ cliente().id }}</p>
         </div>
       </div>
       <button type="button" (click)="cerrar.emit()" [disabled]="guardando()"
@@ -125,12 +125,12 @@
       <!-- CREDENCIALES DE ACCESO -->
       <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[12px] p-4">
         <p class="text-[#bb4d00] text-[11px] font-bold uppercase tracking-wider mb-1">Credenciales de Acceso</p>
-        <p class="text-[#e17100] text-[12px] mb-3">Contraseña de acceso al portal del cliente</p>
+        <p class="text-[#e17100] text-[12px] mb-3">Cada usuario debe contar con un alias y correo único e irrepetible</p>
         <div class="flex flex-col gap-3">
 
           <!-- Login (read-only) -->
           <div>
-            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">ID de Usuario (Login)</label>
+            <label class="text-[#364153] text-[13px] font-medium mb-1.5 block">Alias</label>
             <input type="text" [ngModel]="loginId()" name="loginId" disabled
               class="w-full border border-[#d1d5dc] rounded-[10px] px-3 py-2.5 text-[14px] text-[#6a7282] bg-[#f9fafb] cursor-not-allowed" />
             <p class="text-[#9ca3af] text-[12px] mt-1">El alias no puede modificarse.</p>
@@ -174,7 +174,6 @@
       <!-- TARIFARIO PERSONALIZADO -->
       <div class="bg-[#f0fdf4] border border-[#7bf1a8] rounded-[12px] p-4">
         <p class="text-[#008236] text-[11px] font-bold uppercase tracking-wider mb-1">Tarifario Personalizado</p>
-        <p class="text-[#00a63e] text-[12px] mb-3">Si queda en 0, se usarán los valores globales del sistema</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
           <!-- Tarifa Base -->
@@ -216,7 +215,7 @@
       </button>
       <button type="button" (click)="onGuardar()" [disabled]="guardando()"
         class="flex-1 bg-[#155dfc] hover:bg-[#1447e6] disabled:opacity-50 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-[10px] h-10 transition-colors cursor-pointer">
-        @if (guardando()) { Guardando... } @else { Actualizar Cliente }
+        @if (guardando()) { Guardando... } @else { Guardar Cambios }
       </button>
     </div>
   </div>

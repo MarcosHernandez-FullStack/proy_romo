@@ -94,7 +94,7 @@ export class LiberarServicioComponent implements OnInit {
     switch (estadoOperacion) {
       case 'RESERVADO': return 'border-[#fcd34d] text-[#b45309] bg-[#fffbeb]';
       case 'ASIGNADO':  return 'border-[#fed7aa] text-[#c2410c] bg-[#fff7ed]';
-      case 'EN_CURSO':  return 'border-[#93c5fd] text-[#1d4ed8] bg-[#eff6ff]';
+      case 'ENCURSO':  return 'border-[#93c5fd] text-[#1d4ed8] bg-[#eff6ff]';
       default:          return 'border-[#d1d5dc] text-[#4a5565] bg-[#f9fafb]';
     }
   }

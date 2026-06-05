@@ -7,7 +7,7 @@
         <lucide-angular [img]="CalendarIcon" class="size-5" color="white" [strokeWidth]="1.5" />
         <div>
           <h2 class="text-white text-[20px] font-bold">Gestión de Itinerario</h2>
-          <p class="text-[#9ca3af] text-[13px]">Servicio #{{ reserva().id }} &mdash; {{ reserva().direccionOrigen }}</p>
+          <p class="text-[#9ca3af] text-[13px]">Servicio #{{ reserva().id }}</p>
         </div>
       </div>
     </div>
@@ -195,7 +195,7 @@
           Guardando...
         } @else {
           <lucide-angular [img]="CheckCircle2Icon" class="size-4" color="white" [strokeWidth]="1.5" />
-          Confirmar Reprogramación
+          Guardar Reprogramación
         }
       </button>
     </div>

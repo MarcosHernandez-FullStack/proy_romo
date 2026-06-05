@@ -130,13 +130,13 @@
       <!-- CREDENCIALES DE ACCESO -->
       <div class="bg-[#fffbeb] border border-[#ffd230] rounded-[12px] p-4">
         <p class="text-[#bb4d00] text-[11px] font-bold uppercase tracking-wider mb-1">Credenciales de Acceso</p>
-        <p class="text-[#e17100] text-[12px] mb-3">Solo el administrador puede modificar las credenciales del cliente</p>
+        <p class="text-[#e17100] text-[12px] mb-3">Cada usuario debe contar con un alias y correo único e irrepetible</p>
         <div class="flex flex-col gap-3">
 
           <!-- Login ID -->
           <div>
             <div class="flex justify-between items-center mb-1.5">
-              <label class="text-[#364153] text-[13px] font-medium">ID de Usuario (Login) *</label>
+              <label class="text-[#364153] text-[13px] font-medium">Alias *</label>
               <span class="text-[11px]"
                 [class.text-[#e7000b]]="loginId().length > 10"
                 [class.text-[#e17100]]="loginId().length >= 8 && loginId().length <= 10"
@@ -192,7 +192,6 @@
       <!-- TARIFARIO PERSONALIZADO -->
       <div class="bg-[#f0fdf4] border border-[#7bf1a8] rounded-[12px] p-4">
         <p class="text-[#008236] text-[11px] font-bold uppercase tracking-wider mb-1">Tarifario Personalizado</p>
-        <p class="text-[#00a63e] text-[12px] mb-3">Si queda en 0, se usarán los valores globales del sistema</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
           <!-- Tarifa Base -->

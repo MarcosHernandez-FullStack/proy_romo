@@ -9,7 +9,7 @@
         <div>
           <h2 class="text-[20px] font-bold text-[#101828]">Detalle del Servicio</h2>
           @if (detalle()) {
-            <p class="text-[13px] text-[#6a7282] font-mono mt-0.5">{{ detalle()!.id }}</p>
+            <p class="text-[13px] text-[#6a7282] font-mono mt-0.5">Reserva con Id #{{ detalle()!.id }}</p>
           }
         </div>
         <button (click)="cerrar.emit()" class="text-[#6a7282] hover:text-[#101828] mt-1 cursor-pointer">

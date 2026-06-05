@@ -11,6 +11,8 @@ import {
   ChevronDown,
   Search,
   Eye,
+  Activity,
+  FileText,
 } from 'lucide-angular';
 import { OperacionesService } from '../../../../core/services/operaciones.service';
 import { ErroresAsignarServicio, ReservaOperacion, Sugerencias } from '../../../../models/operaciones.model';
@@ -40,6 +42,8 @@ export class AsignarServicioComponent implements OnInit {
   protected readonly ChevronDownIcon = ChevronDown;
   protected readonly SearchIcon      = Search;
   protected readonly EyeIcon         = Eye;
+  protected readonly ActivityIcon    = Activity;
+  protected readonly FileTextIcon    = FileText;
 
   protected readonly cargando    = signal(true);
   protected readonly guardando   = signal(false);
@@ -158,6 +162,43 @@ export class AsignarServicioComponent implements OnInit {
         this.error.set(err?.error?.mensaje ?? 'No se pudo completar la asignación.');
       },
     });
+  }
+
+  protected estadoOpLabel(estado: string): string {
+    const labels: Record<string, string> = {
+      RESERVADO: 'Reservado', ASIGNADO: 'Asignado', ENCURSO: 'En Curso',
+      FINALIZADO: 'Finalizado', CANCELADO: 'Cancelado',
+    };
+    return labels[estado] ?? estado;
+  }
+
+  protected estadoOpBadgeClass(estado: string): string {
+    switch (estado) {
+      case 'RESERVADO':  return 'bg-[#fffbeb] text-[#bb4d00] border-[#ffd230]';
+      case 'ASIGNADO':   return 'bg-[#eff6ff] text-[#1447e6] border-[#bedbff]';
+      case 'ENCURSO':   return 'bg-[#fff7ed] text-[#ca3500] border-[#fdba74]';
+      case 'FINALIZADO': return 'bg-[#f0fdf4] text-[#008236] border-[#b9f8cf]';
+      case 'CANCELADO':  return 'bg-[#fef2f2] text-[#c10007] border-[#fca5a5]';
+      default:           return 'bg-[#f9fafb] text-[#6a7282] border-[#e5e7eb]';
+    }
+  }
+
+  protected estadoAdminLabel(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'Pendiente';
+      case 'FACTURADO': return 'Facturado';
+      case 'PAGADO':    return 'Pagado';
+      default:          return estado;
+    }
+  }
+
+  protected estadoAdminClass(estado: string): { bg: string; border: string; text: string } {
+    switch (estado) {
+      case 'PAGADO':    return { bg: '#f0fdf4', border: '#b9f8cf', text: '#008236' };
+      case 'FACTURADO': return { bg: '#eff6ff', border: '#bedbff', text: '#1447e6' };
+      case 'PENDIENTE': return { bg: '#fffbeb', border: '#ffd230', text: '#bb4d00' };
+      default:          return { bg: '#f3f4f6', border: '#e5e7eb', text: '#6a7282' };
+    }
   }
 
   protected clasificacionClass(c: string): string {

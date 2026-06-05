@@ -11,7 +11,7 @@
           </h2>
           <p class="text-[13px]" [class]="soloDetalle() ? 'text-[#9ca3af]' : 'text-[#bedbff]'">
             Reserva #{{ reserva().id }}
-            @if (soloDetalle() && reserva().estadoOperacion === 'EN_CURSO') {
+            @if (soloDetalle() && reserva().estadoOperacion === 'ENCURSO') {
               &mdash; En Curso
             }
           </p>
@@ -28,7 +28,7 @@
     <!-- Body -->
     <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
 
-      <!-- ── MODO SOLO DETALLE (EN_CURSO o fuera de tiempo de corte) ── -->
+      <!-- ── MODO SOLO DETALLE (ENCURSO o fuera de tiempo de corte) ── -->
       @if (soloDetalle()) {
 
         <!-- Tarjetas KPI (igual que reprogramar-servicio) -->
@@ -51,6 +51,32 @@
             <p class="text-[#9ca3af] text-[11px]">Horario</p>
             <p class="text-white text-[24px] font-bold leading-tight">{{ formatHora(reserva().horaInicio) }}</p>
             <p class="text-[#9ca3af] text-[11px]">{{ formatFecha(reserva().fechaServicio) }}</p>
+          </div>
+        </div>
+
+        <!-- Estados del Servicio -->
+        <div class="border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col gap-3">
+          <p class="text-[#364153] text-[13px] font-semibold">Estados del Servicio</p>
+          <div class="flex flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+              <lucide-angular [img]="ActivityIcon" class="size-3.5 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#6a7282] text-[11px] font-medium">Operación</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 border"
+                [class]="estadoOpBadgeClass(reserva().estadoOperacion)">
+                {{ estadoOpLabel(reserva().estadoOperacion) }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <lucide-angular [img]="FileTextIcon" class="size-3.5 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#6a7282] text-[11px] font-medium">Administrativo</span>
+              @let sa = estadoAdminClass(reserva().estadoAdministrativo);
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 border"
+                [style.background-color]="sa.bg"
+                [style.border-color]="sa.border"
+                [style.color]="sa.text">
+                {{ estadoAdminLabel(reserva().estadoAdministrativo) }}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -85,7 +111,7 @@
           </div>
         </div>
 
-        <!-- Asignación actual (si está ASIGNADO o EN_CURSO con datos) -->
+        <!-- Asignación actual (si está ASIGNADO o ENCURSO con datos) -->
         @if (reserva().gruaAsignada || reserva().operadorAsignado) {
           <div class="bg-[#eff6ff] border border-[#bedbff] rounded-[12px] p-4 flex flex-col gap-2">
             <p class="text-[#1447e6] text-[13px] font-semibold mb-1">Asignación Registrada</p>
@@ -109,7 +135,7 @@
           <div class="flex items-start gap-2">
             <lucide-angular [img]="ClockIcon" class="size-4 mt-0.5 shrink-0" color="#ea580c" [strokeWidth]="1.5" />
             <p class="text-[#9a3412] text-[12px]">
-              @if (reserva().estadoOperacion === 'EN_CURSO') {
+              @if (reserva().estadoOperacion === 'ENCURSO') {
                 <strong>Servicio en curso.</strong> No se pueden realizar cambios mientras el servicio está activo.
               } @else {
                 <strong>Fuera del tiempo de corte.</strong> No es posible realizar cambios en este servicio.
@@ -164,6 +190,32 @@
             <div class="text-right">
               <p class="text-[#bedbff] text-[11px]">Bloques Requeridos</p>
               <p class="text-white text-[28px] font-bold">{{ reserva().nroBloques }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estados del Servicio -->
+        <div class="border border-[#e5e7eb] rounded-[12px] p-4 flex flex-col gap-3">
+          <p class="text-[#364153] text-[13px] font-semibold">Estados del Servicio</p>
+          <div class="flex flex-wrap gap-4">
+            <div class="flex items-center gap-2">
+              <lucide-angular [img]="ActivityIcon" class="size-3.5 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#6a7282] text-[11px] font-medium">Operación</span>
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 border"
+                [class]="estadoOpBadgeClass(reserva().estadoOperacion)">
+                {{ estadoOpLabel(reserva().estadoOperacion) }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <lucide-angular [img]="FileTextIcon" class="size-3.5 shrink-0" color="#6a7282" [strokeWidth]="1.5" />
+              <span class="text-[#6a7282] text-[11px] font-medium">Administrativo</span>
+              @let sa = estadoAdminClass(reserva().estadoAdministrativo);
+              <span class="text-[11px] font-semibold rounded-full px-2.5 py-0.5 border"
+                [style.background-color]="sa.bg"
+                [style.border-color]="sa.border"
+                [style.color]="sa.text">
+                {{ estadoAdminLabel(reserva().estadoAdministrativo) }}
+              </span>
             </div>
           </div>
         </div>
